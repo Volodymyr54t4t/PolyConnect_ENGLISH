@@ -2326,7 +2326,7 @@ app.post("/api/ideas", authRequired, async (req, res) => {
   const b = req.body || {}, title = String(b.title || "").trim(), category = String(b.category || "").trim()
   const problem = String(b.problem || "").trim(), solution = String(b.solution || "").trim(), benefit = String(b.benefit || "").trim()
   const audience = String(b.audience || "Усім працівникам").trim(), visibility = b.visibility === "staff" ? "staff" : "public"
-  if (!title || title.length > 140 || !IDEA_CATEGORIES.includes(category) || !problem || problem.length > 2000 || !solution || solution.length > 2000 || benefit.length > 800 || !["Викладачам", "Завідувачу кафедри", "Деканату", "Усім працівникам"].includes(audience)) return res.status(400).json({ error: "Перевірте назву, категорію, опис проблеми, рішення та адресата" })
+  if (!title || title.length > 140 || !IDEA_CATEGORIES.includes(category) || !problem || problem.length > 2000 || !solution || solution.length > 2000 || benefit.length > 800 || !["Викладачам", "Завідувачу кафедри", "Деканату", "Усім працівникам"].includes(audience)) return res.status(400).json({ error: "Please check the title, category, problem description, proposed solution, and intended audience." })
   if (visibility === "staff" && req.user.role !== "Студент") return res.status(400).json({ error: "Приватні звернення для працівників призначені студентам" })
   try {
     const { rows } = await pool.query(`INSERT INTO ideas(author_id,title,category,problem,solution,benefit,audience,visibility,is_anonymous)
