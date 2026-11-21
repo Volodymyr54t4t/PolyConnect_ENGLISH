@@ -55,9 +55,9 @@ function fillView(user) {
   els.viewEmail.textContent = user.email || "—"
   els.viewGroup.textContent = user.group_name || "—"
   els.viewStudyLevel.textContent = user.study_level || "—"
-  els.viewCourse.textContent = user.course ? `${user.course} курс` : "—"
+  els.viewCourse.textContent = user.course ? `${user.course} year` : "—"
   els.viewPhone.textContent = user.phone || "—"
-  els.viewAbout.textContent = user.about || "Додайте коротку інформацію про себе у форму профілю."
+  els.viewAbout.textContent = user.about || "Add a short introduction in your profile form."
   renderProfileLinks(user)
   els.photoPlaceholder.textContent = (user.full_name || "Ф").trim().charAt(0).toUpperCase()
 
@@ -75,7 +75,7 @@ function fillView(user) {
 }
 
 function renderProfileLinks(user) {
-  const links = [["GitHub", user.github_url], ["LinkedIn", user.linkedin_url], ["Портфоліо", user.portfolio_url]]
+  const links = [["GitHub", user.github_url], ["LinkedIn", user.linkedin_url], ["Portfolio", user.portfolio_url]]
     .filter(([, url]) => /^https?:\/\//i.test(url || ""))
   els.viewSocial.replaceChildren(...links.map(([label, url]) => {
     const link = document.createElement("a")
@@ -114,7 +114,7 @@ els.photoInput.addEventListener("change", (e) => {
   const file = e.target.files[0]
   if (!file) return
   if (file.size > 4 * 1024 * 1024) {
-    showAlert("Файл завеликий. Максимум 4 МБ.")
+    showAlert("File is too large. Maximum size: 4 MB.")
     return
   }
   const reader = new FileReader()
@@ -151,10 +151,10 @@ els.form.addEventListener("submit", async (e) => {
       body: JSON.stringify(body),
     })
     const data = await res.json().catch(() => ({}))
-    if (!res.ok) throw new Error(data.error || "Помилка збереження")
+    if (!res.ok) throw new Error(data.error || "Could not save changes")
     photoData = null
     fillView(data.user)
-    showAlert("Профіль успішно збережено", true)
+    showAlert("Profile saved successfully", true)
   } catch (err) {
     showAlert(err.message)
   }

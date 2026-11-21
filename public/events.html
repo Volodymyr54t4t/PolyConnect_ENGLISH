@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Events, зустрічі та активності спільноти Порталу Інженерії Програмного Забезпечення" />
+  <meta name="description" content="Events, meetups, and community activities on the Software Engineering Portal" />
   <title>Events — Software Engineering Portal</title>
   <link rel="stylesheet" href="/auth.css" />
   <link rel="stylesheet" href="/header.css" />
@@ -20,37 +20,37 @@
   </header>
   <main class="events-shell">
     <section class="events-hero">
-      <div class="events-hero__copy"><p class="event-eyebrow">Календар спільноти · ФІКТ</p><h1>Зустрічаймося<br /><em>на подіях.</em></h1><p>Лекції, хакатони, захисти, воркшопи й зустрічі спільноти. Обирай цікаве та долучайся.</p></div>
-      <div class="events-hero__side"><div class="events-orbit" aria-hidden="true"><span>✳</span><i></i><b></b></div><button id="createEventBtn" class="btn btn--primary hidden" type="button">＋ Create подію</button><p id="heroNote">Participation відкрита студентам, викладачам і деканату.</p></div>
+      <div class="events-hero__copy"><p class="event-eyebrow">Community calendar · FICT</p><h1>Let’s meet<br /><em>at events.</em></h1><p>Lectures, hackathons, defenses, workshops, and community meetups. Find something interesting and join in.</p></div>
+      <div class="events-hero__side"><div class="events-orbit" aria-hidden="true"><span>✳</span><i></i><b></b></div><button id="createEventBtn" class="btn btn--primary hidden" type="button">＋ Create event</button><p id="heroNote">Events are open to students, faculty, and the dean’s office.</p></div>
     </section>
-    <section class="events-dashboard" aria-label="Каталог подій">
-      <div class="events-toolbar"><div><p class="event-eyebrow">Знайди своє</p><h2>Календар подій</h2></div><div class="events-tabs" role="tablist" aria-label="Фільтр подій"><button class="event-tab is-active" data-filter="upcoming" type="button">Найближчі</button><button class="event-tab" data-filter="attending" type="button">Моя участь</button><button class="event-tab hidden" id="hostedFilter" data-filter="hosted" type="button">Mine події</button><button class="event-tab" data-filter="archive" type="button">Архів</button></div></div>
-      <div class="events-summary"><span><b id="eventTotal">—</b><small> подій у календарі</small></span><span><b id="eventNext">—</b><small> найближча зустріч</small></span><label class="events-search"><span aria-hidden="true">⌕</span><input id="eventSearch" type="search" placeholder="Search події…" aria-label="Search подій" /></label></div>
-      <div id="eventsGrid" class="events-grid" aria-live="polite"><div class="event-empty">Loading календар…</div></div>
+    <section class="events-dashboard" aria-label="Event directory">
+      <div class="events-toolbar"><div><p class="event-eyebrow">Find your next event</p><h2>Events calendar</h2></div><div class="events-tabs" role="tablist" aria-label="Event filters"><button class="event-tab is-active" data-filter="upcoming" type="button">Upcoming</button><button class="event-tab" data-filter="attending" type="button">My registrations</button><button class="event-tab hidden" id="hostedFilter" data-filter="hosted" type="button">My events</button><button class="event-tab" data-filter="archive" type="button">Archive</button></div></div>
+      <div class="events-summary"><span><b id="eventTotal">—</b><small> events in the calendar</small></span><span><b id="eventNext">—</b><small> next event</small></span><label class="events-search"><span aria-hidden="true">⌕</span><input id="eventSearch" type="search" placeholder="Search events…" aria-label="Search events" /></label></div>
+      <div id="eventsGrid" class="events-grid" aria-live="polite"><div class="event-empty">Loading events…</div></div>
     </section>
   </main>
 
   <div id="eventEditor" class="event-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="eventEditorTitle">
     <button class="event-overlay__backdrop" type="button" data-close-editor aria-label="Close"></button>
     <section class="event-editor">
-      <div class="event-editor__head"><div><p class="event-eyebrow">Організатор події</p><h2 id="eventEditorTitle">Створи подію</h2><p>Додай усі деталі — учасникам буде простіше спланувати участь.</p></div><button class="event-close" type="button" data-close-editor aria-label="Close">×</button></div>
+      <div class="event-editor__head"><div><p class="event-eyebrow">Event organizer</p><h2 id="eventEditorTitle">Create an event</h2><p>Add all the details to help people plan to attend.</p></div><button class="event-close" type="button" data-close-editor aria-label="Close">×</button></div>
       <form id="eventForm" class="event-form">
         <input id="eventId" type="hidden" />
-        <label class="event-field event-field--wide"><span>Title події <b>*</b></span><input id="eventTitle" maxlength="160" required placeholder="Наприклад, Хакатон цифрових рішень 2026" /></label>
-        <label class="event-field event-field--wide"><span>Короткий опис <small>До 280 символів</small></span><input id="eventSummary" maxlength="280" placeholder="Про що подія і кому буде цікава?" /></label>
-        <label class="event-field"><span>Тип події</span><select id="eventType"><option>Лекція</option><option>Воркшоп</option><option>Хакатон</option><option>Конференція</option><option>Зустріч</option><option>Захист</option><option>Кар’єра</option><option>Конкурс</option><option>Інше</option></select></label>
-        <label class="event-field"><span>Формат</span><select id="eventFormat"><option value="offline">📍 Очно</option><option value="online">🌐 Онлайн</option><option value="hybrid">↔ Гібридний</option></select></label>
-        <label class="event-field"><span>Початок <b>*</b></span><input id="eventStarts" type="datetime-local" required /></label>
-        <label class="event-field"><span>Завершення <b>*</b></span><input id="eventEnds" type="datetime-local" required /></label>
-        <label class="event-field"><span>Дедлайн реєстрації</span><input id="eventDeadline" type="datetime-local" /></label>
-        <label class="event-field"><span>Кількість місць <small>Порожньо — без обмежень</small></span><input id="eventCapacity" type="number" min="1" max="100000" placeholder="Наприклад, 40" /></label>
-        <label class="event-field event-field--wide"><span>Location проведення</span><input id="eventLocation" maxlength="200" placeholder="Корпус, аудиторія або місто" /></label>
-        <div class="event-field event-field--wide"><span>Обкладинка з пристрою <small>PNG, JPEG, WebP або GIF · до 5 МБ</small></span><label class="event-upload"><input id="eventCoverFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" /><span aria-hidden="true">↑</span><span><b>Обрати зображення</b><small>Завантажити з комп’ютера або телефона</small></span></label><div id="eventCoverPreviewWrap" class="event-cover-preview hidden"><img id="eventCoverPreview" alt="Попередній перегляд обкладинки події" /><button id="clearEventCover" type="button">Прибрати фото</button></div><p id="eventCoverMessage" class="event-cover-message" role="status"></p></div>
-        <label class="event-field event-field--wide"><span>Або посилання на обкладинку <small>Необов’язково</small></span><input id="eventCover" type="url" maxlength="1000" placeholder="https://…" /></label>
-        <label class="event-field event-field--wide"><span>Посилання для онлайн-участі</span><input id="eventMeeting" type="url" maxlength="1000" placeholder="https://…" /></label>
-        <label class="event-field event-field--wide"><span>Контакт організатора</span><input id="eventContact" maxlength="300" placeholder="Email, телефон або Telegram" /></label>
-        <label class="event-field event-field--wide"><span>Повний опис <b>*</b></span><textarea id="eventDescription" rows="6" maxlength="10000" required placeholder="Програма, для кого подія, що підготувати, умови участі…"></textarea></label>
-        <div class="event-form__footer"><p id="eventFormMessage" role="status"></p><div><button id="saveDraftBtn" class="btn btn--secondary" type="button">Save чернетку</button><button id="publishEventBtn" class="btn btn--primary" type="button">Опублікувати подію</button></div></div>
+        <label class="event-field event-field--wide"><span>Event title <b>*</b></span><input id="eventTitle" maxlength="160" required placeholder="For example, Digital Solutions Hackathon 2026" /></label>
+        <label class="event-field event-field--wide"><span>Short description <small>Up to 280 characters</small></span><input id="eventSummary" maxlength="280" placeholder="What is the event about, and who might be interested?" /></label>
+        <label class="event-field"><span>Event type</span><select id="eventType"><option>Lecture</option><option>Workshop</option><option>Hackathon</option><option>Conference</option><option>Meeting</option><option>Defense</option><option>Career</option><option>Competition</option><option>Other</option></select></label>
+        <label class="event-field"><span>Format</span><select id="eventFormat"><option value="offline">📍 In person</option><option value="online">🌐 Online</option><option value="hybrid">↔ Hybrid</option></select></label>
+        <label class="event-field"><span>Start <b>*</b></span><input id="eventStarts" type="datetime-local" required /></label>
+        <label class="event-field"><span>End <b>*</b></span><input id="eventEnds" type="datetime-local" required /></label>
+        <label class="event-field"><span>Registration deadline</span><input id="eventDeadline" type="datetime-local" /></label>
+        <label class="event-field"><span>Capacity <small>Leave blank for no limit</small></span><input id="eventCapacity" type="number" min="1" max="100000" placeholder="For example, 40" /></label>
+        <label class="event-field event-field--wide"><span>Venue</span><input id="eventLocation" maxlength="200" placeholder="Building, room, or city" /></label>
+        <div class="event-field event-field--wide"><span>Upload a cover image <small>PNG, JPEG, WebP or GIF · up to 5 MB</small></span><label class="event-upload"><input id="eventCoverFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" /><span aria-hidden="true">↑</span><span><b>Choose image</b><small>Upload from your computer or phone</small></span></label><div id="eventCoverPreviewWrap" class="event-cover-preview hidden"><img id="eventCoverPreview" alt="Event cover preview" /><button id="clearEventCover" type="button">Remove photo</button></div><p id="eventCoverMessage" class="event-cover-message" role="status"></p></div>
+        <label class="event-field event-field--wide"><span>Or add a cover image URL <small>Optional</small></span><input id="eventCover" type="url" maxlength="1000" placeholder="https://…" /></label>
+        <label class="event-field event-field--wide"><span>Online meeting link</span><input id="eventMeeting" type="url" maxlength="1000" placeholder="https://…" /></label>
+        <label class="event-field event-field--wide"><span>Organizer contact</span><input id="eventContact" maxlength="300" placeholder="Email, phone, or Telegram" /></label>
+        <label class="event-field event-field--wide"><span>Full description <b>*</b></span><textarea id="eventDescription" rows="6" maxlength="10000" required placeholder="Agenda, intended audience, what to bring, and participation requirements…"></textarea></label>
+        <div class="event-form__footer"><p id="eventFormMessage" role="status"></p><div><button id="saveDraftBtn" class="btn btn--secondary" type="button">Save draft</button><button id="publishEventBtn" class="btn btn--primary" type="button">Publish event</button></div></div>
       </form>
     </section>
   </div>
@@ -61,10 +61,10 @@
       <button class="event-close event-detail__close" type="button" data-close-detail aria-label="Close">×</button>
       <div id="detailCover" class="event-detail__cover"></div>
       <div class="event-detail__body"><div class="event-detail__eyebrow"><span id="detailType"></span><span id="detailState"></span></div><h2 id="detailTitle"></h2><p id="detailSummary" class="event-detail__summary"></p>
-        <div class="event-facts"><div><span>Коли</span><b id="detailWhen"></b></div><div><span>Де</span><b id="detailWhere"></b></div><div><span>Організатор</span><b id="detailCreator"></b></div><div><span>Місця</span><b id="detailCapacity"></b></div></div>
+        <div class="event-facts"><div><span>When</span><b id="detailWhen"></b></div><div><span>Where</span><b id="detailWhere"></b></div><div><span>Organizer</span><b id="detailCreator"></b></div><div><span>Places</span><b id="detailCapacity"></b></div></div>
         <div id="detailDescription" class="event-detail__description"></div><div id="detailLinks" class="event-detail__links"></div>
         <section id="participantsSection" class="event-participants hidden"><h3>Participants <span id="participantCount"></span></h3><div id="participantList"></div></section>
-        <div class="event-detail__actions"><p id="registrationMessage" role="status"></p><div><button id="participantsBtn" class="btn btn--secondary hidden" type="button">Список учасників</button><button id="editEventBtn" class="btn btn--secondary hidden" type="button">Edit</button><button id="cancelEventBtn" class="btn btn--danger hidden" type="button">Cancel подію</button><button id="deleteEventBtn" class="btn btn--danger hidden" type="button">Delete</button><button id="registerBtn" class="btn btn--primary" type="button">Долучитися</button></div></div>
+        <div class="event-detail__actions"><p id="registrationMessage" role="status"></p><div><button id="participantsBtn" class="btn btn--secondary hidden" type="button">Participants list</button><button id="editEventBtn" class="btn btn--secondary hidden" type="button">Edit</button><button id="cancelEventBtn" class="btn btn--danger hidden" type="button">Cancel event</button><button id="deleteEventBtn" class="btn btn--danger hidden" type="button">Delete</button><button id="registerBtn" class="btn btn--primary" type="button">Join</button></div></div>
       </div>
     </article>
   </div>

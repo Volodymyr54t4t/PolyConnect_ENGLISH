@@ -26,9 +26,9 @@
         <img class="brand__badge" src="/ztu-logo.png" alt="Zhytomyr Polytechnic logo" />
         <h1 class="brand__title">Software Engineering Portal</h1>
         <p class="brand__subtitle">
-          A single access point for the dean's office, departments, faculty, and students.
-          Sign-in is available only with an institutional email address
-          <span class="brand__domain">@ztu.edu.ua</span> або
+          A single access point for the dean’s office, departments, faculty, and students.
+          Sign in using your institutional email address
+          <span class="brand__domain">@ztu.edu.ua</span> or
           <span class="brand__domain">@student.ztu.edu.ua</span>.
         </p>
         <ul class="brand__roles">
@@ -59,7 +59,7 @@
         <div id="alert" class="alert hidden" role="status"></div>
 
         <form id="loginForm" class="form" data-view="login" novalidate>
-          <h2 class="form__title">Sign in to your account</h2>
+          <h2 class="form__title">Sign in</h2>
           <label class="field">
             <span>Institutional email</span>
             <input type="email" name="email" placeholder="name@ztu.edu.ua or name@student.ztu.edu.ua" autocomplete="email" required />
@@ -95,12 +95,12 @@
             <span>Password (at least 6 characters)</span>
             <input type="password" name="password" placeholder="••••••••" autocomplete="new-password" required />
           </label>
-          <button class="btn btn--primary" type="submit">Create account</button>
+          <button class="btn btn--primary" type="submit">Register</button>
         </form>
 
         <form id="forgotForm" class="form hidden" data-view="forgot" novalidate>
-          <h2 class="form__title">Reset your password</h2>
-          <p class="form__hint">Enter your email and we'll generate a password reset token.</p>
+          <h2 class="form__title">Reset password</h2>
+          <p class="form__hint">Enter your email and we’ll generate a password reset token.</p>
           <label class="field">
             <span>Institutional email</span>
             <input type="email" name="email" placeholder="name@ztu.edu.ua or name@student.ztu.edu.ua" autocomplete="email" required />
@@ -109,7 +109,7 @@
 
           <div id="resetBlock" class="reset hidden">
             <label class="field">
-              <span>Reset token</span>
+              <span>Password reset token</span>
               <input type="text" name="token" placeholder="Paste the token you received" />
             </label>
             <label class="field">

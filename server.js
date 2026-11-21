@@ -575,24 +575,24 @@ function isPlatformAdmin(user) { return String(user?.role || "").trim() === DEVE
 function developerOnly(req,res,next) { if (!isPlatformAdmin(req.user)) return res.status(403).json({error:"Дія доступна лише розробнику платформи"}); next() }
 async function authRequired(req, res, next) {
   const token = req.cookies?.token || (req.headers.authorization || "").replace("Bearer ", "")
-  if (!token) return res.status(401).json({ error: "Не авторизовано" })
+  if (!token) return res.status(401).json({ error: "Not authenticated" })
   try {
     req.user = jwt.verify(token, JWT_SECRET)
   } catch {
-    return res.status(401).json({ error: "Недійсний або протермінований токен" })
+    return res.status(401).json({ error: "Invalid or expired token" })
   }
   try {
     // JWT є stateless, тому після видалення акаунта старий токен інакше ще діяв би до 7 днів.
     const account = await pool.query("SELECT id,role,email,full_name FROM users WHERE id = $1", [req.user.id])
     if (!account.rows.length) {
       res.clearCookie("token")
-      return res.status(401).json({ error: "Обліковий запис більше не існує" })
+      return res.status(401).json({ error: "This account no longer exists" })
     }
     Object.assign(req.user, account.rows[0])
     return next()
   } catch (err) {
     console.error("auth account check error:", err.message)
-    return res.status(503).json({ error: "Не вдалося перевірити сесію. Спробуйте пізніше." })
+    return res.status(503).json({ error: "Could not verify the session. Please try again later." })
   }
 }
 
@@ -603,7 +603,7 @@ let activeMediaDownloads = 0
 app.use((req, res, next) => {
   if (inFlightRequests >= maxConcurrentRequests) {
     res.setHeader("Retry-After", "2")
-    return res.status(503).json({ error: "Сервер зараз обробляє багато запитів. Спробуйте ще раз за кілька секунд." })
+    return res.status(503).json({ error: "The server is busy. Please try again in a few seconds." })
   }
   inFlightRequests += 1
   let released = false
@@ -633,7 +633,7 @@ app.post("/api/register", async (req, res) => {
     if (!cleanName || cleanName.length>160 || !normEmail || !password || !role) return await respondAuthFailure(req,res,normEmail,400,"Заповніть усі поля коректно")
     if (!isAllowedEmail(normEmail)) return await respondAuthFailure(req,res,normEmail,400,`Дозволена реєстрація лише з поштою ${ALLOWED_DOMAINS_LABEL}`)
     if (!VALID_ROLES.filter(candidate=>candidate!==DEVELOPER_ROLE).includes(role)) return await respondAuthFailure(req,res,normEmail,400,"Невірна роль")
-    if (String(password).length<6) return await respondAuthFailure(req,res,normEmail,400,"Пароль має містити щонайменше 6 символів")
+    if (String(password).length<6) return await respondAuthFailure(req,res,normEmail,400,"Password must be at least 6 characters")
     const exists=await pool.query("SELECT id FROM users WHERE email=$1",[normEmail])
     if(exists.rows.length)return await respondAuthFailure(req,res,normEmail,409,"Користувач з такою поштою вже існує")
     const passwordHash=await bcrypt.hash(password,10)
@@ -643,7 +643,7 @@ app.post("/api/register", async (req, res) => {
     res.status(201).json({message:"Акаунт створено",token,user:publicUser(user)})
   } catch (err) {
     console.error("register error:", err.message)
-    res.status(500).json({ error:"Не вдалося створити акаунт" })
+    res.status(500).json({ error:"Could not create the account" })
   }
 })
 
@@ -665,26 +665,26 @@ app.post("/api/login", async (req, res) => {
     res.json({message:"Вхід виконано",token,user:publicUser(user)})
   } catch (err) {
     console.error("login error:", err.message)
-    res.status(500).json({error:"Не вдалося виконати вхід"})
+    res.status(500).json({error:"Could not sign in"})
   }
 })
 
 // Вихід
 app.post("/api/logout", (req, res) => {
   res.clearCookie("token")
-  res.json({ message: "Ви вийшли з системи" })
+  res.json({ message: "You have signed out" })
 })
 
 // Поточний користувач (перевірка JWT)
 app.get("/api/me", authRequired, async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM users WHERE id = $1", [req.user.id])
-    if (result.rows.length === 0) return res.status(404).json({ error: "Користувача не знайдено" })
+    if (result.rows.length === 0) return res.status(404).json({ error: "User not found" })
     const user = publicUser(result.rows[0])
     res.json({ user, redirect: user.redirect })
   } catch (err) {
     console.error("me error:", err.message)
-    res.status(500).json({ error: "Помилка сервера" })
+    res.status(500).json({ error: "Server error" })
   }
 })
 
@@ -695,7 +695,7 @@ app.delete("/api/account", authRequired, async (req, res) => {
   const confirmation = typeof req.body?.confirmation === "string" ? req.body.confirmation.trim() : ""
 
   if (!password || !email || confirmation !== "ВИДАЛИТИ") {
-    return res.status(400).json({ error: "Введіть пароль, email акаунта та слово «ВИДАЛИТИ» для підтвердження." })
+    return res.status(400).json({ error: "Enter your password, account email, and the word “DELETE” to confirm." })
   }
 
   let client
@@ -706,14 +706,14 @@ app.delete("/api/account", authRequired, async (req, res) => {
     if (!found.rows.length) {
       await client.query("ROLLBACK")
       res.clearCookie("token")
-      return res.status(404).json({ error: "Обліковий запис уже видалено." })
+      return res.status(404).json({ error: "This account has already been deleted." })
     }
     const account = found.rows[0]
     const emailMatches = account.email.toLowerCase() === email
     const passwordMatches = await bcrypt.compare(password, account.password_hash)
     if (!emailMatches || !passwordMatches) {
       await client.query("ROLLBACK")
-      return res.status(403).json({ error: "Email або пароль не збігається. Акаунт не видалено." })
+      return res.status(403).json({ error: "The email or password does not match. The account was not deleted." })
     }
 
     // Чистимо дочірні записи явно: на старих інсталяціях частина колонок могла бути додана міграцією без FK.
@@ -743,11 +743,11 @@ app.delete("/api/account", authRequired, async (req, res) => {
     await client.query("DELETE FROM users WHERE id = $1", [account.id])
     await client.query("COMMIT")
     res.clearCookie("token")
-    return res.json({ message: "Акаунт і пов'язані з ним дані видалено." })
+    return res.json({ message: "The account and its related data have been deleted." })
   } catch (err) {
     if (client) await client.query("ROLLBACK").catch(() => {})
     console.error("account deletion error:", err.message)
-    return res.status(500).json({ error: "Не вдалося видалити акаунт. Дані залишилися без змін; спробуйте пізніше." })
+    return res.status(500).json({ error: "Could not delete the account. No data was changed; please try again later." })
   } finally {
     client?.release()
   }
@@ -756,29 +756,29 @@ app.delete("/api/account", authRequired, async (req, res) => {
 app.get("/api/presence", authRequired, async (req, res) => {
   try {
     const result = await pool.query("SELECT user_status, status_message, last_seen, last_active_at FROM users WHERE id=$1", [req.user.id])
-    if (!result.rows.length) return res.status(404).json({ error: "Користувача не знайдено" })
+    if (!result.rows.length) return res.status(404).json({ error: "User not found" })
     const user = result.rows[0]
     res.json({ presence_status: effectivePresence(user.user_status, user.last_seen, user.last_active_at), status_message: user.status_message || "", last_seen: user.last_seen })
   } catch (err) {
     console.error("presence read error:", err.message)
-    res.status(500).json({ error: "Не вдалося завантажити статус" })
+    res.status(500).json({ error: "Could not load status" })
   }
 })
 
 app.put("/api/presence", authRequired, async (req, res) => {
   const status = String(req.body?.user_status || "").trim()
   const message = String(req.body?.status_message || "").trim()
-  if (!PRESENCE_STATUSES.includes(status)) return res.status(400).json({ error: "Оберіть статус зі списку" })
-  if (message.length > 80) return res.status(400).json({ error: "Підпис до статусу має містити не більше 80 символів" })
+  if (!PRESENCE_STATUSES.includes(status)) return res.status(400).json({ error: "Select a status from the list" })
+  if (message.length > 80) return res.status(400).json({ error: "Status message must be 80 characters or fewer" })
   try {
     const result = await pool.query(`UPDATE users SET user_status=$1, status_message=$2, last_seen=now(), last_active_at=now()
       WHERE id=$3 RETURNING user_status, status_message, last_seen, last_active_at`, [status, message, req.user.id])
-    if (!result.rows.length) return res.status(404).json({ error: "Користувача не знайдено" })
+    if (!result.rows.length) return res.status(404).json({ error: "User not found" })
     const user = result.rows[0]
     res.json({ presence_status: effectivePresence(user.user_status, user.last_seen, user.last_active_at), status_message: user.status_message, last_seen: user.last_seen })
   } catch (err) {
     console.error("presence update error:", err.message)
-    res.status(500).json({ error: "Не вдалося оновити статус" })
+    res.status(500).json({ error: "Could not update status" })
   }
 })
 
@@ -790,7 +790,7 @@ app.post("/api/presence/ping", authRequired, async (req, res) => {
     res.json({ ok: true, presence_status: effectivePresence(user.user_status, user.last_seen, user.last_active_at), status_message: user.status_message || "" })
   } catch (err) {
     console.error("presence ping error:", err.message)
-    res.status(500).json({ error: "Не вдалося оновити присутність" })
+    res.status(500).json({ error: "Could not update presence" })
   }
 })
 
@@ -802,7 +802,7 @@ app.put("/api/profile", authRequired, async (req, res) => {
 
     // Поточний запис — щоб оновити тільки передані поля (merge)
     const current = await pool.query("SELECT * FROM users WHERE id = $1", [req.user.id])
-    if (current.rows.length === 0) return res.status(404).json({ error: "Користувача не знайдено" })
+    if (current.rows.length === 0) return res.status(404).json({ error: "User not found" })
     const u = current.rows[0]
 
     // Дозволені текстові поля профілю
@@ -831,7 +831,7 @@ app.put("/api/profile", authRequired, async (req, res) => {
     for (const key of ["linkedin_url", "github_url", "portfolio_url"]) {
       const value = String(nextValues[key] || "").trim()
       if (value.length > 500 || (value && !/^https?:\/\//i.test(value))) {
-        return res.status(400).json({ error: "Посилання в профілі має починатися з http:// або https:// та містити не більше 500 символів" })
+        return res.status(400).json({ error: "Profile links must start with http:// or https:// and be no longer than 500 characters" })
       }
       nextValues[key] = value
     }
@@ -883,10 +883,10 @@ app.put("/api/profile", authRequired, async (req, res) => {
         req.user.id,
       ],
     )
-    res.json({ message: "Профіль оновлено", user: publicUser(result.rows[0]) })
+    res.json({ message: "Profile updated", user: publicUser(result.rows[0]) })
   } catch (err) {
     console.error("profile error:", err.message)
-    res.status(500).json({ error: "Помилка сервера при оновленні проф��лю" })
+    res.status(500).json({ error: "Server error while updating the profile" })
   }
 })
 
@@ -894,7 +894,7 @@ app.put("/api/profile", authRequired, async (req, res) => {
 app.post("/api/forgot-password", async (req, res) => {
   try {
     const { email } = req.body || {}
-    if (!email) return res.status(400).json({ error: "Введіть пошту" })
+    if (!email) return res.status(400).json({ error: "Enter your email" })
     if (!isAllowedEmail(email)) {
       return res.status(400).json({ error: `Дозволена лише пошта ${ALLOWED_DOMAINS_LABEL}` })
     }
@@ -904,7 +904,7 @@ app.post("/api/forgot-password", async (req, res) => {
 
     // Завжди повертаємо однакову відповідь, щоб не розкривати наявність акаунта
     if (result.rows.length === 0) {
-      return res.json({ message: "Якщо акаунт існує, токен відновлення згенеровано" })
+      return res.json({ message: "If the account exists, a reset token has been generated" })
     }
 
     const token = crypto.randomBytes(24).toString("hex")
@@ -923,7 +923,7 @@ app.post("/api/forgot-password", async (req, res) => {
     })
   } catch (err) {
     console.error("forgot error:", err.message)
-    res.status(500).json({ error: "Помилка сервера" })
+    res.status(500).json({ error: "Server error" })
   }
 })
 
@@ -931,9 +931,9 @@ app.post("/api/forgot-password", async (req, res) => {
 app.post("/api/reset-password", async (req, res) => {
   try {
     const { token, password } = req.body || {}
-    if (!token || !password) return res.status(400).json({ error: "Вкажіть токен та новий пароль" })
+    if (!token || !password) return res.status(400).json({ error: "Enter the token and a new password" })
     if (String(password).length < 6) {
-      return res.status(400).json({ error: "Пароль має містити щонайменше 6 символів" })
+      return res.status(400).json({ error: "Password must be at least 6 characters" })
     }
 
     const result = await pool.query(
@@ -941,7 +941,7 @@ app.post("/api/reset-password", async (req, res) => {
       [token],
     )
     if (result.rows.length === 0) {
-      return res.status(400).json({ error: "Недійсний або протермінований токен" })
+      return res.status(400).json({ error: "Invalid or expired token" })
     }
 
     const hash = await bcrypt.hash(password, 10)
@@ -949,17 +949,17 @@ app.post("/api/reset-password", async (req, res) => {
       "UPDATE users SET password_hash = $1, reset_token = NULL, reset_expires = NULL WHERE id = $2",
       [hash, result.rows[0].id],
     )
-    res.json({ message: "Пароль успішно змінено. Тепер увійдіть з новим паролем." })
+    res.json({ message: "Password changed. Sign in with your new password." })
   } catch (err) {
     console.error("reset error:", err.message)
-    res.status(500).json({ error: "Помилка сервера" })
+    res.status(500).json({ error: "Server error" })
   }
 })
 
 const NEWS_MAX_FILE = 5 * 1024 * 1024
 const NEWS_AUTHOR_ROLES = [DEVELOPER_ROLE, "ДеканФІКТ", "Завідувач Кафедри", "Викладач"]
 function deanOnly(req, res, next) {
-  if (String(req.user.role || "").trim() !== "ДеканФІКТ" && !isPlatformAdmin(req.user)) return res.status(403).json({ error: "Дашборд доступний адміністраторам платформи та декану ФІКТ" })
+  if (String(req.user.role || "").trim() !== "ДеканФІКТ" && !isPlatformAdmin(req.user)) return res.status(403).json({ error: "The dashboard is available to platform administrators and the FICT dean" })
   next()
 }
 // Факультетська адмінка: усі зміни користувачів доступні тільки ролі декана.
@@ -967,7 +967,7 @@ app.get("/api/dean/users", authRequired, deanOnly, async (req, res) => {
   try {
     const result = await pool.query(`SELECT id,full_name,email,role,phone,department,group_name,position,course,study_level,created_at,profile_updated_at FROM users ORDER BY role,full_name`)
     res.json({ users: result.rows })
-  } catch (err) { console.error("dean users list error:", err.message); res.status(500).json({ error: "Не вдалося завантажити користувачів" }) }
+  } catch (err) { console.error("dean users list error:", err.message); res.status(500).json({ error: "Could not load users" }) }
 })
 app.post("/api/dean/users", authRequired, deanOnly, async (req, res) => {
   try {
@@ -977,7 +977,7 @@ app.post("/api/dean/users", authRequired, deanOnly, async (req, res) => {
     const hash = await bcrypt.hash(password || crypto.randomBytes(32).toString("base64url"), 10)
     const result = await pool.query(`INSERT INTO users(full_name,email,password_hash,role,department,group_name,position,phone,course,study_level,reset_token,reset_expires) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,CASE WHEN $11::text IS NULL THEN NULL ELSE now()+interval '7 days' END) RETURNING id,full_name,email,role,department,group_name,position,phone,course,study_level,created_at,profile_updated_at`, [fullName,email,hash,role,String(b.department||"").trim(),String(b.group_name||"").trim(),String(b.position||"").trim(),String(b.phone||"").trim(),String(b.course||"").trim(),String(b.study_level||"").trim(),setupToken])
     res.status(201).json({ user: result.rows[0], setupToken })
-  } catch (err) { if (err.code === "23505") return res.status(409).json({ error: "Користувач із такою адресою вже існує" }); console.error("dean user create error:", err.message); res.status(500).json({ error: "Не вдалося створити користувача" }) }
+  } catch (err) { if (err.code === "23505") return res.status(409).json({ error: "A user with this email already exists" }); console.error("dean user create error:", err.message); res.status(500).json({ error: "Could not create user" }) }
 })
 app.put("/api/dean/users/:id", authRequired, deanOnly, async (req, res) => {
   try {
@@ -986,10 +986,10 @@ app.put("/api/dean/users/:id", authRequired, deanOnly, async (req, res) => {
     if (b.password && String(b.password).length<8) return res.status(400).json({error:"Пароль має містити щонайменше 8 символів"})
     if (Number(req.params.id)===req.user.id && ((isPlatformAdmin(req.user) && role!==DEVELOPER_ROLE) || (!isPlatformAdmin(req.user) && role!=="ДеканФІКТ"))) return res.status(400).json({error:"Не можна змінити власну адміністративну роль"})
     const result=await pool.query(`UPDATE users SET full_name=$1,email=$2,role=$3,department=$4,group_name=$5,position=$6,phone=$7,course=$8,study_level=$9,profile_updated_at=now() WHERE id=$10 RETURNING id,full_name,email,role,department,group_name,position,phone,course,study_level,created_at,profile_updated_at`,[fullName,email,role,String(b.department||"").trim(),String(b.group_name||"").trim(),String(b.position||"").trim(),String(b.phone||"").trim(),String(b.course||"").trim(),String(b.study_level||"").trim(),req.params.id])
-    if(!result.rows.length)return res.status(404).json({error:"Користувача не знайдено"})
+    if(!result.rows.length)return res.status(404).json({error:"User not found"})
     if (b.password) await pool.query("UPDATE users SET password_hash=$1,reset_token=NULL,reset_expires=NULL WHERE id=$2",[await bcrypt.hash(String(b.password),10),req.params.id])
     res.json({user:result.rows[0]})
-  } catch(err){if(err.code==="23505")return res.status(409).json({error:"Користувач із такою адресою вже існує"}); console.error("dean user update error:",err.message);res.status(500).json({error:"Не вдалося зберегти користувача"})}
+  } catch(err){if(err.code==="23505")return res.status(409).json({error:"A user with this email already exists"}); console.error("dean user update error:",err.message);res.status(500).json({error:"Could not save the user"})}
 })
 app.delete("/api/dean/users/:id", authRequired, deanOnly, async (req,res)=>{
   const id=Number(req.params.id)
@@ -998,20 +998,20 @@ app.delete("/api/dean/users/:id", authRequired, deanOnly, async (req,res)=>{
   try {
     await client.query("BEGIN")
     const target=await client.query("SELECT id,role FROM users WHERE id=$1 FOR UPDATE",[id])
-    if(!target.rows.length){await client.query("ROLLBACK");return res.status(404).json({error:"Користувача не знайдено"})}
+    if(!target.rows.length){await client.query("ROLLBACK");return res.status(404).json({error:"User not found"})}
     if(target.rows[0].role==="ДеканФІКТ") {const other=await client.query("SELECT 1 FROM users WHERE role='ДеканФІКТ' AND id<>$1 LIMIT 1",[id]); if(!other.rows.length){await client.query("ROLLBACK");return res.status(409).json({error:"Не можна видалити останній обліковий запис декана"})}}
     await client.query("DELETE FROM chat_reads WHERE user_id=$1",[id]); await client.query("DELETE FROM chat_members WHERE user_id=$1",[id]); await client.query("DELETE FROM chats WHERE chat_type='direct' AND (user_one_id=$1 OR user_two_id=$1)",[id]); await client.query("UPDATE chats SET created_by=NULL WHERE created_by=$1",[id]);
     await client.query("DELETE FROM news_attachments WHERE news_id IN (SELECT id FROM news WHERE author_id=$1)",[id]); await client.query("DELETE FROM news WHERE author_id=$1",[id]);
     await client.query("DELETE FROM achievements WHERE user_id=$1",[id]); await client.query("DELETE FROM student_activities WHERE user_id=$1",[id]); await client.query("DELETE FROM event_registrations WHERE user_id=$1",[id]); await client.query("UPDATE events SET created_by=NULL WHERE created_by=$1",[id]);
     await client.query("DELETE FROM users WHERE id=$1",[id]); await client.query("COMMIT"); res.json({message:"Користувача та пов’язані з ним персональні записи видалено"})
-  }catch(err){await client.query("ROLLBACK").catch(()=>{});console.error("dean user delete error:",err.message);res.status(500).json({error:"Не вдалося видалити користувача"})}finally{client.release()}
+  }catch(err){await client.query("ROLLBACK").catch(()=>{});console.error("dean user delete error:",err.message);res.status(500).json({error:"Could not delete the user"})}finally{client.release()}
 })
 function newsAuthorOnly(req, res, next) {
-  if (!NEWS_AUTHOR_ROLES.includes(String(req.user.role || "").trim())) return res.status(403).json({ error: "Створювати новини можуть лише уповноважені працівники" })
+  if (!NEWS_AUTHOR_ROLES.includes(String(req.user.role || "").trim())) return res.status(403).json({ error: "Only authorized staff can create news posts" })
   next()
 }
 function studentExtractOnly(req, res, next) {
-  if (!NEWS_AUTHOR_ROLES.includes(String(req.user.role || "").trim())) return res.status(403).json({ error: "Витяг доступний лише викладачам та уповноваженим працівникам" })
+  if (!NEWS_AUTHOR_ROLES.includes(String(req.user.role || "").trim())) return res.status(403).json({ error: "The report is available only to faculty and authorized staff" })
   next()
 }
 function cleanNewsPayload(body) {
@@ -1039,34 +1039,34 @@ app.get("/api/news/categories", async (req, res) => {
       FROM news_categories c LEFT JOIN news_category_links l ON l.category_id=c.id
       GROUP BY c.id ORDER BY c.name`)
     res.json({ categories: result.rows })
-  } catch (err) { console.error("news categories error:", err.message); res.status(500).json({ error: "Не вдалося завантажити категорії" }) }
+  } catch (err) { console.error("news categories error:", err.message); res.status(500).json({ error: "Could not load categories" }) }
 })
 app.post("/api/news/categories", authRequired, newsAuthorOnly, async (req, res) => {
   try {
     const name = String(req.body?.name || "").trim().replace(/\s+/g, " ")
-    if (!name || name.length > 80 || name.includes(",")) return res.status(400).json({ error: "Назва категорії має містити від 1 до 80 символів і не містити кому" })
+    if (!name || name.length > 80 || name.includes(",")) return res.status(400).json({ error: "Category name must be 1–80 characters and cannot contain a comma" })
     const result = await pool.query("INSERT INTO news_categories(name) VALUES($1) ON CONFLICT(name) DO UPDATE SET name=EXCLUDED.name RETURNING id,name", [name])
     res.status(201).json({ category: result.rows[0] })
-  } catch (err) { console.error("news category create error:", err.message); res.status(500).json({ error: "Не вдалося створити категорію" }) }
+  } catch (err) { console.error("news category create error:", err.message); res.status(500).json({ error: "Could not create category" }) }
 })
 app.put("/api/news/categories/:id", authRequired, newsAuthorOnly, async (req, res) => {
   try {
     const name = String(req.body?.name || "").trim().replace(/\\s+/g, " ")
-    if (!name || name.length > 80 || name.includes(",")) return res.status(400).json({ error: "Назва категорії має містити від 1 до 80 символів і не містити кому" })
+    if (!name || name.length > 80 || name.includes(",")) return res.status(400).json({ error: "Category name must be 1–80 characters and cannot contain a comma" })
     const result = await pool.query("UPDATE news_categories SET name=$1 WHERE id=$2 RETURNING id,name", [name, req.params.id])
-    if (!result.rows.length) return res.status(404).json({ error: "Категорію не знайдено" })
+    if (!result.rows.length) return res.status(404).json({ error: "Category not found" })
     await pool.query("UPDATE news SET category=$1 WHERE id IN (SELECT news_id FROM news_category_links WHERE category_id=$2)", [name, req.params.id])
     res.json({ category: result.rows[0] })
-  } catch (err) { if (err.code === "23505") return res.status(409).json({ error: "Така категорія вже існує" }); console.error("news category update error:", err.message); res.status(500).json({ error: "Не вдалося перейменувати категорію" }) }
+  } catch (err) { if (err.code === "23505") return res.status(409).json({ error: "This category already exists" }); console.error("news category update error:", err.message); res.status(500).json({ error: "Could not rename category" }) }
 })
 app.delete("/api/news/categories/:id", authRequired, newsAuthorOnly, async (req, res) => {
   try {
     const used = await pool.query("SELECT 1 FROM news_category_links WHERE category_id=$1 LIMIT 1", [req.params.id])
-    if (used.rows.length) return res.status(409).json({ error: "Категорію не можна видалити, поки вона використовується новинами" })
+    if (used.rows.length) return res.status(409).json({ error: "A category cannot be deleted while news posts use it" })
     const result = await pool.query("DELETE FROM news_categories WHERE id=$1 RETURNING id", [req.params.id])
-    if (!result.rows.length) return res.status(404).json({ error: "Категорію не знайдено" })
-    res.json({ message: "Категорію видалено" })
-  } catch (err) { console.error("news category delete error:", err.message); res.status(500).json({ error: "Не вдалося видалити категорію" }) }
+    if (!result.rows.length) return res.status(404).json({ error: "Category not found" })
+    res.json({ message: "Category deleted" })
+  } catch (err) { console.error("news category delete error:", err.message); res.status(500).json({ error: "Could not delete category" }) }
 })
 app.get("/api/news", async (req, res) => {
   try {
@@ -1082,7 +1082,7 @@ app.get("/api/news", async (req, res) => {
       WHERE n.status = 'published' OR n.author_id = $1 OR $2 IN ('ДеканФІКТ','${DEVELOPER_ROLE}') GROUP BY n.id, u.full_name
       ORDER BY n.is_pinned DESC, n.created_at DESC`, [viewerId, viewerRole])
     res.json({ news: result.rows })
-  } catch (err) { console.error("news list error:", err.message); res.status(500).json({ error: "Не вдалося завантажити новини" }) }
+  } catch (err) { console.error("news list error:", err.message); res.status(500).json({ error: "Could not load news" }) }
 })
 app.get("/news/export", authRequired, newsAuthorOnly, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "news-export.html"))
@@ -1093,27 +1093,27 @@ app.get("/students/export", authRequired, studentExtractOnly, (req, res) => {
 app.post("/api/news/:id/reaction", authRequired, async (req, res) => {
   try {
     const news = await pool.query("SELECT id FROM news WHERE id=$1 AND status='published'", [req.params.id])
-    if (!news.rows.length) return res.status(404).json({ error: "Опубліковану новину не знайдено" })
+    if (!news.rows.length) return res.status(404).json({ error: "Published news post not found" })
     const exists = await pool.query("SELECT 1 FROM news_reactions WHERE news_id=$1 AND user_id=$2", [req.params.id, req.user.id])
     if (exists.rows.length) await pool.query("DELETE FROM news_reactions WHERE news_id=$1 AND user_id=$2", [req.params.id, req.user.id])
     else await pool.query("INSERT INTO news_reactions(news_id,user_id,reaction,type) VALUES($1,$2,'like','like')", [req.params.id, req.user.id])
     res.json({ reacted: !exists.rows.length })
   } catch (err) {
     console.error("reaction error:", err.message)
-    res.status(500).json({ error: "Не вдалося зберегти реакцію" })
+    res.status(500).json({ error: "Could not save reaction" })
   }
 })
 app.post("/api/news/:id/save", authRequired, async (req, res) => {
   try {
     const published = await pool.query("SELECT id FROM news WHERE id=$1 AND status='published'", [req.params.id])
-    if (!published.rows.length) return res.status(404).json({ error: "Опубліковану новину не знайдено" })
+    if (!published.rows.length) return res.status(404).json({ error: "Published news post not found" })
     const exists = await pool.query("SELECT 1 FROM saved_news WHERE news_id=$1 AND user_id=$2", [req.params.id, req.user.id])
     if (exists.rows.length) await pool.query("DELETE FROM saved_news WHERE news_id=$1 AND user_id=$2", [req.params.id, req.user.id])
     else await pool.query("INSERT INTO saved_news(news_id,user_id) VALUES($1,$2) ON CONFLICT DO NOTHING", [req.params.id, req.user.id])
     res.json({ saved: !exists.rows.length })
   } catch (err) {
     console.error("save news error:", err.message)
-    res.status(500).json({ error: "Не вдалося зберегти новину" })
+    res.status(500).json({ error: "Could not save news post" })
   }
 })
 app.get("/api/news/:id/comments", async (req, res) => {
@@ -1122,16 +1122,16 @@ app.get("/api/news/:id/comments", async (req, res) => {
 })
 app.post("/api/news/:id/comments", authRequired, async (req, res) => {
   const content = String(req.body?.content || "").trim()
-  if (!content || content.length > 1000) return res.status(400).json({ error: "Коментар має містити від 1 до 1000 символів" })
+  if (!content || content.length > 1000) return res.status(400).json({ error: "Comment must be 1–1,000 characters" })
   const result = await pool.query("INSERT INTO news_comments(news_id,user_id,content) SELECT $1,$2,$3 WHERE EXISTS(SELECT 1 FROM news WHERE id=$1 AND status='published') RETURNING id,content,created_at", [req.params.id, req.user.id, content])
-  if (!result.rows.length) return res.status(404).json({ error: "Опубліковану новину не знайдено" })
+  if (!result.rows.length) return res.status(404).json({ error: "Published news post not found" })
   res.status(201).json({ comment: { ...result.rows[0], author_name: req.user.full_name } })
 })
 
 app.post("/api/news", authRequired, newsAuthorOnly, async (req, res) => {
   try {
     const item = cleanNewsPayload(req.body || {})
-    if (!item.title || !item.content) return res.status(400).json({ error: "Вкажіть заголовок і текст новини" })
+    if (!item.title || !item.content) return res.status(400).json({ error: "Enter a title and news text" })
     const client = await pool.connect()
     try {
       await client.query("BEGIN")
@@ -1140,38 +1140,38 @@ app.post("/api/news", authRequired, newsAuthorOnly, async (req, res) => {
       await client.query("COMMIT")
       res.status(201).json({ news: { ...result.rows[0], categories: item.categories.map((name) => ({ name })) } })
     } catch (err) { await client.query("ROLLBACK"); throw err } finally { client.release() }
-  } catch (err) { console.error("news create error:", err.message); res.status(500).json({ error: "Не вдалося створити новину" }) }
+  } catch (err) { console.error("news create error:", err.message); res.status(500).json({ error: "Could not create news post" }) }
 })
 app.put("/api/news/:id", authRequired, newsAuthorOnly, async (req, res) => {
   try {
     const item = cleanNewsPayload(req.body || {})
-    if (!item.title || !item.content) return res.status(400).json({ error: "Вкажіть заголовок і текст новини" })
+    if (!item.title || !item.content) return res.status(400).json({ error: "Enter a title and news text" })
     const client = await pool.connect()
     try {
       await client.query("BEGIN")
       const result = await client.query(`UPDATE news SET title=$1,content=$2,category=$3,status=$4,is_pinned=$5,updated_at=now() WHERE id=$6 AND (author_id=$7 OR $8 IN ('ДеканФІКТ','${DEVELOPER_ROLE}')) RETURNING *`, [item.title, item.content, item.categories[0], item.status, item.is_pinned, req.params.id, req.user.id, req.user.role])
-      if (!result.rows.length) { await client.query("ROLLBACK"); return res.status(404).json({ error: "Новину не знайдено або це не ваша новина" }) }
+      if (!result.rows.length) { await client.query("ROLLBACK"); return res.status(404).json({ error: "News post not found or you do not own it" }) }
       await client.query("DELETE FROM news_category_links WHERE news_id=$1", [result.rows[0].id])
       await setNewsCategories(client, result.rows[0].id, item.categories)
       await client.query("COMMIT")
       res.json({ news: { ...result.rows[0], categories: item.categories.map((name) => ({ name })) } })
     } catch (err) { await client.query("ROLLBACK"); throw err } finally { client.release() }
-  } catch (err) { res.status(500).json({ error: "Не вдалося оновити новину" }) }
+  } catch (err) { res.status(500).json({ error: "Could not update news post" }) }
 })
 app.delete("/api/news/:id", authRequired, newsAuthorOnly, async (req, res) => {
   const result = await pool.query(`DELETE FROM news WHERE id=$1 AND (author_id=$2 OR $3 IN ('ДеканФІКТ','${DEVELOPER_ROLE}')) RETURNING id`, [req.params.id, req.user.id, req.user.role])
-  if (!result.rows.length) return res.status(404).json({ error: "Новину не знайдено або це не ваша новина" })
-  res.json({ message: "Новину видалено" })
+  if (!result.rows.length) return res.status(404).json({ error: "News post not found or you do not own it" })
+  res.json({ message: "News post deleted" })
 })
 app.post("/api/news/:id/attachments", authRequired, newsAuthorOnly, async (req, res) => {
   try {
     const { file_name, mime_type, file_data } = req.body || {}
-    if (!file_name || !mime_type || !file_data || file_data.length > NEWS_MAX_FILE * 1.4) return res.status(400).json({ error: "Файл відсутній або перевищує 5 МБ" })
+    if (!file_name || !mime_type || !file_data || file_data.length > NEWS_MAX_FILE * 1.4) return res.status(400).json({ error: "File is missing or larger than 5 MB" })
     const owns = await pool.query("SELECT id FROM news WHERE id=$1 AND (author_id=$2 OR $3=$4)", [req.params.id, req.user.id, req.user.role, DEVELOPER_ROLE])
-    if (!owns.rows.length) return res.status(404).json({ error: "Новину не знайдено" })
+    if (!owns.rows.length) return res.status(404).json({ error: "News post not found" })
     const result = await pool.query("INSERT INTO news_attachments (news_id,file_name,mime_type,file_data) VALUES ($1,$2,$3,$4) RETURNING id,file_name,mime_type", [req.params.id, file_name.slice(0, 200), mime_type, file_data])
     res.status(201).json({ attachment: result.rows[0] })
-  } catch (err) { res.status(500).json({ error: "Не вдалося додати файл" }) }
+  } catch (err) { res.status(500).json({ error: "Could not attach the file" }) }
 })
 app.get("/api/news/attachments/:id", authRequired, async (req, res) => {
   const result = await pool.query("SELECT * FROM news_attachments WHERE id=$1", [req.params.id])
@@ -1181,7 +1181,7 @@ app.get("/api/news/attachments/:id", authRequired, async (req, res) => {
 
 const EVENT_MANAGER_ROLES = [DEVELOPER_ROLE, "ДеканФІКТ", "Завідувач Кафедри", "Викладач"]
 function eventManagerOnly(req, res, next) {
-  if (!EVENT_MANAGER_ROLES.includes(String(req.user.role || "").trim())) return res.status(403).json({ error: "Створювати події можуть лише викладачі та деканат" })
+  if (!EVENT_MANAGER_ROLES.includes(String(req.user.role || "").trim())) return res.status(403).json({ error: "Only faculty and the dean’s office can create events" })
   next()
 }
 const POLL_MANAGER_ROLES = [DEVELOPER_ROLE, "ДеканФІКТ", "Завідувач Кафедри", "Викладач"]
@@ -1214,23 +1214,23 @@ app.get("/api/polls",authRequired,async(req,res)=>{
     const polls=[]
     for(const row of result.rows){const options=await pool.query(`SELECT o.id,o.label,(SELECT COUNT(*)::int FROM poll_selections s WHERE s.option_id=o.id) AS votes,EXISTS(SELECT 1 FROM poll_voters v JOIN poll_selections s ON s.ballot_id=v.ballot_id WHERE v.poll_id=o.poll_id AND v.user_id=$2 AND s.option_id=o.id) AS selected FROM poll_options o WHERE o.poll_id=$1 ORDER BY o.position,o.id`,[row.id,req.user.id]);polls.push(pollPublic(row,options.rows,req.user))}
     res.json({polls})
-  }catch(err){console.error("poll list error:",err.message);res.status(500).json({error:"Не вдалося завантажити опитування"})}
+  }catch(err){console.error("poll list error:",err.message);res.status(500).json({error:"Could not load polls"})}
 })
 app.post("/api/polls",authRequired,pollManagerOnly,async(req,res)=>{
   const p=cleanPollPayload(req.body||{});if(!p.valid)return res.status(400).json({error:"Перевірте назву, 2–20 унікальних варіантів і дати опитування"})
-  const client=await pool.connect();try{await client.query("BEGIN");const q=await client.query(`INSERT INTO polls(author_id,title,description,poll_type,max_choices,anonymous,results_visibility,target_groups,status,opens_at,closes_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,[req.user.id,p.title,p.description,p.pollType,p.maxChoices,p.anonymous,p.resultsVisibility,p.targetGroups,p.status,p.opensAt,p.closesAt]);for(let i=0;i<p.options.length;i++)await client.query("INSERT INTO poll_options(poll_id,label,position) VALUES($1,$2,$3)",[q.rows[0].id,p.options[i],i]);await client.query("COMMIT");res.status(201).json({id:q.rows[0].id,message:"Опитування створено"})}catch(err){await client.query("ROLLBACK").catch(()=>{});console.error("poll create error:",err.message);res.status(500).json({error:"Не вдалося створити опитування"})}finally{client.release()}
+  const client=await pool.connect();try{await client.query("BEGIN");const q=await client.query(`INSERT INTO polls(author_id,title,description,poll_type,max_choices,anonymous,results_visibility,target_groups,status,opens_at,closes_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,[req.user.id,p.title,p.description,p.pollType,p.maxChoices,p.anonymous,p.resultsVisibility,p.targetGroups,p.status,p.opensAt,p.closesAt]);for(let i=0;i<p.options.length;i++)await client.query("INSERT INTO poll_options(poll_id,label,position) VALUES($1,$2,$3)",[q.rows[0].id,p.options[i],i]);await client.query("COMMIT");res.status(201).json({id:q.rows[0].id,message:"Poll created"})}catch(err){await client.query("ROLLBACK").catch(()=>{});console.error("poll create error:",err.message);res.status(500).json({error:"Could not create poll"})}finally{client.release()}
 })
 app.put("/api/polls/:id",authRequired,pollManagerOnly,async(req,res)=>{
   const p=cleanPollPayload(req.body||{});if(!p.valid)return res.status(400).json({error:"Перевірте назву, 2–20 унікальних варіантів і дати опитування"})
-  const client=await pool.connect();try{await client.query("BEGIN");const old=await client.query("SELECT id,author_id,(SELECT COUNT(*) FROM poll_ballots WHERE poll_id=polls.id)::int AS votes FROM polls WHERE id=$1 FOR UPDATE",[req.params.id]);if(!old.rows.length){await client.query("ROLLBACK");return res.status(404).json({error:"Опитування не знайдено"})}if(old.rows[0].author_id!==req.user.id&&req.user.role!=="ДеканФІКТ"){await client.query("ROLLBACK");return res.status(403).json({error:"Редагувати опитування може його автор або декан"})}if(old.rows[0].votes){await client.query("ROLLBACK");return res.status(409).json({error:"Після першого голосу опитування не можна редагувати. Закрийте його або створіть нове."})}await client.query(`UPDATE polls SET title=$1,description=$2,poll_type=$3,max_choices=$4,anonymous=$5,results_visibility=$6,target_groups=$7,status=$8,opens_at=$9,closes_at=$10,updated_at=now() WHERE id=$11`,[p.title,p.description,p.pollType,p.maxChoices,p.anonymous,p.resultsVisibility,p.targetGroups,p.status,p.opensAt,p.closesAt,req.params.id]);await client.query("DELETE FROM poll_options WHERE poll_id=$1",[req.params.id]);for(let i=0;i<p.options.length;i++)await client.query("INSERT INTO poll_options(poll_id,label,position) VALUES($1,$2,$3)",[req.params.id,p.options[i],i]);await client.query("COMMIT");res.json({message:"Опитування оновлено"})}catch(err){await client.query("ROLLBACK").catch(()=>{});console.error("poll update error:",err.message);res.status(500).json({error:"Не вдалося оновити опитування"})}finally{client.release()}
+  const client=await pool.connect();try{await client.query("BEGIN");const old=await client.query("SELECT id,author_id,(SELECT COUNT(*) FROM poll_ballots WHERE poll_id=polls.id)::int AS votes FROM polls WHERE id=$1 FOR UPDATE",[req.params.id]);if(!old.rows.length){await client.query("ROLLBACK");return res.status(404).json({error:"Poll not found"})}if(old.rows[0].author_id!==req.user.id&&req.user.role!=="ДеканФІКТ"){await client.query("ROLLBACK");return res.status(403).json({error:"Only the poll author or dean can edit it"})}if(old.rows[0].votes){await client.query("ROLLBACK");return res.status(409).json({error:"A poll cannot be edited after the first vote. Close it or create a new one."})}await client.query(`UPDATE polls SET title=$1,description=$2,poll_type=$3,max_choices=$4,anonymous=$5,results_visibility=$6,target_groups=$7,status=$8,opens_at=$9,closes_at=$10,updated_at=now() WHERE id=$11`,[p.title,p.description,p.pollType,p.maxChoices,p.anonymous,p.resultsVisibility,p.targetGroups,p.status,p.opensAt,p.closesAt,req.params.id]);await client.query("DELETE FROM poll_options WHERE poll_id=$1",[req.params.id]);for(let i=0;i<p.options.length;i++)await client.query("INSERT INTO poll_options(poll_id,label,position) VALUES($1,$2,$3)",[req.params.id,p.options[i],i]);await client.query("COMMIT");res.json({message:"Poll updated"})}catch(err){await client.query("ROLLBACK").catch(()=>{});console.error("poll update error:",err.message);res.status(500).json({error:"Could not update poll"})}finally{client.release()}
 })
 app.post("/api/polls/:id/vote",authRequired,async(req,res)=>{
   if(req.user.role!=="Студент")return res.status(403).json({error:"Голосувати можуть лише студенти"})
   const ids=Array.isArray(req.body?.option_ids)?Array.from(new Set(req.body.option_ids.map(Number))):[];if(!ids.length||ids.some(x=>!Number.isInteger(x)))return res.status(400).json({error:"Оберіть варіант відповіді"})
-  const client=await pool.connect();try{await client.query("BEGIN");const q=await client.query("SELECT * FROM polls WHERE id=$1 FOR UPDATE",[req.params.id]);if(!q.rows.length){await client.query("ROLLBACK");return res.status(404).json({error:"Опитування не знайдено"})}const p=q.rows[0];const now=new Date();if(p.status!=="published"||(p.opens_at&&new Date(p.opens_at)>now)||(p.closes_at&&new Date(p.closes_at)<=now)){await client.query("ROLLBACK");return res.status(409).json({error:"Голосування зараз закрите"})}if(p.target_groups?.length){const group=await client.query("SELECT group_name FROM users WHERE id=$1",[req.user.id]);if(!p.target_groups.includes(group.rows[0]?.group_name||"")){await client.query("ROLLBACK");return res.status(403).json({error:"Це опитування доступне лише вибраним групам"})}}if((p.poll_type==="single"&&ids.length!==1)||ids.length>p.max_choices){await client.query("ROLLBACK");return res.status(400).json({error:`Для цього опитування можна обрати ${p.poll_type==="single"?"один варіант":`до ${p.max_choices} варіантів`}`})}const valid=await client.query("SELECT id FROM poll_options WHERE poll_id=$1 AND id=ANY($2::int[])",[p.id,ids]);if(valid.rows.length!==ids.length){await client.query("ROLLBACK");return res.status(400).json({error:"Один із варіантів відповіді некоректний"})}const ballot=await client.query("INSERT INTO poll_ballots(poll_id) VALUES($1) RETURNING id",[p.id]);for(const id of ids)await client.query("INSERT INTO poll_selections(ballot_id,option_id) VALUES($1,$2)",[ballot.rows[0].id,id]);await client.query("INSERT INTO poll_voters(poll_id,user_id,ballot_id) VALUES($1,$2,$3)",[p.id,req.user.id,p.anonymous?null:ballot.rows[0].id]);await client.query("COMMIT");res.status(201).json({message:"Ваш голос зараховано"})}catch(err){await client.query("ROLLBACK").catch(()=>{});if(err.code==="23505")return res.status(409).json({error:"Ви вже голосували в цьому опитуванні"});console.error("poll vote error:",err.message);res.status(500).json({error:"Не вдалося зберегти голос"})}finally{client.release()}
+  const client=await pool.connect();try{await client.query("BEGIN");const q=await client.query("SELECT * FROM polls WHERE id=$1 FOR UPDATE",[req.params.id]);if(!q.rows.length){await client.query("ROLLBACK");return res.status(404).json({error:"Poll not found"})}const p=q.rows[0];const now=new Date();if(p.status!=="published"||(p.opens_at&&new Date(p.opens_at)>now)||(p.closes_at&&new Date(p.closes_at)<=now)){await client.query("ROLLBACK");return res.status(409).json({error:"Voting is currently closed"})}if(p.target_groups?.length){const group=await client.query("SELECT group_name FROM users WHERE id=$1",[req.user.id]);if(!p.target_groups.includes(group.rows[0]?.group_name||"")){await client.query("ROLLBACK");return res.status(403).json({error:"This poll is only available to selected groups"})}}if((p.poll_type==="single"&&ids.length!==1)||ids.length>p.max_choices){await client.query("ROLLBACK");return res.status(400).json({error:`Для цього опитування можна обрати ${p.poll_type==="single"?"one option":`up to ${p.max_choices} options`}`})}const valid=await client.query("SELECT id FROM poll_options WHERE poll_id=$1 AND id=ANY($2::int[])",[p.id,ids]);if(valid.rows.length!==ids.length){await client.query("ROLLBACK");return res.status(400).json({error:"One of the selected options is invalid"})}const ballot=await client.query("INSERT INTO poll_ballots(poll_id) VALUES($1) RETURNING id",[p.id]);for(const id of ids)await client.query("INSERT INTO poll_selections(ballot_id,option_id) VALUES($1,$2)",[ballot.rows[0].id,id]);await client.query("INSERT INTO poll_voters(poll_id,user_id,ballot_id) VALUES($1,$2,$3)",[p.id,req.user.id,p.anonymous?null:ballot.rows[0].id]);await client.query("COMMIT");res.status(201).json({message:"Your vote has been counted"})}catch(err){await client.query("ROLLBACK").catch(()=>{});if(err.code==="23505")return res.status(409).json({error:"You have already voted in this poll"});console.error("poll vote error:",err.message);res.status(500).json({error:"Could not save your vote"})}finally{client.release()}
 })
-app.post("/api/polls/:id/close",authRequired,pollManagerOnly,async(req,res)=>{try{const q=await pool.query("UPDATE polls SET status='closed',updated_at=now() WHERE id=$1 AND (author_id=$2 OR $3='ДеканФІКТ') RETURNING id",[req.params.id,req.user.id,req.user.role]);if(!q.rows.length)return res.status(404).json({error:"Опитування не знайдено або немає доступу"});res.json({message:"Голосування закрито"})}catch(err){console.error("poll close error:",err.message);res.status(500).json({error:"Не вдалося закрити опитування"})}})
-app.delete("/api/polls/:id",authRequired,pollManagerOnly,async(req,res)=>{try{const q=await pool.query("DELETE FROM polls WHERE id=$1 AND (author_id=$2 OR $3='ДеканФІКТ') RETURNING id",[req.params.id,req.user.id,req.user.role]);if(!q.rows.length)return res.status(404).json({error:"Опитування не знайдено або немає доступу"});res.json({message:"Опитування видалено"})}catch(err){console.error("poll delete error:",err.message);res.status(500).json({error:"Не вдалося видалити опитування"})}})
+app.post("/api/polls/:id/close",authRequired,pollManagerOnly,async(req,res)=>{try{const q=await pool.query("UPDATE polls SET status='closed',updated_at=now() WHERE id=$1 AND (author_id=$2 OR $3='ДеканФІКТ') RETURNING id",[req.params.id,req.user.id,req.user.role]);if(!q.rows.length)return res.status(404).json({error:"Poll not found або немає доступу"});res.json({message:"Poll closed"})}catch(err){console.error("poll close error:",err.message);res.status(500).json({error:"Could not close poll"})}})
+app.delete("/api/polls/:id",authRequired,pollManagerOnly,async(req,res)=>{try{const q=await pool.query("DELETE FROM polls WHERE id=$1 AND (author_id=$2 OR $3='ДеканФІКТ') RETURNING id",[req.params.id,req.user.id,req.user.role]);if(!q.rows.length)return res.status(404).json({error:"Poll not found або немає доступу"});res.json({message:"Poll deleted"})}catch(err){console.error("poll delete error:",err.message);res.status(500).json({error:"Could not delete poll"})}})
 function cleanEventPayload(body = {}) {
   const title = String(body.title || "").trim()
   const summary = String(body.summary || "").trim()
@@ -1276,31 +1276,31 @@ app.get("/api/events", authRequired, async (req, res) => {
       GROUP BY e.id,u.full_name
       ORDER BY CASE WHEN e.status='published' THEN 0 ELSE 1 END, e.starts_at ASC`, [req.user.id, req.user.role])
     res.json({ events: result.rows })
-  } catch (err) { console.error("events list error:", err.message); res.status(500).json({ error: "Не вдалося завантажити події" }) }
+  } catch (err) { console.error("events list error:", err.message); res.status(500).json({ error: "Could not load events" }) }
 })
 app.post("/api/events", authRequired, eventManagerOnly, async (req, res) => {
   const event = cleanEventPayload(req.body)
-  if (!event.valid) return res.status(400).json({ error: "Перевірте назву, опис, посилання, місткість і дати події. Завершення має бути після початку, а дедлайн реєстрації — не пізніше початку." })
-  if (event.status === "published" && event.starts_at <= new Date()) return res.status(400).json({ error: "Нову опубліковану подію потрібно запланувати на майбутнє." })
+  if (!event.valid) return res.status(400).json({ error: "Check the event title, description, links, capacity, and dates. The event must end after it starts, and registration must close before the event begins." })
+  if (event.status === "published" && event.starts_at <= new Date()) return res.status(400).json({ error: "Published events must be scheduled for a future date." })
   try {
     const result = await pool.query(`INSERT INTO events (created_by,title,summary,description,event_type,format,location,starts_at,ends_at,registration_deadline,capacity,cover_image,meeting_url,contact,status)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`, [req.user.id,event.title,event.summary,event.description,event.event_type,event.format,event.location,event.starts_at,event.ends_at,event.registration_deadline,event.capacity,event.cover_image ?? "",event.meeting_url,event.contact,event.status])
     res.status(201).json({ event: { ...publicEvent(result.rows[0]), creator_name: req.user.full_name, registered_count: 0, waitlist_count: 0, my_status: null } })
-  } catch (err) { console.error("event create error:", err.message); res.status(500).json({ error: "Не вдалося створити подію" }) }
+  } catch (err) { console.error("event create error:", err.message); res.status(500).json({ error: "Could not create event" }) }
 })
 app.put("/api/events/:id", authRequired, eventManagerOnly, async (req, res) => {
   const event = cleanEventPayload(req.body)
-  if (!event.valid) return res.status(400).json({ error: "Перевірте заповнені поля та дати події." })
-  if (event.status === "published" && event.starts_at <= new Date()) return res.status(400).json({ error: "Щоб відкрити реєстрацію, заплануйте подію на майбутнє." })
+  if (!event.valid) return res.status(400).json({ error: "Check the required fields and event dates." })
+  if (event.status === "published" && event.starts_at <= new Date()) return res.status(400).json({ error: "Schedule the event for a future date to open registration." })
   let client
   try {
     client = await pool.connect()
     await client.query("BEGIN")
     const existing = await client.query("SELECT id,created_by FROM events WHERE id=$1 FOR UPDATE", [req.params.id])
-    if (!existing.rows.length) { await client.query("ROLLBACK"); return res.status(404).json({ error: "Подію не знайдено" }) }
-    if (existing.rows[0].created_by !== req.user.id && req.user.role !== "ДеканФІКТ" && !isPlatformAdmin(req.user)) { await client.query("ROLLBACK"); return res.status(403).json({ error: "Редагувати цю подію може її автор або адміністратор" }) }
+    if (!existing.rows.length) { await client.query("ROLLBACK"); return res.status(404).json({ error: "Event not found" }) }
+    if (existing.rows[0].created_by !== req.user.id && req.user.role !== "ДеканФІКТ" && !isPlatformAdmin(req.user)) { await client.query("ROLLBACK"); return res.status(403).json({ error: "Only the event owner or an administrator can edit this event" }) }
     const count = await client.query("SELECT COUNT(*)::int AS total FROM event_registrations WHERE event_id=$1 AND status='registered'", [req.params.id])
-    if (event.capacity !== null && event.capacity < count.rows[0].total) { await client.query("ROLLBACK"); return res.status(409).json({ error: `Уже зареєстровано ${count.rows[0].total} учасників. Збільште місткість або зачекайте на скасування участі.` }) }
+    if (event.capacity !== null && event.capacity < count.rows[0].total) { await client.query("ROLLBACK"); return res.status(409).json({ error: `Already registered ${count.rows[0].total}  participants. Increase the capacity or wait for a cancellation.` }) }
     const result = await client.query(`UPDATE events SET title=$1,summary=$2,description=$3,event_type=$4,format=$5,location=$6,starts_at=$7,ends_at=$8,registration_deadline=$9,capacity=$10,cover_image=COALESCE($11,cover_image),meeting_url=$12,contact=$13,status=$14,updated_at=now()
       WHERE id=$15 RETURNING *`, [event.title,event.summary,event.description,event.event_type,event.format,event.location,event.starts_at,event.ends_at,event.registration_deadline,event.capacity,event.cover_image,event.meeting_url,event.contact,event.status,req.params.id])
     const openSeats = event.capacity === null ? null : Math.max(0, event.capacity - count.rows[0].total)
@@ -1311,7 +1311,7 @@ app.put("/api/events/:id", authRequired, eventManagerOnly, async (req, res) => {
     await client.query("COMMIT")
     const row = result.rows[0]
     res.json({ event: { ...publicEvent(row), creator_name: req.user.id === row.created_by ? req.user.full_name : "", registered_count: count.rows[0].total, my_status: null } })
-  } catch (err) { if (client) await client.query("ROLLBACK").catch(() => {}); console.error("event update error:", err.message); res.status(500).json({ error: "Не вдалося зберегти зміни події" }) } finally { client?.release() }
+  } catch (err) { if (client) await client.query("ROLLBACK").catch(() => {}); console.error("event update error:", err.message); res.status(500).json({ error: "Could not save event changes" }) } finally { client?.release() }
 })
 app.get("/api/events/:id/cover", authRequired, async (req, res) => {
   try {
@@ -1329,17 +1329,17 @@ app.get("/api/events/:id/cover", authRequired, async (req, res) => {
 app.delete("/api/events/:id", authRequired, eventManagerOnly, async (req, res) => {
   try {
     const result = await pool.query(`DELETE FROM events WHERE id=$1 AND (created_by=$2 OR $3 IN ('ДеканФІКТ','${DEVELOPER_ROLE}')) RETURNING id`, [req.params.id, req.user.id, req.user.role])
-    if (!result.rows.length) return res.status(404).json({ error: "Подію не знайдено або ви не маєте права її видалити" })
-    res.json({ message: "Подію та її реєстрації видалено" })
-  } catch (err) { console.error("event delete error:", err.message); res.status(500).json({ error: "Не вдалося видалити подію" }) }
+    if (!result.rows.length) return res.status(404).json({ error: "Event not found or you are not allowed to delete it" })
+    res.json({ message: "Event and registrations deleted" })
+  } catch (err) { console.error("event delete error:", err.message); res.status(500).json({ error: "Could not delete event" }) }
 })
 app.post("/api/events/:id/cancel", authRequired, eventManagerOnly, async (req, res) => {
   try {
     const result = await pool.query(`UPDATE events SET status='cancelled',updated_at=now()
       WHERE id=$1 AND (created_by=$2 OR $3 IN ('ДеканФІКТ','${DEVELOPER_ROLE}')) AND status='published' RETURNING id`, [req.params.id,req.user.id,req.user.role])
-    if (!result.rows.length) return res.status(404).json({ error: "Опубліковану подію не знайдено або ви не маєте права її скасувати" })
-    res.json({ message: "Подію скасовано. Зареєстровані учасники побачать це в календарі." })
-  } catch (err) { console.error("event cancellation error:", err.message); res.status(500).json({ error: "Не вдалося скасувати подію" }) }
+    if (!result.rows.length) return res.status(404).json({ error: "Published event not found or you are not allowed to cancel it" })
+    res.json({ message: "Event cancelled. Registered participants will see the change in the calendar." })
+  } catch (err) { console.error("event cancellation error:", err.message); res.status(500).json({ error: "Could not cancel event" }) }
 })
 app.post("/api/events/:id/register", authRequired, async (req, res) => {
   let client
@@ -1347,11 +1347,11 @@ app.post("/api/events/:id/register", authRequired, async (req, res) => {
     client = await pool.connect()
     await client.query("BEGIN")
     const result = await client.query("SELECT id,title,status,starts_at,registration_deadline,capacity FROM events WHERE id=$1 FOR UPDATE", [req.params.id])
-    if (!result.rows.length) { await client.query("ROLLBACK"); return res.status(404).json({ error: "Подію не знайдено" }) }
+    if (!result.rows.length) { await client.query("ROLLBACK"); return res.status(404).json({ error: "Event not found" }) }
     const event = result.rows[0]
     const previous = await client.query("SELECT status FROM event_registrations WHERE event_id=$1 AND user_id=$2 FOR UPDATE", [event.id, req.user.id])
     if (previous.rows.length && previous.rows[0].status !== "cancelled") {
-      if (new Date(event.starts_at) <= new Date()) { await client.query("ROLLBACK"); return res.status(409).json({ error: "Реєстрацію не можна змінити після початку події" }) }
+      if (new Date(event.starts_at) <= new Date()) { await client.query("ROLLBACK"); return res.status(409).json({ error: "Registration cannot be changed after the event starts" }) }
       const wasRegistered = previous.rows[0].status === "registered"
       await client.query("UPDATE event_registrations SET status='cancelled',updated_at=now() WHERE event_id=$1 AND user_id=$2", [event.id,req.user.id])
       if (wasRegistered && event.capacity !== null && event.status === "published" && new Date(event.starts_at) > new Date()) {
@@ -1361,27 +1361,27 @@ app.post("/api/events/:id/register", authRequired, async (req, res) => {
       await client.query("COMMIT")
       return res.json({ status: "cancelled", message: "Реєстрацію скасовано" })
     }
-    if (event.status !== "published") { await client.query("ROLLBACK"); return res.status(404).json({ error: "Відкриту для реєстрації подію не знайдено" }) }
-    if (new Date(event.starts_at) <= new Date() || new Date(event.registration_deadline) <= new Date()) { await client.query("ROLLBACK"); return res.status(409).json({ error: "Реєстрацію на цю подію вже закрито" }) }
+    if (event.status !== "published") { await client.query("ROLLBACK"); return res.status(404).json({ error: "Open event not found" }) }
+    if (new Date(event.starts_at) <= new Date() || new Date(event.registration_deadline) <= new Date()) { await client.query("ROLLBACK"); return res.status(409).json({ error: "Registration for this event is closed" }) }
     const counts = await client.query("SELECT COUNT(*) FILTER (WHERE status='registered')::int AS registered FROM event_registrations WHERE event_id=$1", [event.id])
     const status = event.capacity !== null && counts.rows[0].registered >= event.capacity ? "waitlisted" : "registered"
     await client.query(`INSERT INTO event_registrations(event_id,user_id,status) VALUES($1,$2,$3)
       ON CONFLICT(event_id,user_id) DO UPDATE SET status=EXCLUDED.status,created_at=now(),updated_at=now()`, [event.id,req.user.id,status])
     await client.query("COMMIT")
     res.status(201).json({ status, message: status === "waitlisted" ? "Місць поки немає. Ви у списку очікування й автоматично отримаєте місце, якщо воно звільниться." : "Ви успішно зареєструвалися на подію" })
-  } catch (err) { if (client) await client.query("ROLLBACK").catch(() => {}); console.error("event registration error:", err.message); res.status(500).json({ error: "Не вдалося оновити реєстрацію" }) } finally { client?.release() }
+  } catch (err) { if (client) await client.query("ROLLBACK").catch(() => {}); console.error("event registration error:", err.message); res.status(500).json({ error: "Could not update registration" }) } finally { client?.release() }
 })
 app.get("/api/events/:id/participants", authRequired, async (req, res) => {
   try {
     const event = await pool.query("SELECT created_by FROM events WHERE id=$1", [req.params.id])
-    if (!event.rows.length) return res.status(404).json({ error: "Подію не знайдено" })
-    if (event.rows[0].created_by !== req.user.id && req.user.role !== "ДеканФІКТ" && !isPlatformAdmin(req.user)) return res.status(403).json({ error: "Список учасників доступний організатору події та адміністратору" })
+    if (!event.rows.length) return res.status(404).json({ error: "Event not found" })
+    if (event.rows[0].created_by !== req.user.id && req.user.role !== "ДеканФІКТ" && !isPlatformAdmin(req.user)) return res.status(403).json({ error: "Only the event organizer and an administrator can view participants" })
     const result = await pool.query(`SELECT u.id,u.full_name,u.email,u.role,r.status,r.created_at
       FROM event_registrations r JOIN users u ON u.id=r.user_id
       WHERE r.event_id=$1 AND r.status IN ('registered','waitlisted')
       ORDER BY CASE r.status WHEN 'registered' THEN 0 ELSE 1 END,r.created_at`, [req.params.id])
     res.json({ participants: result.rows })
-  } catch (err) { console.error("event participants error:", err.message); res.status(500).json({ error: "Не вдалося завантажити учасників" }) }
+  } catch (err) { console.error("event participants error:", err.message); res.status(500).json({ error: "Could not load participants" }) }
 })
 
 app.get("/api/dean-dashboard", authRequired, deanOnly, async (req, res) => {
@@ -1418,7 +1418,7 @@ app.get("/api/dean-dashboard", authRequired, deanOnly, async (req, res) => {
     res.json({ overview: overview.rows[0], activity: activity.rows[0], groups: groups.rows, departments: departments.rows })
   } catch (err) {
     console.error("dean dashboard error:", err.message)
-    res.status(500).json({ error: "Не вдалося завантажити статистику факультету" })
+    res.status(500).json({ error: "Could not load faculty statistics" })
   }
 })
 
@@ -1437,7 +1437,7 @@ const profileMailer = PROFILE_MAIL_FROM && PROFILE_MAIL_PASSWORD ? nodemailer.cr
 }) : null
 
 app.get("/api/profiles-review", authRequired, async (req, res) => {
-  if (!PROFILE_REVIEW_ROLES.includes(String(req.user.role || "").trim())) return res.status(403).json({ error: "Перегляд профілів доступний завідувачу кафедри та розробнику платформи" })
+  if (!PROFILE_REVIEW_ROLES.includes(String(req.user.role || "").trim())) return res.status(403).json({ error: "Profile review is available to department chairs and the platform developer" })
   try {
     const result = await pool.query(`SELECT id,full_name,email,role,department,position,group_name,study_level,course,phone,about,profile_updated_at FROM users ORDER BY full_name`)
     const profiles = result.rows.map(user => ({ ...user, missing_fields: profileFieldsMissing(user) }))
@@ -1452,17 +1452,17 @@ app.get("/api/profiles-review", authRequired, async (req, res) => {
       WHERE u.role='Студент' AND ($1::boolean OR COALESCE(NULLIF(btrim(u.department),''),'')=$2)
       ORDER BY u.group_name,u.full_name`, [String(req.user.role || "").trim() === "Розробник", department])
     res.json({ profiles, students: studentsResult.rows, summary: { total: profiles.length, complete: profiles.filter(p => !p.missing_fields.length).length, incomplete: profiles.filter(p => p.missing_fields.length).length } })
-  } catch (err) { console.error("profile review list error:", err.message); res.status(500).json({ error: "Не вдалося завантажити профілі" }) }
+  } catch (err) { console.error("profile review list error:", err.message); res.status(500).json({ error: "Could not load profiles" }) }
 })
 
 app.post("/api/profiles-review/:id/remind", authRequired, async (req, res) => {
-  if (!PROFILE_REVIEW_ROLES.includes(String(req.user.role || "").trim())) return res.status(403).json({ error: "Надсилати нагадування може завідувач кафедри або розробник платформи" })
-  if (!profileMailer) return res.status(503).json({ error: "Пошту не налаштовано. Перевірте PROFILE_MAIL_FROM та PROFILE_MAIL_APP_PASSWORD у .env" })
+  if (!PROFILE_REVIEW_ROLES.includes(String(req.user.role || "").trim())) return res.status(403).json({ error: "Only department chairs and the platform developer can send reminders" })
+  if (!profileMailer) return res.status(503).json({ error: "Mail is not configured. Check PROFILE_MAIL_FROM and PROFILE_MAIL_APP_PASSWORD in .env" })
   try {
     const result = await pool.query("SELECT id,full_name,email,role,department,position,group_name,study_level,course,phone,about FROM users WHERE id=$1", [req.params.id])
-    if (!result.rows.length) return res.status(404).json({ error: "Користувача не знайдено" })
+    if (!result.rows.length) return res.status(404).json({ error: "User not found" })
     const user = result.rows[0], missing = profileFieldsMissing(user)
-    if (!missing.length) return res.status(409).json({ error: "Профіль уже заповнений повністю" })
+    if (!missing.length) return res.status(409).json({ error: "The profile is already complete" })
     const list = missing.map(label => `<li>${label.replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]))}</li>`).join("")
     const safeName = String(user.full_name || "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]))
     const profilePath = user.role === "Студент" ? "/profileStudent" : "/profileTeacher"
@@ -1477,13 +1477,13 @@ app.post("/api/profiles-review/:id/remind", authRequired, async (req, res) => {
       html: `<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Інформація для заповнення профілю</title></head><body style="margin:0;padding:0;background-color:#f1f4f9;font-family:Arial,Helvetica,sans-serif;color:#24324f;-webkit-text-size-adjust:100%"><div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">Інформація про поля профілю, які потрібно доповнити в PolyConnect ZTU.</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f1f4f9"><tr><td align="center" style="padding:32px 14px"><table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:600px;border:1px solid #dce3ef;border-radius:16px;background-color:#ffffff;overflow:hidden"><tr><td style="padding:23px 30px;background-color:#172b63;border-bottom:4px solid #ccaa48"><div style="font-size:11px;line-height:16px;font-weight:bold;letter-spacing:1.6px;color:#dce6ff">ЖИТОМИРСЬКА ПОЛІТЕХНІКА</div><div style="padding-top:5px;font-size:20px;line-height:27px;font-weight:bold;color:#ffffff">PolyConnect ZTU</div><div style="padding-top:3px;font-size:12px;line-height:18px;color:#dce6ff">Портал інженерії програмного забезпечення</div></td></tr><tr><td style="padding:32px 30px 12px"><div style="font-size:12px;line-height:18px;font-weight:bold;letter-spacing:1px;color:#526aa8;text-transform:uppercase">Інформація щодо профілю</div><h1 style="margin:8px 0 18px;font-size:25px;line-height:32px;color:#182b5d">Потрібно доповнити профіль</h1><p style="margin:0 0 14px;font-size:15px;line-height:25px">Шановний(а) ${safeName}!</p><p style="margin:0 0 20px;font-size:15px;line-height:25px;color:#485773">Під час перевірки профілів PolyConnect ZTU виявлено, що у вашому обліковому записі бракує наведених нижче відомостей.</p><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #e2e8f2;border-radius:10px;background-color:#f8faff"><tr><td style="padding:17px 20px"><div style="margin-bottom:10px;font-size:13px;line-height:19px;font-weight:bold;color:#273b72">Будь ласка, перевірте та заповніть:</div><ul style="margin:0;padding-left:20px;color:#364663">${list.replace(/<li>/g, '<li style="padding:3px 0;font-size:14px;line-height:21px">')}</ul></td></tr></table><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:25px 0 20px"><tr><td align="center" style="border-radius:8px;background-color:#24469a"><a href="${profileUrl}" style="display:inline-block;padding:13px 22px;border:1px solid #24469a;border-radius:8px;color:#ffffff;font-size:14px;line-height:20px;font-weight:bold;text-decoration:none">Перейти до мого профілю</a></td></tr></table><p style="margin:0 0 18px;font-size:13px;line-height:21px;color:#64718a">Після входу відкриється сторінка вашого профілю. Якщо ви вже заповнили ці поля, додаткових дій не потрібно.</p><div style="height:1px;background-color:#e6eaf1"></div><p style="margin:18px 0 4px;font-size:14px;line-height:22px;color:#35435e">З повагою,<br><strong>Команда PolyConnect ZTU</strong><br>Житомирська політехніка</p></td></tr><tr><td style="padding:15px 30px;background-color:#f8faff;border-top:1px solid #e6eaf1"><p style="margin:0;font-size:11px;line-height:18px;color:#7a869b">Це автоматичне службове повідомлення щодо вашого облікового запису PolyConnect ZTU.</p><p style="margin:6px 0 0;font-size:11px;line-height:18px;color:#7a869b">Якщо кнопка не відкривається, скопіюйте це посилання у браузер:<br><a href="${profileUrl}" style="color:#24469a;word-break:break-all">${profileUrl}</a></p></td></tr></table></td></tr></table></body></html>`,
     })
     res.json({ message: `Нагадування надіслано на ${user.email}` })
-  } catch (err) { console.error("profile reminder error:", err.message); res.status(502).json({ error: "Не вдалося надіслати лист. Перевірте налаштування пошти та спробуйте ще раз" }) }
+  } catch (err) { console.error("profile reminder error:", err.message); res.status(502).json({ error: "Could not send the email. Check your mail settings and try again." }) }
 })
 
 const MAIL_CENTER_ROLES = [DEVELOPER_ROLE, "ДеканФІКТ", "Завідувач Кафедри", "Викладач"]
 const mailSendAttempts = new Map()
 function mailCenterOnly(req, res, next) {
-  if (!MAIL_CENTER_ROLES.includes(String(req.user?.role || "").trim())) return res.status(403).json({ error: "Центр пошти доступний викладачам, завідувачам кафедр і деканату" })
+  if (!MAIL_CENTER_ROLES.includes(String(req.user?.role || "").trim())) return res.status(403).json({ error: "The mail center is available to faculty, department chairs, and the dean’s office" })
   next()
 }
 function mailEscape(value) {
@@ -1495,12 +1495,12 @@ app.get("/api/mail/audience", authRequired, mailCenterOnly, async (_req, res) =>
       WHERE role IN ('Студент','Викладач','ДеканФІКТ','Завідувач Кафедри')
       ORDER BY CASE role WHEN 'Студент' THEN 1 WHEN 'Викладач' THEN 2 WHEN 'Завідувач Кафедри' THEN 3 ELSE 4 END, group_name NULLS LAST, full_name`)
     res.json({ users: result.rows })
-  } catch (err) { console.error("mail audience error:", err.message); res.status(500).json({ error: "Не вдалося завантажити список адресатів" }) }
+  } catch (err) { console.error("mail audience error:", err.message); res.status(500).json({ error: "Could not load recipients" }) }
 })
 app.post("/api/mail/send", authRequired, mailCenterOnly, async (req, res) => {
-  if (!profileMailer) return res.status(503).json({ error: "Пошту не налаштовано. Перевірте PROFILE_MAIL_FROM та PROFILE_MAIL_APP_PASSWORD у середовищі сервера." })
+  if (!profileMailer) return res.status(503).json({ error: "Mail is not configured. Check PROFILE_MAIL_FROM and PROFILE_MAIL_APP_PASSWORD on the server." })
   const lastSent = mailSendAttempts.get(req.user.id) || 0
-  if (Date.now() - lastSent < 10_000) return res.status(429).json({ error: "Зачекайте кілька секунд перед наступним листом." })
+  if (Date.now() - lastSent < 10_000) return res.status(429).json({ error: "Wait a few seconds before sending another email." })
   try {
     const body = req.body || {}
     const subject = String(body.subject || "").trim(), message = String(body.message || "").trim()
@@ -1509,9 +1509,9 @@ app.post("/api/mail/send", authRequired, mailCenterOnly, async (req, res) => {
     const ids = (value) => Array.isArray(value) ? [...new Set(value.map(Number).filter((id) => Number.isSafeInteger(id) && id > 0))] : []
     const recipientIds = ids(body.recipientIds), ccIds = ids(body.ccIds), bccIds = ids(body.bccIds)
     const safeRoles = ["Студент", "Викладач", "ДеканФІКТ", "Завідувач Кафедри"]
-    if (!subject || subject.length > 180 || !message || message.length > 20_000) return res.status(400).json({ error: "Додайте тему (до 180 символів) і повідомлення (до 20 000 символів)." })
-    if (roles.some((role) => !safeRoles.includes(role))) return res.status(400).json({ error: "Обрано невідому роль адресата." })
-    if (groups.length > 100 || recipientIds.length + ccIds.length + bccIds.length > 300) return res.status(400).json({ error: "Забагато груп або адресатів у одному листі." })
+    if (!subject || subject.length > 180 || !message || message.length > 20_000) return res.status(400).json({ error: "Add a subject (up to 180 characters) and a message (up to 20,000 characters)." })
+    if (roles.some((role) => !safeRoles.includes(role))) return res.status(400).json({ error: "An unrecognized recipient role was selected." })
+    if (groups.length > 100 || recipientIds.length + ccIds.length + bccIds.length > 300) return res.status(400).json({ error: "Too many groups or recipients in one email." })
     const attachments = Array.isArray(body.attachments) ? body.attachments : []
     let attachmentsSize = 0
     const mailAttachments = []
@@ -1519,11 +1519,11 @@ app.post("/api/mail/send", authRequired, mailCenterOnly, async (req, res) => {
       const filename = String(file?.filename || "").replace(/[\\/\r\n\0]/g, "").trim()
       const content = String(file?.content || "")
       const contentType = String(file?.contentType || "application/octet-stream").slice(0, 120)
-      if (!filename || filename.length > 180 || !/^[A-Za-z0-9+/]*={0,2}$/.test(content) || content.length > 8 * 1024 * 1024 * 1.38) return res.status(400).json({ error: "Перевірте назву та формат вкладень." })
+      if (!filename || filename.length > 180 || !/^[A-Za-z0-9+/]*={0,2}$/.test(content) || content.length > 8 * 1024 * 1024 * 1.38) return res.status(400).json({ error: "Check the attachment name and format." })
       attachmentsSize += Buffer.byteLength(content, "base64")
       mailAttachments.push({ filename, content: Buffer.from(content, "base64"), contentType })
     }
-    if (attachmentsSize > 8 * 1024 * 1024) return res.status(400).json({ error: "Загальний розмір вкладень має бути до 8 МБ." })
+    if (attachmentsSize > 8 * 1024 * 1024) return res.status(400).json({ error: "Attachments must total no more than 8 MB." })
 
     const audience = await pool.query(`SELECT id,full_name,email,role,group_name FROM users
       WHERE role = ANY($1::text[]) OR (role='Студент' AND group_name = ANY($2::text[])) OR (id = ANY($3::int[]) AND role IN ('Студент','Викладач','ДеканФІКТ','Завідувач Кафедри'))
@@ -1534,8 +1534,8 @@ app.post("/api/mail/send", authRequired, mailCenterOnly, async (req, res) => {
     const cc = ccResult.rows.filter((person) => person.id !== req.user.id && !recipientMap.has(person.id))
     const bcc = bccResult.rows.filter((person) => person.id !== req.user.id && !recipientMap.has(person.id) && !cc.some((copy) => copy.id === person.id))
     const recipients = [...recipientMap.values()]
-    if (!recipients.length && !cc.length && !bcc.length) return res.status(400).json({ error: "Оберіть хоча б одного адресата, групу або роль." })
-    if (recipients.length + cc.length + bcc.length > 250) return res.status(400).json({ error: "Максимум 250 адресатів у одному листі." })
+    if (!recipients.length && !cc.length && !bcc.length) return res.status(400).json({ error: "Select at least one recipient, group, or role." })
+    if (recipients.length + cc.length + bcc.length > 250) return res.status(400).json({ error: "An email can have at most 250 recipients." })
     const sender = await pool.query("SELECT full_name,email,role FROM users WHERE id=$1", [req.user.id])
     const senderInfo = sender.rows[0] || { full_name: "Команда PolyConnect ZTU", role: "" }
     const priority = Boolean(body.urgent)
@@ -1551,8 +1551,8 @@ app.post("/api/mail/send", authRequired, mailCenterOnly, async (req, res) => {
       priority: priority ? "high" : "normal", headers: priority ? { "X-Priority": "1", Importance: "high" } : undefined, attachments: mailAttachments,
     })
     mailSendAttempts.set(req.user.id, Date.now())
-    res.json({ message: "Лист надіслано", sent: recipients.length + cc.length + bcc.length })
-  } catch (err) { console.error("mail send error:", err.message); res.status(502).json({ error: "Не вдалося надіслати лист. Перевірте поштовий сервер і повторіть спробу." }) }
+    res.json({ message: "Email sent", sent: recipients.length + cc.length + bcc.length })
+  } catch (err) { console.error("mail send error:", err.message); res.status(502).json({ error: "Could not send email. Check the mail server and try again." }) }
 })
 
 app.get("/api/chat-users", authRequired, async (req, res) => {
@@ -1560,7 +1560,7 @@ app.get("/api/chat-users", authRequired, async (req, res) => {
     const result = await pool.query(`SELECT u.id, u.full_name, u.role, u.email, u.group_name, ${PRESENCE_SQL} AS presence_status, u.status_message
       FROM users u WHERE u.id <> $1 ORDER BY u.role, u.group_name NULLS LAST, u.full_name`, [req.user.id])
     res.json({ users: result.rows })
-  } catch (err) { console.error("chat users error:", err.message); res.status(500).json({ error: "Не вдалося завантажити користувачів" }) }
+  } catch (err) { console.error("chat users error:", err.message); res.status(500).json({ error: "Could not load users" }) }
 })
 
 // Розробник платформи має оглядовий доступ до приватних даних і повне керування ними.
@@ -1571,15 +1571,15 @@ app.get("/api/developer/students", authRequired, developerOnly, async (_req, res
       FROM users u LEFT JOIN student_activities a ON a.user_id=u.id LEFT JOIN activity_categories c ON c.id=a.category_id
       WHERE u.role='Студент' GROUP BY u.id ORDER BY u.group_name,u.full_name`)
     res.json({students:result.rows})
-  } catch(err) { console.error("developer students error:",err.message); res.status(500).json({error:"Не вдалося завантажити профілі студентів"}) }
+  } catch(err) { console.error("developer students error:",err.message); res.status(500).json({error:"Could not load student profiles"}) }
 })
 app.get("/api/developer/overview", authRequired, developerOnly, async (_req,res)=>{
   try{const result=await pool.query(`SELECT (SELECT COUNT(*)::int FROM users) AS users,(SELECT COUNT(*)::int FROM users WHERE role='Студент') AS students,(SELECT COUNT(*)::int FROM news) AS news,(SELECT COUNT(*)::int FROM events) AS events,(SELECT COUNT(*)::int FROM achievements) AS achievements,(SELECT COUNT(*)::int FROM chats) AS chats,(SELECT COUNT(*)::int FROM chats WHERE chat_type='group') AS groups,(SELECT COUNT(*)::int FROM chat_messages) AS messages`);res.json({overview:result.rows[0]})}
-  catch(err){console.error("developer overview error:",err.message);res.status(500).json({error:"Не вдалося завантажити огляд платформи"})}
+  catch(err){console.error("developer overview error:",err.message);res.status(500).json({error:"Could not load the platform overview"})}
 })
 app.get("/api/developer/achievements", authRequired, developerOnly, async (_req,res)=>{
   try { const result=await pool.query(`SELECT a.*,u.full_name,u.email,u.role FROM achievements a JOIN users u ON u.id=a.user_id ORDER BY a.created_at DESC`);res.json({achievements:result.rows}) }
-  catch(err){console.error("developer achievements error:",err.message);res.status(500).json({error:"Не вдалося завантажити досягнення"})}
+  catch(err){console.error("developer achievements error:",err.message);res.status(500).json({error:"Could not load achievements"})}
 })
 app.get("/api/developer/chats", authRequired, developerOnly, async (_req,res)=>{
   try { const result=await pool.query(`SELECT c.id,c.chat_type,c.title,c.description,c.created_at,c.created_by,creator.full_name AS creator_name,
@@ -1591,7 +1591,7 @@ app.get("/api/developer/chats", authRequired, developerOnly, async (_req,res)=>{
         FROM chat_members m JOIN users u ON u.id=m.user_id WHERE m.chat_id=c.id),'[]') AS members
       FROM chats c LEFT JOIN users creator ON creator.id=c.created_by LEFT JOIN users u1 ON u1.id=c.user_one_id LEFT JOIN users u2 ON u2.id=c.user_two_id
       ORDER BY COALESCE((SELECT MAX(m.created_at) FROM chat_messages m WHERE m.chat_id=c.id),c.created_at) DESC`);res.json({chats:result.rows}) }
-  catch(err){console.error("developer chats error:",err.message);res.status(500).json({error:"Не вдалося завантажити чати"})}
+  catch(err){console.error("developer chats error:",err.message);res.status(500).json({error:"Could not load chats"})}
 })
 app.get("/api/developer/chats/:id", authRequired, developerOnly, async (req,res)=>{
   try { const [chat,messages]=await Promise.all([
@@ -1600,20 +1600,20 @@ app.get("/api/developer/chats/:id", authRequired, developerOnly, async (req,res)
       CASE WHEN c.chat_type='direct' THEN json_build_array((SELECT json_build_object('id',u.id,'full_name',u.full_name,'email',u.email,'role',u.role) FROM users u WHERE u.id=c.user_one_id),(SELECT json_build_object('id',u.id,'full_name',u.full_name,'email',u.email,'role',u.role) FROM users u WHERE u.id=c.user_two_id)) ELSE '[]'::json END AS direct_participants
       FROM chats c LEFT JOIN users creator ON creator.id=c.created_by WHERE c.id=$1`,[req.params.id]),
     pool.query(`SELECT m.id,m.content,m.sender_id,u.full_name AS sender_name,u.email AS sender_email,m.file_name,m.file_type,m.attachments,m.created_at,m.edited_at FROM chat_messages m LEFT JOIN users u ON u.id=m.sender_id WHERE m.chat_id=$1 ORDER BY m.created_at DESC LIMIT 500`,[req.params.id])
-  ]);if(!chat.rows.length)return res.status(404).json({error:"Чат не знайдено"});res.json({chat:chat.rows[0],messages:messages.rows}) }
-  catch(err){console.error("developer chat detail error:",err.message);res.status(500).json({error:"Не вдалося завантажити деталі чату"})}
+  ]);if(!chat.rows.length)return res.status(404).json({error:"Chat not found"});res.json({chat:chat.rows[0],messages:messages.rows}) }
+  catch(err){console.error("developer chat detail error:",err.message);res.status(500).json({error:"Could not load chat details"})}
 })
-app.delete("/api/developer/chats/:id", authRequired, developerOnly, async(req,res)=>{try{const result=await pool.query("DELETE FROM chats WHERE id=$1 RETURNING id",[req.params.id]);if(!result.rows.length)return res.status(404).json({error:"Чат не знайдено"});res.json({message:"Чат видалено"})}catch(err){console.error("developer chat delete error:",err.message);res.status(500).json({error:"Не вдалося видалити чат"})}})
+app.delete("/api/developer/chats/:id", authRequired, developerOnly, async(req,res)=>{try{const result=await pool.query("DELETE FROM chats WHERE id=$1 RETURNING id",[req.params.id]);if(!result.rows.length)return res.status(404).json({error:"Chat not found"});res.json({message:"Chat deleted"})}catch(err){console.error("developer chat delete error:",err.message);res.status(500).json({error:"Could not delete chat"})}})
 app.put("/api/developer/achievements/:id", authRequired, developerOnly, async(req,res)=>{
   const item=achievementPayload(req.body||{})
   if(!item.title||item.title.length>160||!ACHIEVEMENT_TYPES.has(item.achievementType)||item.description.length>2000||item.achievementType.length>60||item.eventName.length>180||item.organizer.length>180||item.location.length>180||item.result.length>300||item.link.length>500)return res.status(400).json({error:"Перевірте поля досягнення"})
-  if(item.link&&!/^https?:\/\//i.test(item.link))return res.status(400).json({error:"Посилання має починатися з http:// або https://"})
+  if(item.link&&!/^https?:\/\//i.test(item.link))return res.status(400).json({error:"Links must start with http:// or https://"})
   if(item.achievementDate){const date=new Date(`${item.achievementDate}T00:00:00.000Z`);if(!/^\d{4}-\d{2}-\d{2}$/.test(item.achievementDate)||Number.isNaN(date.getTime())||date.toISOString().slice(0,10)!==item.achievementDate)return res.status(400).json({error:"Некоректна дата досягнення"})}
-  try{const result=await pool.query(`UPDATE achievements SET title=$1,description=$2,photo=$3,achievement_type=$4,event_name=$5,organizer=$6,location=$7,achievement_date=$8,result=$9,link=$10,is_public=$11 WHERE id=$12 RETURNING *, (SELECT full_name FROM users WHERE id=achievements.user_id) AS full_name, (SELECT role FROM users WHERE id=achievements.user_id) AS role`,[item.title,item.description,item.photo,item.achievementType,item.eventName,item.organizer,item.location,item.achievementDate||null,item.result,item.link,item.isPublic,req.params.id]);if(!result.rows.length)return res.status(404).json({error:"Досягнення не знайдено"});res.json({achievement:publicAchievement(result.rows[0])})}
-  catch(err){console.error("developer achievement update error:",err.message);res.status(500).json({error:"Не вдалося оновити досягнення"})}
+  try{const result=await pool.query(`UPDATE achievements SET title=$1,description=$2,photo=$3,achievement_type=$4,event_name=$5,organizer=$6,location=$7,achievement_date=$8,result=$9,link=$10,is_public=$11 WHERE id=$12 RETURNING *, (SELECT full_name FROM users WHERE id=achievements.user_id) AS full_name, (SELECT role FROM users WHERE id=achievements.user_id) AS role`,[item.title,item.description,item.photo,item.achievementType,item.eventName,item.organizer,item.location,item.achievementDate||null,item.result,item.link,item.isPublic,req.params.id]);if(!result.rows.length)return res.status(404).json({error:"Achievement not found"});res.json({achievement:publicAchievement(result.rows[0])})}
+  catch(err){console.error("developer achievement update error:",err.message);res.status(500).json({error:"Could not update the achievement"})}
 })
-app.delete("/api/developer/achievements/:id", authRequired, developerOnly, async(req,res)=>{try{const result=await pool.query("DELETE FROM achievements WHERE id=$1 RETURNING id",[req.params.id]);if(!result.rows.length)return res.status(404).json({error:"Досягнення не знайдено"});res.json({message:"Досягнення видалено"})}catch(err){res.status(500).json({error:"Не вдалося видалити досягнення"})}})
-app.delete("/api/developer/activities/:id", authRequired, developerOnly, async(req,res)=>{try{const result=await pool.query("DELETE FROM student_activities WHERE id=$1 RETURNING id",[req.params.id]);if(!result.rows.length)return res.status(404).json({error:"Активність не знайдена"});res.json({message:"Активність видалено"})}catch(err){res.status(500).json({error:"Не вдалося видалити активність"})}})
+app.delete("/api/developer/achievements/:id", authRequired, developerOnly, async(req,res)=>{try{const result=await pool.query("DELETE FROM achievements WHERE id=$1 RETURNING id",[req.params.id]);if(!result.rows.length)return res.status(404).json({error:"Achievement not found"});res.json({message:"Achievement deleted"})}catch(err){res.status(500).json({error:"Could not delete the achievement"})}})
+app.delete("/api/developer/activities/:id", authRequired, developerOnly, async(req,res)=>{try{const result=await pool.query("DELETE FROM student_activities WHERE id=$1 RETURNING id",[req.params.id]);if(!result.rows.length)return res.status(404).json({error:"Активність не знайдена"});res.json({message:"Activity deleted"})}catch(err){res.status(500).json({error:"Could not delete activity"})}})
 
 app.get("/api/chats", authRequired, async (req, res) => {
   try {
@@ -1631,56 +1631,56 @@ app.get("/api/chats", authRequired, async (req, res) => {
       c.created_at
     ) DESC`, [req.user.id])
     res.json({ chats: result.rows })
-  } catch (err) { console.error("chats list error:", err.message); res.status(500).json({ error: "Не вдалося завантажити чати" }) }
+  } catch (err) { console.error("chats list error:", err.message); res.status(500).json({ error: "Could not load chats" }) }
 })
 
 app.post("/api/chats", authRequired, async (req, res) => {
   try {
     const otherId = Number(req.body?.user_id)
-    if (!Number.isInteger(otherId) || otherId === req.user.id) return res.status(400).json({ error: "Оберіть іншого користувача" })
+    if (!Number.isInteger(otherId) || otherId === req.user.id) return res.status(400).json({ error: "Select another user" })
     const first = Math.min(req.user.id, otherId), second = Math.max(req.user.id, otherId)
     const result = await pool.query(`INSERT INTO chats (user_one_id,user_two_id) VALUES ($1,$2)
       ON CONFLICT (user_one_id,user_two_id) DO UPDATE SET user_one_id=EXCLUDED.user_one_id RETURNING id`, [first, second])
     res.status(201).json({ chat_id: result.rows[0].id })
-  } catch (err) { console.error("chat create error:", err.message); res.status(500).json({ error: "Не вдалося створити чат" }) }
+  } catch (err) { console.error("chat create error:", err.message); res.status(500).json({ error: "Could not create chat" }) }
 })
 
 app.get("/api/chats/:id/draft", authRequired, async (req, res) => {
   try {
     const isAdmin = isPlatformAdmin(req.user)
     const access = await pool.query(`SELECT id FROM chats WHERE id=$1 AND (${isAdmin ? "true" : "((chat_type='direct' AND (user_one_id=$2 OR user_two_id=$2)) OR (chat_type='group' AND EXISTS (SELECT 1 FROM chat_members WHERE chat_id=chats.id AND user_id=$2)))"})`, isAdmin ? [req.params.id] : [req.params.id, req.user.id])
-    if (!access.rows.length) return res.status(404).json({ error: "Чат не знайдено" })
+    if (!access.rows.length) return res.status(404).json({ error: "Chat not found" })
     const result = await pool.query("SELECT content,updated_at FROM chat_drafts WHERE chat_id=$1 AND user_id=$2", [req.params.id, req.user.id])
     res.json({ draft: result.rows[0] || { content: "" } })
   } catch (err) {
     console.error("chat draft read error:", err.message)
-    res.status(500).json({ error: "Не вдалося завантажити чернетку" })
+    res.status(500).json({ error: "Could not load draft" })
   }
 })
 
 app.put("/api/chats/:id/draft", authRequired, async (req, res) => {
   try {
     const content = String(req.body?.content || "")
-    if (content.length > 2000) return res.status(400).json({ error: "Чернетка має містити до 2000 символів" })
+    if (content.length > 2000) return res.status(400).json({ error: "Draft must be 2,000 characters or fewer" })
     const isAdmin = isPlatformAdmin(req.user)
     const result = await pool.query(`INSERT INTO chat_drafts(chat_id,user_id,content)
       SELECT $1,$2,$3 WHERE EXISTS (SELECT 1 FROM chats WHERE id=$1 AND (${isAdmin ? "true" : "((chat_type='direct' AND (user_one_id=$2 OR user_two_id=$2)) OR (chat_type='group' AND EXISTS (SELECT 1 FROM chat_members WHERE chat_id=chats.id AND user_id=$2)))"}))
       ON CONFLICT(chat_id,user_id) DO UPDATE SET content=EXCLUDED.content,updated_at=now() RETURNING content,updated_at`, [req.params.id, req.user.id, content])
-    if (!result.rows.length) return res.status(404).json({ error: "Чат не знайдено" })
+    if (!result.rows.length) return res.status(404).json({ error: "Chat not found" })
     res.json({ draft: result.rows[0] })
   } catch (err) {
     console.error("chat draft save error:", err.message)
-    res.status(500).json({ error: "Не вдалося зберегти чернетку" })
+    res.status(500).json({ error: "Could not save draft" })
   }
 })
 
 app.delete("/api/chats/:id/draft", authRequired, async (req, res) => {
   try {
     await pool.query("DELETE FROM chat_drafts WHERE chat_id=$1 AND user_id=$2", [req.params.id, req.user.id])
-    res.json({ message: "Чернетку видалено" })
+    res.json({ message: "Draft deleted" })
   } catch (err) {
     console.error("chat draft clear error:", err.message)
-    res.status(500).json({ error: "Не вдалося очистити чернетку" })
+    res.status(500).json({ error: "Could not clear draft" })
   }
 })
 
@@ -1690,11 +1690,11 @@ app.post("/api/groups", authRequired, async (req, res) => {
     const description = String(req.body?.description || "").trim()
     const avatar = String(req.body?.avatar || "")
     const memberIds = Array.from(new Set([req.user.id, ...(Array.isArray(req.body?.member_ids) ? req.body.member_ids : [])].map(Number).filter(Number.isInteger)))
-    if (!title || title.length > 120) return res.status(400).json({ error: "Назва групи має містити від 1 до 120 символів" })
-    if (description.length > 1000) return res.status(400).json({ error: "Опис групи не може бути довшим за 1000 символів" })
-    if (avatar.length > 7 * 1024 * 1024) return res.status(400).json({ error: "Аватар групи завеликий" })
+    if (!title || title.length > 120) return res.status(400).json({ error: "Group name must be 1–120 characters" })
+    if (description.length > 1000) return res.status(400).json({ error: "Group description must be 1,000 characters or fewer" })
+    if (avatar.length > 7 * 1024 * 1024) return res.status(400).json({ error: "Group avatar file is too large" })
     const users = await pool.query("SELECT id FROM users WHERE id = ANY($1::int[])", [memberIds])
-    if (users.rows.length !== memberIds.length) return res.status(400).json({ error: "Одного з учасників не знайдено" })
+    if (users.rows.length !== memberIds.length) return res.status(400).json({ error: "One of the members could not be found" })
     const created = await pool.query(
       `INSERT INTO chats (chat_type,title,description,avatar,created_by) VALUES ('group',$1,$2,$3,$4) RETURNING id`,
       [title, description, avatar, req.user.id],
@@ -1709,7 +1709,7 @@ app.post("/api/groups", authRequired, async (req, res) => {
     res.status(201).json({ chat_id: chatId })
   } catch (err) {
     console.error("group create error:", err.message)
-    res.status(500).json({ error: "Не вдалося створити групу" })
+    res.status(500).json({ error: "Could not create group" })
   }
 })
 
@@ -1725,11 +1725,11 @@ app.get("/api/groups/:id", authRequired, async (req, res) => {
        GROUP BY c.id,u.full_name`,
       isAdmin ? [req.params.id] : [req.params.id, req.user.id],
     )
-    if (!group.rows.length) return res.status(404).json({ error: "Групу не знайдено" })
+    if (!group.rows.length) return res.status(404).json({ error: "Group not found" })
     res.json({ group: group.rows[0] })
   } catch (err) {
     console.error("group details error:", err.message)
-    res.status(500).json({ error: "Не вдалося завантажити інформацію про групу" })
+    res.status(500).json({ error: "Could not load group information" })
   }
 })
 
@@ -1737,28 +1737,28 @@ app.get("/api/groups/:id/topics", authRequired, async (req, res) => {
   try {
     const isAdmin = isPlatformAdmin(req.user)
     const access = await pool.query(`SELECT id FROM chats WHERE id=$1 AND chat_type='group' AND (${isAdmin ? "true" : "EXISTS (SELECT 1 FROM chat_members WHERE chat_id=chats.id AND user_id=$2)"})`, isAdmin ? [req.params.id] : [req.params.id, req.user.id])
-    if (!access.rows.length) return res.status(404).json({ error: "Групу не знайдено" })
+    if (!access.rows.length) return res.status(404).json({ error: "Group not found" })
     const result = await pool.query("SELECT id,name FROM chat_topics WHERE chat_id=$1 ORDER BY CASE WHEN name='Загальне' THEN 0 ELSE 1 END,name", [req.params.id])
     const membership = isAdmin ? null : await pool.query("SELECT is_admin FROM chat_members WHERE chat_id=$1 AND user_id=$2", [req.params.id, req.user.id])
     res.json({ topics: result.rows, can_manage: isAdmin || Boolean(membership?.rows[0]?.is_admin) })
   } catch (err) {
     console.error("group topics list error:", err.message)
-    res.status(500).json({ error: "Не вдалося завантажити теми групи" })
+    res.status(500).json({ error: "Could not load group topics" })
   }
 })
 
 app.post("/api/groups/:id/topics", authRequired, async (req, res) => {
   try {
     const name = String(req.body?.name || "").trim().slice(0, 50)
-    if (!name) return res.status(400).json({ error: "Вкажіть назву теми" })
+    if (!name) return res.status(400).json({ error: "Enter a topic name" })
     const isAdmin = isPlatformAdmin(req.user)
     const access = await pool.query(`SELECT id FROM chats WHERE id=$1 AND chat_type='group' AND (${isAdmin ? "true" : "EXISTS (SELECT 1 FROM chat_members WHERE chat_id=chats.id AND user_id=$2 AND is_admin=true)"})`, isAdmin ? [req.params.id] : [req.params.id, req.user.id])
-    if (!access.rows.length) return res.status(403).json({ error: "Створювати теми може адміністратор групи" })
+    if (!access.rows.length) return res.status(403).json({ error: "Only a group administrator can create topics" })
     const result = await pool.query("INSERT INTO chat_topics(chat_id,name,created_by) VALUES($1,$2,$3) ON CONFLICT(chat_id,name) DO UPDATE SET name=EXCLUDED.name RETURNING id,name", [req.params.id, name, req.user.id])
     res.status(201).json({ topic: result.rows[0] })
   } catch (err) {
     console.error("group topic create error:", err.message)
-    res.status(500).json({ error: "Не вдалося створити тему" })
+    res.status(500).json({ error: "Could not create topic" })
   }
 })
 
@@ -1769,11 +1769,11 @@ app.get("/api/chats/:id/messages", authRequired, async (req, res) => {
       `SELECT id FROM chats WHERE id=$1 AND (${isAdmin ? "true" : "((chat_type='direct' AND (user_one_id=$2 OR user_two_id=$2)) OR (chat_type='group' AND EXISTS (SELECT 1 FROM chat_members WHERE chat_id=chats.id AND user_id=$2)))"})`,
       isAdmin ? [req.params.id] : [req.params.id, req.user.id],
     )
-    if (!chat.rows.length) return res.status(404).json({ error: "Чат не знайдено" })
+    if (!chat.rows.length) return res.status(404).json({ error: "Chat not found" })
     const requestedTopicId = req.query.topic_id ? Number.parseInt(req.query.topic_id, 10) : null
-    if (requestedTopicId !== null && !Number.isInteger(requestedTopicId)) return res.status(400).json({ error: "Некоректна тема" })
+    if (requestedTopicId !== null && !Number.isInteger(requestedTopicId)) return res.status(400).json({ error: "Invalid topic" })
     const requestedBeforeId = req.query.before_id ? Number.parseInt(req.query.before_id, 10) : null
-    if (requestedBeforeId !== null && (!Number.isSafeInteger(requestedBeforeId) || requestedBeforeId < 1)) return res.status(400).json({ error: "Некоректний курсор повідомлень" })
+    if (requestedBeforeId !== null && (!Number.isSafeInteger(requestedBeforeId) || requestedBeforeId < 1)) return res.status(400).json({ error: "Invalid message cursor" })
     const limit = Math.max(1, Math.min(100, Number.parseInt(req.query.limit || "60", 10) || 60))
     const readState = await pool.query("SELECT last_read_at FROM chat_reads WHERE chat_id=$1 AND user_id=$2", [req.params.id, req.user.id])
     const lastReadAt = readState.rows[0]?.last_read_at || null
@@ -1794,7 +1794,7 @@ app.get("/api/chats/:id/messages", authRequired, async (req, res) => {
     const messages = result.rows
     if (req.query.silent !== "1") await pool.query(`INSERT INTO chat_reads(chat_id,user_id,last_read_at) VALUES($1,$2,now()) ON CONFLICT(chat_id,user_id) DO UPDATE SET last_read_at=now()`, [req.params.id, req.user.id])
     res.json({ messages, unread_message_ids: unreadMessageIds, has_more: hasMore })
-  } catch (err) { console.error("messages list error:", err.message); res.status(500).json({ error: "Не вдалося завантажити повідомлення" }) }
+  } catch (err) { console.error("messages list error:", err.message); res.status(500).json({ error: "Could not load messages" }) }
 })
 
 app.post("/api/chats/:id/messages", authRequired, async (req, res) => {
@@ -1808,18 +1808,18 @@ app.post("/api/chats/:id/messages", authRequired, async (req, res) => {
       type: String(item.type || "application/octet-stream").slice(0, 150),
       data: item.data,
     }))
-    if (!content && !attachments.length) return res.status(400).json({ error: "Додайте текст або файл" })
-    if (content.length > 2000) return res.status(400).json({ error: "Повідомлення має містити до 2000 символів" })
-    if (scheduledAt && (Number.isNaN(scheduledAt.getTime()) || scheduledAt.getTime() < Date.now() + 60_000 || scheduledAt.getTime() > Date.now() + 365 * 24 * 60 * 60 * 1000)) return res.status(400).json({ error: "Оберіть час щонайменше через хвилину і не далі ніж за рік" })
-    if (topicId !== null && !Number.isInteger(topicId)) return res.status(400).json({ error: "Некоректна тема" })
+    if (!content && !attachments.length) return res.status(400).json({ error: "Add text or an attachment" })
+    if (content.length > 2000) return res.status(400).json({ error: "Message must be 2,000 characters or fewer" })
+    if (scheduledAt && (Number.isNaN(scheduledAt.getTime()) || scheduledAt.getTime() < Date.now() + 60_000 || scheduledAt.getTime() > Date.now() + 365 * 24 * 60 * 60 * 1000)) return res.status(400).json({ error: "Choose a time at least one minute from now and within the next year" })
+    if (topicId !== null && !Number.isInteger(topicId)) return res.status(400).json({ error: "Invalid topic" })
     const attachmentBytes = attachments.reduce((total, item) => {
       const encoded = item.data.split(",")[1] || ""
       return total + Math.max(0, Math.floor(encoded.length * 3 / 4) - (encoded.endsWith("==") ? 2 : encoded.endsWith("=") ? 1 : 0))
     }, 0)
-    if (attachmentBytes > 10 * 1024 * 1024) return res.status(413).json({ error: "Загальний розмір вкладень у повідомленні має бути до 10 МБ" })
+    if (attachmentBytes > 10 * 1024 * 1024) return res.status(413).json({ error: "Message attachments must total no more than 10 MB" })
     if (topicId !== null) {
       const topic = await pool.query("SELECT id FROM chat_topics WHERE id=$1 AND chat_id=$2", [topicId, req.params.id])
-      if (!topic.rows.length) return res.status(400).json({ error: "Тема не належить цьому чату" })
+      if (!topic.rows.length) return res.status(400).json({ error: "This topic does not belong to this chat" })
     } else {
       const defaultTopic = await pool.query("SELECT t.id FROM chat_topics t JOIN chats c ON c.id=t.chat_id WHERE c.id=$1 AND c.chat_type='group' AND t.name='Загальне'", [req.params.id])
       topicId = defaultTopic.rows[0]?.id || null
@@ -1827,9 +1827,9 @@ app.post("/api/chats/:id/messages", authRequired, async (req, res) => {
     const firstAttachment = attachments[0] || null
     const result = await pool.query(`INSERT INTO chat_messages(chat_id,sender_id,content,file_name,file_type,file_data,attachments,scheduled_at,topic_id)
       SELECT $1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9 WHERE EXISTS (SELECT 1 FROM chats WHERE id=$1 AND (${isPlatformAdmin(req.user) ? "true" : "((chat_type='direct' AND (user_one_id=$2 OR user_two_id=$2)) OR (chat_type='group' AND EXISTS (SELECT 1 FROM chat_members WHERE chat_id=chats.id AND user_id=$2)))"})) RETURNING id,content,sender_id,file_name,file_type,created_at,edited_at,is_pinned,scheduled_at,topic_id`, [req.params.id, req.user.id, content, firstAttachment?.name || null, firstAttachment?.type || null, firstAttachment?.data || null, JSON.stringify(attachments), scheduledAt, topicId])
-    if (!result.rows.length) return res.status(404).json({ error: "Чат не знайдено" })
+    if (!result.rows.length) return res.status(404).json({ error: "Chat not found" })
     res.status(201).json({ message: { ...result.rows[0], full_name: req.user.full_name, attachments: attachments.map((file, index) => ({ name: file.name, type: file.type, index })) } })
-  } catch (err) { console.error("message create error:", err.message); res.status(500).json({ error: "Не вдалося надіслати повідомлення" }) }
+  } catch (err) { console.error("message create error:", err.message); res.status(500).json({ error: "Could not send message" }) }
 })
 
 app.put("/api/chats/:chatId/messages/:messageId/pin", authRequired, async (req, res) => {
@@ -1837,17 +1837,17 @@ app.put("/api/chats/:chatId/messages/:messageId/pin", authRequired, async (req, 
     const chatId = req.params.chatId
     const isAdmin = isPlatformAdmin(req.user)
     const access = await pool.query(`SELECT id,chat_type FROM chats WHERE id=$1 AND (${isAdmin ? "true" : "((chat_type='direct' AND (user_one_id=$2 OR user_two_id=$2)) OR (chat_type='group' AND EXISTS (SELECT 1 FROM chat_members WHERE chat_id=chats.id AND user_id=$2)))"})`, isAdmin ? [chatId] : [chatId, req.user.id])
-    if (!access.rows.length) return res.status(404).json({ error: "Чат не знайдено" })
+    if (!access.rows.length) return res.status(404).json({ error: "Chat not found" })
     if (access.rows[0].chat_type === "group" && !isAdmin) {
       const membership = await pool.query("SELECT is_admin FROM chat_members WHERE chat_id=$1 AND user_id=$2", [chatId, req.user.id])
-      if (!membership.rows[0]?.is_admin) return res.status(403).json({ error: "Закріплювати повідомлення може адміністратор групи" })
+      if (!membership.rows[0]?.is_admin) return res.status(403).json({ error: "Only a group administrator can pin messages" })
     }
     const result = await pool.query("UPDATE chat_messages SET is_pinned=$1 WHERE id=$2 AND chat_id=$3 RETURNING id,is_pinned", [req.body?.is_pinned === true, req.params.messageId, chatId])
-    if (!result.rows.length) return res.status(404).json({ error: "Повідомлення не знайдено" })
+    if (!result.rows.length) return res.status(404).json({ error: "Message not found" })
     res.json({ message: result.rows[0] })
   } catch (err) {
     console.error("message pin error:", err.message)
-    res.status(500).json({ error: "Не вдалося закріпити повідомлення" })
+    res.status(500).json({ error: "Could not pin message" })
   }
 })
 
@@ -1856,7 +1856,7 @@ app.get("/api/chats/:chatId/messages/:messageId/file", authRequired, async (req,
   try {
     if (activeMediaDownloads >= maxConcurrentMediaDownloads) {
       res.setHeader("Retry-After", "2")
-      return res.status(503).json({ error: "Забагато одночасних завантажень. Спробуйте ще раз за кілька секунд." })
+      return res.status(503).json({ error: "Too many simultaneous uploads. Try again in a few seconds." })
     }
     activeMediaDownloads += 1
     let mediaSlotReleased = false
@@ -1913,24 +1913,24 @@ app.get("/api/chats/:chatId/messages/:messageId/file", authRequired, async (req,
     res.end(content)
   } catch (err) {
     console.error("message file error:", err.message)
-    res.status(500).json({ error: "Не вдалося відкрити файл" })
+    res.status(500).json({ error: "Could not open file" })
   }
 })
 app.put("/api/chats/:chatId/messages/:messageId", authRequired, async (req, res) => {
   try {
     const content = String(req.body?.content || "").trim()
-    if (!content || content.length > 2000) return res.status(400).json({ error: "Повідомлення має містити від 1 до 2000 символів" })
+    if (!content || content.length > 2000) return res.status(400).json({ error: "Message must be 1–2,000 characters" })
     const result = await pool.query(
       `UPDATE chat_messages SET content=$1, edited_at=now()
        WHERE id=$2 AND chat_id=$3 AND (sender_id=$4 OR $5=$6)
        RETURNING id,content,sender_id,created_at,edited_at`,
       [content, req.params.messageId, req.params.chatId, req.user.id, req.user.role, DEVELOPER_ROLE],
     )
-    if (!result.rows.length) return res.status(404).json({ error: "Повідомлення не знайдено або воно вам не належить" })
+    if (!result.rows.length) return res.status(404).json({ error: "Message not found or it does not belong to you" })
     res.json({ message: { ...result.rows[0], full_name: req.user.full_name } })
   } catch (err) {
     console.error("message update error:", err.message)
-    res.status(500).json({ error: "Не вдалося змінити повідомлення" })
+    res.status(500).json({ error: "Could not edit message" })
   }
 })
 
@@ -1940,11 +1940,11 @@ app.delete("/api/chats/:chatId/messages/:messageId", authRequired, async (req, r
       "DELETE FROM chat_messages WHERE id=$1 AND chat_id=$2 AND (sender_id=$3 OR $4=$5) RETURNING id",
       [req.params.messageId, req.params.chatId, req.user.id, req.user.role, DEVELOPER_ROLE],
     )
-    if (!result.rows.length) return res.status(404).json({ error: "Повідомлення не знайдено або воно вам не належить" })
-    res.json({ message: "Повідомлення видалено" })
+    if (!result.rows.length) return res.status(404).json({ error: "Message not found or it does not belong to you" })
+    res.json({ message: "Message deleted" })
   } catch (err) {
     console.error("message delete error:", err.message)
-    res.status(500).json({ error: "Не вдалося видалити повідомлення" })
+    res.status(500).json({ error: "Could not delete message" })
   }
 })
 
@@ -1953,7 +1953,7 @@ const ACHIEVEMENT_MAX_FILE = 4 * 1024 * 1024
 const ACHIEVEMENT_ROLES = [DEVELOPER_ROLE, "ДеканФІКТ", "Завідувач Кафедри", "Викладач", "Студент"]
 
 function studentOnly(req, res, next) {
-  if (String(req.user.role || "").trim() !== "Студент") return res.status(403).json({ error: "Ця дія доступна лише студентам" })
+  if (String(req.user.role || "").trim() !== "Студент") return res.status(403).json({ error: "This action is available to students only" })
   next()
 }
 function cleanActivityPayload(body) {
@@ -1974,15 +1974,15 @@ app.get("/api/activity-categories", authRequired, async (req, res) => {
   try {
     const result = await pool.query("SELECT id,name FROM activity_categories ORDER BY name")
     res.json({ categories: result.rows })
-  } catch (err) { console.error("activity categories error:", err.message); res.status(500).json({ error: "Не вдалося завантажити категорії активностей" }) }
+  } catch (err) { console.error("activity categories error:", err.message); res.status(500).json({ error: "Could not load activity categories" }) }
 })
 app.post("/api/activity-categories", authRequired, studentOnly, async (req, res) => {
   try {
     const name = String(req.body?.name || "").trim().replace(/\s+/g, " ")
-    if (!name || name.length > 80 || name.includes(",")) return res.status(400).json({ error: "Назва виду активності має містити від 1 до 80 символів" })
+    if (!name || name.length > 80 || name.includes(",")) return res.status(400).json({ error: "Activity category name must be 1–80 characters" })
     const result = await pool.query("INSERT INTO activity_categories(name) VALUES($1) ON CONFLICT(name) DO UPDATE SET name=EXCLUDED.name RETURNING id,name", [name])
     res.status(201).json({ category: result.rows[0] })
-  } catch (err) { console.error("activity category create error:", err.message); res.status(500).json({ error: "Не вдалося створити вид активності" }) }
+  } catch (err) { console.error("activity category create error:", err.message); res.status(500).json({ error: "Could not create activity category" }) }
 })
 app.get("/api/student-activities/mine", authRequired, studentOnly, async (req, res) => {
   try {
@@ -1990,14 +1990,14 @@ app.get("/api/student-activities/mine", authRequired, studentOnly, async (req, r
       JOIN activity_categories c ON c.id=a.category_id WHERE a.user_id=$1
       ORDER BY a.activity_date DESC NULLS LAST, a.created_at DESC`, [req.user.id])
     res.json({ activities: result.rows })
-  } catch (err) { console.error("my activities error:", err.message); res.status(500).json({ error: "Не вдалося завантажити активності" }) }
+  } catch (err) { console.error("my activities error:", err.message); res.status(500).json({ error: "Could not load activities" }) }
 })
 app.post("/api/student-activities", authRequired, studentOnly, async (req, res) => {
   const item = cleanActivityPayload(req.body)
-  if (!item.title || !item.categoryName) return res.status(400).json({ error: "Вкажіть назву та вид активності" })
-  if (item.title.length > 180 || item.categoryName.length > 80 || item.organizer.length > 180 || item.location.length > 180 || item.description.length > 2000 || item.link.length > 500) return res.status(400).json({ error: "Одне з полів надто довге" })
-  if (item.link && !/^https?:\/\//i.test(item.link)) return res.status(400).json({ error: "Посилання має починатися з http:// або https://" })
-  if (item.activityDate && !/^\d{4}-\d{2}-\d{2}$/.test(item.activityDate)) return res.status(400).json({ error: "Некоректна дата активності" })
+  if (!item.title || !item.categoryName) return res.status(400).json({ error: "Enter an activity title and type" })
+  if (item.title.length > 180 || item.categoryName.length > 80 || item.organizer.length > 180 || item.location.length > 180 || item.description.length > 2000 || item.link.length > 500) return res.status(400).json({ error: "One of the fields is too long" })
+  if (item.link && !/^https?:\/\//i.test(item.link)) return res.status(400).json({ error: "Links must start with http:// or https://" })
+  if (item.activityDate && !/^\d{4}-\d{2}-\d{2}$/.test(item.activityDate)) return res.status(400).json({ error: "Invalid activity date" })
   try {
     const client = await pool.connect()
     try {
@@ -2008,14 +2008,14 @@ app.post("/api/student-activities", authRequired, studentOnly, async (req, res) 
       await client.query("COMMIT")
       res.status(201).json({ activity: { ...result.rows[0], category_name: category.name } })
     } catch (err) { await client.query("ROLLBACK"); throw err } finally { client.release() }
-  } catch (err) { console.error("activity create error:", err.message); res.status(500).json({ error: "Не вдалося зберегти активність" }) }
+  } catch (err) { console.error("activity create error:", err.message); res.status(500).json({ error: "Could not save activity" }) }
 })
 app.delete("/api/student-activities/:id", authRequired, studentOnly, async (req, res) => {
   try {
     const result = await pool.query("DELETE FROM student_activities WHERE id=$1 AND user_id=$2 RETURNING id", [req.params.id, req.user.id])
-    if (!result.rows.length) return res.status(404).json({ error: "Активність не знайдено" })
-    res.json({ message: "Активність видалено" })
-  } catch (err) { console.error("activity delete error:", err.message); res.status(500).json({ error: "Не вдалося видалити активність" }) }
+    if (!result.rows.length) return res.status(404).json({ error: "Activity not found" })
+    res.json({ message: "Activity deleted" })
+  } catch (err) { console.error("activity delete error:", err.message); res.status(500).json({ error: "Could not delete activity" }) }
 })
 app.get("/api/students", authRequired, async (req, res) => {
   try {
@@ -2025,7 +2025,7 @@ app.get("/api/students", authRequired, async (req, res) => {
       FROM users u LEFT JOIN student_activities a ON a.user_id=u.id AND a.is_public=true LEFT JOIN activity_categories c ON c.id=a.category_id
       WHERE u.role='Студент' GROUP BY u.id ORDER BY u.full_name`)
     res.json({ students: result.rows })
-  } catch (err) { console.error("students list error:", err.message); res.status(500).json({ error: "Не вдалося завантажити студентів" }) }
+  } catch (err) { console.error("students list error:", err.message); res.status(500).json({ error: "Could not load students" }) }
 })
 
 function achievementPayload(body) {
@@ -2074,7 +2074,7 @@ function googleSheetCsvUrl(input) {
   const regular = url.pathname.match(/^\/spreadsheets\/(?:u\/\d+\/)?d\/([A-Za-z0-9_-]+)(?:\/[^/]*)?\/?$/)
   const hashGid = url.hash.match(/(?:^#|&)gid=(\d+)/)?.[1]
   const gid = url.searchParams.get("gid") || hashGid || "0"
-  if (!/^\d{1,12}$/.test(gid)) throw new Error("Не вдалося визначити номер аркуша (gid) у посиланні")
+  if (!/^\d{1,12}$/.test(gid)) throw new Error("Could not determine the sheet ID (gid) from the link")
   if (published) return `https://docs.google.com/spreadsheets/d/e/${published[1]}/pub?output=csv&gid=${gid}`
   if (regular && /\/pub(?:html)?\/?$/.test(url.pathname)) return `https://docs.google.com/spreadsheets/d/${regular[1]}/pub?output=csv&gid=${gid}`
   if (regular) return `https://docs.google.com/spreadsheets/d/${regular[1]}/export?format=csv&gid=${gid}`
@@ -2139,7 +2139,7 @@ function parseAchievementCsv(csv) {
     item.row_number = index + 2
     const parsedDate = item.achievement_date && new Date(`${item.achievement_date}T00:00:00.000Z`)
     const validDate = !item.achievement_date || (/^\d{4}-\d{2}-\d{2}$/.test(item.achievement_date) && !Number.isNaN(parsedDate.getTime()) && parsedDate.toISOString().slice(0, 10) === item.achievement_date)
-    item.error = !item.title ? "Не вказано назву" : item.title.length > 160 ? "Назва довша за 160 символів" : item.description.length > 2000 ? "Опис довший за 2000 символів" : item.event_name.length > 180 || item.organizer.length > 180 || item.location.length > 180 ? "Поле перевищує дозволену довжину" : item.result.length > 300 ? "Результат довший за 300 символів" : item.link.length > 500 ? "Посилання довше за 500 символів" : item.link && !/^https?:\/\//i.test(item.link) ? "Посилання має починатися з http:// або https://" : !validDate ? "Перевірте формат дати" : ""
+    item.error = !item.title ? "Не вказано назву" : item.title.length > 160 ? "Назва довша за 160 символів" : item.description.length > 2000 ? "Опис довший за 2000 символів" : item.event_name.length > 180 || item.organizer.length > 180 || item.location.length > 180 ? "Поле перевищує дозволену довжину" : item.result.length > 300 ? "Результат довший за 300 символів" : item.link.length > 500 ? "Посилання довше за 500 символів" : item.link && !/^https?:\/\//i.test(item.link) ? "Links must start with http:// or https://" : !validDate ? "Перевірте формат дати" : ""
     return item
   })
   return { rows: mapped, truncated: rows.length - 1 > 100, totalRows: rows.length - 1 }
@@ -2155,13 +2155,13 @@ async function fetchGoogleSheetCsv(input) {
     const finalUrl = new URL(response.url)
     if (finalUrl.protocol !== "https:" || !(finalUrl.hostname === "docs.google.com" || finalUrl.hostname.endsWith(".googleusercontent.com"))) throw new Error("Google перенаправив запит на непідтримуваний ресурс")
     const reader = response.body?.getReader()
-    if (!reader) throw new Error("Не вдалося прочитати дані таблиці")
+    if (!reader) throw new Error("Could not read the spreadsheet data")
     const chunks = []; let size = 0
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
       size += value.byteLength
-      if (size > 2 * 1024 * 1024) { await reader.cancel(); throw new Error("Таблиця завелика: ліміт імпорту — 2 МБ") }
+      if (size > 2 * 1024 * 1024) { await reader.cancel(); throw new Error("Таблиця завелика: ліміт імпорту — 2 MB") }
       chunks.push(value)
     }
     const bytes = new Uint8Array(size); let offset = 0
@@ -2179,12 +2179,12 @@ app.post("/api/achievements/google-sheet/preview", authRequired, studentOnly, as
   try {
     const csv = await fetchGoogleSheetCsv(req.body?.url)
     res.json(parseAchievementCsv(csv))
-  } catch (error) { res.status(400).json({ error: error.message || "Не вдалося прочитати таблицю" }) }
+  } catch (error) { res.status(400).json({ error: error.message || "Could not read the spreadsheet" }) }
 })
 
 app.post("/api/achievements/google-sheet/import", authRequired, studentOnly, async (req, res) => {
   const rows = req.body?.rows
-  if (!Array.isArray(rows) || !rows.length || rows.length > 100) return res.status(400).json({ error: "Оберіть від 1 до 100 рядків для імпорту" })
+  if (!Array.isArray(rows) || !rows.length || rows.length > 100) return res.status(400).json({ error: "Select 1–100 rows to import" })
   const client = await pool.connect()
   try {
     await client.query("BEGIN")
@@ -2207,7 +2207,7 @@ app.post("/api/achievements/google-sheet/import", authRequired, studentOnly, asy
     res.status(201).json({ imported, skipped, message: `Імпортовано: ${imported}. Пропущено повторів: ${skipped}. Імпортовані записи збережено приватно.` })
   } catch (error) {
     await client.query("ROLLBACK")
-    res.status(400).json({ error: error.message || "Не вдалося імпортувати досягнення" })
+    res.status(400).json({ error: error.message || "Could not import achievements" })
   } finally { client.release() }
 })
 
@@ -2236,7 +2236,7 @@ app.get("/api/achievements", authRequired, async (req, res) => {
     res.json({ achievements: result.rows.map(publicAchievement) })
   } catch (err) {
     console.error("achievements list error:", err.message)
-    res.status(500).json({ error: "Не вдалося завантажити досягнення" })
+    res.status(500).json({ error: "Could not load achievements" })
   }
 })
 
@@ -2250,7 +2250,7 @@ app.get("/api/achievements/mine", authRequired, async (req, res) => {
     res.json({ achievements: result.rows.map(publicAchievement) })
   } catch (err) {
     console.error("own achievements error:", err.message)
-    res.status(500).json({ error: "Не вдалося завантажити ваші досягнення" })
+    res.status(500).json({ error: "Could not load your achievements" })
   }
 })
 
@@ -2261,12 +2261,12 @@ app.post("/api/achievements", authRequired, async (req, res) => {
     if (!ACHIEVEMENT_TYPES.has(item.achievementType)) return res.status(400).json({ error: "Оберіть тип досягнення зі списку" })
     if (item.description.length > 2000) return res.status(400).json({ error: "Опис не може бути довшим за 2000 символів" })
     if (item.achievementType.length > 60 || item.eventName.length > 180 || item.organizer.length > 180 || item.location.length > 180 || item.result.length > 300 || item.link.length > 500) return res.status(400).json({ error: "Одне з полів досягнення надто довге" })
-    if (item.link && !/^https?:\/\//i.test(item.link)) return res.status(400).json({ error: "Посилання має починатися з http:// або https://" })
+    if (item.link && !/^https?:\/\//i.test(item.link)) return res.status(400).json({ error: "Links must start with http:// or https://" })
     if (item.achievementDate) {
       const date = new Date(`${item.achievementDate}T00:00:00.000Z`)
       if (!/^\d{4}-\d{2}-\d{2}$/.test(item.achievementDate) || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== item.achievementDate) return res.status(400).json({ error: "Некоректна дата досягнення" })
     }
-    if (item.photo.length > ACHIEVEMENT_MAX_FILE * 1.4) return res.status(400).json({ error: "Фото досягнення не може перевищувати 4 МБ" })
+    if (item.photo.length > ACHIEVEMENT_MAX_FILE * 1.4) return res.status(400).json({ error: "Achievement photo cannot exceed 4 MB" })
     const result = await pool.query(
       `INSERT INTO achievements (user_id, title, description, photo, achievement_type, event_name, organizer, location, achievement_date, result, link, is_public)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
@@ -2275,22 +2275,22 @@ app.post("/api/achievements", authRequired, async (req, res) => {
     res.status(201).json({ achievement: publicAchievement({ ...result.rows[0], full_name: req.user.full_name, role: req.user.role }) })
   } catch (err) {
     console.error("achievement create error:", err.message)
-    res.status(500).json({ error: "Не вдалося зберегти досягнення" })
+    res.status(500).json({ error: "Could not save the achievement" })
   }
 })
 
 app.delete("/api/achievements/:id", authRequired, async (req, res) => {
   const result = await pool.query("DELETE FROM achievements WHERE id = $1 AND user_id = $2 RETURNING id", [req.params.id, req.user.id])
-  if (!result.rows.length) return res.status(404).json({ error: "Досягнення не знайдено" })
-  res.json({ message: "Досягнення видалено" })
+  if (!result.rows.length) return res.status(404).json({ error: "Achievement not found" })
+  res.json({ message: "Achievement deleted" })
 })
 
-const IDEA_STATUSES = ["Нова", "На розгляді", "Заплановано", "У роботі", "Реалізовано", "Відхилено"]
+const IDEA_STATUSES = ["Нова", "На розгляді", "Scheduled", "У роботі", "Реалізовано", "Відхилено"]
 const IDEA_CATEGORIES = ["Навчання", "Інфраструктура", "Цифрові сервіси", "Події та спільнота", "Добробут студентів", "Інше"]
 const IDEA_STAFF = [DEVELOPER_ROLE, "ДеканФІКТ", "Завідувач Кафедри", "Викладач"]
 function ideaIsStaff(user) { return IDEA_STAFF.includes(String(user?.role || "").trim()) }
 async function findVisibleIdea(id, user) {
-  const { rows } = await pool.query(`SELECT i.*, CASE WHEN i.is_anonymous AND i.author_id <> $2 THEN 'Анонімно' ELSE u.full_name END AS author_name,
+  const { rows } = await pool.query(`SELECT i.*, CASE WHEN i.is_anonymous AND i.author_id <> $2 THEN 'Anonymous' ELSE u.full_name END AS author_name,
     u.role AS author_role FROM ideas i JOIN users u ON u.id=i.author_id
     WHERE i.id=$1 AND (i.visibility='public' OR i.author_id=$2 OR $3::boolean)`, [id, user.id, ideaIsStaff(user)])
   return rows[0]
@@ -2308,7 +2308,7 @@ app.get("/api/ideas", authRequired, async (req, res) => {
     if (req.query.mine === "true") clauses.push("i.author_id=$1")
     const sort = req.query.sort === "popular" ? "votes DESC, i.updated_at DESC" : "i.updated_at DESC"
     const { rows } = await pool.query(`SELECT i.id,i.author_id,i.title,i.category,i.problem,i.solution,i.benefit,i.audience,i.visibility,i.is_anonymous,i.status,i.status_note,i.created_at,i.updated_at,
-      CASE WHEN i.is_anonymous AND i.author_id <> $1 THEN 'Анонімно' ELSE u.full_name END AS author_name, u.role AS author_role,
+      CASE WHEN i.is_anonymous AND i.author_id <> $1 THEN 'Anonymous' ELSE u.full_name END AS author_name, u.role AS author_role,
       (SELECT count(*)::int FROM idea_votes v WHERE v.idea_id=i.id) AS vote_count,
       (SELECT count(*)::int FROM idea_comments c WHERE c.idea_id=i.id) AS comment_count,
       EXISTS(SELECT 1 FROM idea_votes v WHERE v.idea_id=i.id AND v.user_id=$1) AS has_voted,
@@ -2316,11 +2316,11 @@ app.get("/api/ideas", authRequired, async (req, res) => {
       FROM ideas i JOIN users u ON u.id=i.author_id WHERE ${clauses.join(" AND ")} ORDER BY ${sort} LIMIT 200`, params)
     const summary = await pool.query(`SELECT count(*)::int AS total,
       count(*) FILTER (WHERE status='На розгляді')::int AS reviewing,
-      count(*) FILTER (WHERE status IN ('Заплановано','У роботі'))::int AS active,
+      count(*) FILTER (WHERE status IN ('Scheduled','У роботі'))::int AS active,
       count(*) FILTER (WHERE status='Реалізовано')::int AS completed
       FROM ideas WHERE visibility='public' OR author_id=$1 OR $2::boolean`, [req.user.id, ideaIsStaff(req.user)])
     res.json({ ideas: rows, summary: summary.rows[0], categories: IDEA_CATEGORIES, statuses: IDEA_STATUSES, staff: ideaIsStaff(req.user) })
-  } catch (err) { console.error("ideas list error:", err.message); res.status(500).json({ error: "Не вдалося завантажити ідеї" }) }
+  } catch (err) { console.error("ideas list error:", err.message); res.status(500).json({ error: "Could not load ideas" }) }
 })
 app.post("/api/ideas", authRequired, async (req, res) => {
   const b = req.body || {}, title = String(b.title || "").trim(), category = String(b.category || "").trim()
@@ -2332,19 +2332,19 @@ app.post("/api/ideas", authRequired, async (req, res) => {
     const { rows } = await pool.query(`INSERT INTO ideas(author_id,title,category,problem,solution,benefit,audience,visibility,is_anonymous)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`, [req.user.id,title,category,problem,solution,benefit,audience,visibility,Boolean(b.is_anonymous)])
     res.status(201).json({ id: rows[0].id, message: "Ідею надіслано на розгляд" })
-  } catch (err) { console.error("idea create error:", err.message); res.status(500).json({ error: "Не вдалося зберегти ідею" }) }
+  } catch (err) { console.error("idea create error:", err.message); res.status(500).json({ error: "Could not save the idea" }) }
 })
 app.get("/api/ideas/:id", authRequired, async (req, res) => {
   try {
     const idea = await findVisibleIdea(req.params.id, req.user)
     if (!idea) return res.status(404).json({ error: "Ідею не знайдено" })
     const [comments, history] = await Promise.all([
-      pool.query(`SELECT c.id,c.content,c.created_at,CASE WHEN i.is_anonymous AND c.user_id=i.author_id AND c.user_id<>$2 THEN 'Анонімно' ELSE u.full_name END AS author_name,u.role FROM idea_comments c JOIN users u ON u.id=c.user_id JOIN ideas i ON i.id=c.idea_id WHERE c.idea_id=$1 ORDER BY c.created_at`, [idea.id,req.user.id]),
+      pool.query(`SELECT c.id,c.content,c.created_at,CASE WHEN i.is_anonymous AND c.user_id=i.author_id AND c.user_id<>$2 THEN 'Anonymous' ELSE u.full_name END AS author_name,u.role FROM idea_comments c JOIN users u ON u.id=c.user_id JOIN ideas i ON i.id=c.idea_id WHERE c.idea_id=$1 ORDER BY c.created_at`, [idea.id,req.user.id]),
       pool.query(`SELECT h.from_status,h.to_status,h.note,h.created_at,u.full_name AS actor_name FROM idea_status_history h JOIN users u ON u.id=h.user_id WHERE h.idea_id=$1 ORDER BY h.created_at DESC`, [idea.id]),
     ])
     const vote = await pool.query("SELECT count(*)::int AS votes, EXISTS(SELECT 1 FROM idea_votes WHERE idea_id=$1 AND user_id=$2) AS has_voted FROM idea_votes WHERE idea_id=$1", [idea.id,req.user.id])
     res.json({ idea, comments: comments.rows, history: history.rows, votes: vote.rows[0], staff: ideaIsStaff(req.user), can_edit: idea.author_id === req.user.id && idea.status === "Нова" })
-  } catch (err) { console.error("idea detail error:", err.message); res.status(500).json({ error: "Не вдалося відкрити ідею" }) }
+  } catch (err) { console.error("idea detail error:", err.message); res.status(500).json({ error: "Could not open the idea" }) }
 })
 app.put("/api/ideas/:id", authRequired, async (req, res) => {
   const b=req.body||{}, title=String(b.title||"").trim(), problem=String(b.problem||"").trim(), solution=String(b.solution||"").trim(), benefit=String(b.benefit||"").trim(), category=String(b.category||"").trim()
@@ -2370,7 +2370,7 @@ app.post("/api/ideas/:id/vote", authRequired, async (req,res)=>{
 app.post("/api/ideas/:id/comments", authRequired, async(req,res)=>{
   const idea=await findVisibleIdea(req.params.id,req.user), content=String(req.body?.content||"").trim()
   if(!idea)return res.status(404).json({error:"Ідею не знайдено"})
-  if(!content||content.length>1000)return res.status(400).json({error:"Коментар має містити від 1 до 1000 символів"})
+  if(!content||content.length>1000)return res.status(400).json({error:"Comment must be 1–1,000 characters"})
   await pool.query("INSERT INTO idea_comments(idea_id,user_id,content) VALUES($1,$2,$3)",[idea.id,req.user.id,content])
   await pool.query("UPDATE ideas SET updated_at=now() WHERE id=$1",[idea.id])
   res.status(201).json({message:"Коментар додано"})
@@ -2388,7 +2388,7 @@ app.patch("/api/ideas/:id/status", authRequired, async(req,res)=>{
     await client.query("INSERT INTO idea_status_history(idea_id,user_id,from_status,to_status,note) VALUES($1,$2,$3,$4,$5)",[req.params.id,req.user.id,old.rows[0].status,status,note])
     await client.query("COMMIT")
     res.json({message:"Статус ідеї оновлено"})
-  } catch(err){await client.query("ROLLBACK");console.error("idea status error:",err.message);res.status(500).json({error:"Не вдалося оновити статус"})} finally{client.release()}
+  } catch(err){await client.query("ROLLBACK");console.error("idea status error:",err.message);res.status(500).json({error:"Could not update status"})} finally{client.release()}
 })
 // Кореневий маршрут → сторінка авторизації
 app.get("/", (req, res) => {

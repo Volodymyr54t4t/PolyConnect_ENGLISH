@@ -14,31 +14,31 @@ function escapeFeed(value) {
 }
 
 function roleGroup(role) {
-  if (role === "Студент") return "Студенти"
-  if (role === "Викладач") return "Викладачі"
-  return "Деканат"
+  if (role === "Студент") return "Students"
+  if (role === "Викладач") return "Faculty"
+  return "Dean’s office"
 }
 
 function renderFeed(items) {
   achievementItems = items
   if (!items.length) {
-    feed.innerHTML = '<p class="achievement-empty">Публічних досягнень у цій категорії ще немає.</p>'
+    feed.innerHTML = '<p class="achievement-empty">No public achievements in this category yet.</p>'
     return
   }
   feed.innerHTML = items.map((item) => `
     <article class="achievement-card" tabindex="0" role="button" data-achievement-id="${item.id}">
       <div class="achievement-card__media">${item.photo ? `<img src="${item.photo}" alt="" loading="lazy" />` : `<span>${escapeFeed(item.full_name).charAt(0).toUpperCase()}</span>`}</div>
-      <div class="achievement-card__body"><div class="achievement-card__meta"><span>${escapeFeed(item.achievement_type || "Досягнення")}</span><span>${escapeFeed(roleGroup(item.role))}</span></div><h2>${escapeFeed(item.title)}</h2><p>${escapeFeed(item.event_name || item.result || item.description) || "Досягнення учасника спільноти ФІКТ."}</p><strong>${escapeFeed(item.full_name)}</strong></div>
+      <div class="achievement-card__body"><div class="achievement-card__meta"><span>${escapeFeed(item.achievement_type || "Achievement")}</span><span>${escapeFeed(roleGroup(item.role))}</span></div><h2>${escapeFeed(item.title)}</h2><p>${escapeFeed(item.event_name || item.result || item.description) || "Achievement by a FICT community member."}</p><strong>${escapeFeed(item.full_name)}</strong></div>
     </article>`).join("")
 }
 
 function openDetail(item) {
-  detailMedia.innerHTML = item.photo ? `<img src="${item.photo}" alt="Повне фото досягнення" />` : `<span>${escapeFeed(item.full_name).charAt(0).toUpperCase()}</span>`
-  detailMeta.textContent = `${item.achievement_type || "Досягнення"} · ${roleGroup(item.role)} · ${item.role}`
+  detailMedia.innerHTML = item.photo ? `<img src="${item.photo}" alt="Full achievement photo" />` : `<span>${escapeFeed(item.full_name).charAt(0).toUpperCase()}</span>`
+  detailMeta.textContent = `${item.achievement_type || "Achievement"} · ${roleGroup(item.role)} · ${item.role}`
   detailTitle.textContent = item.title
-  detailDescription.textContent = item.description || "Досягнення учасника спільноти ФІКТ."
+  detailDescription.textContent = item.description || "Achievement by a FICT community member."
   detailAuthor.textContent = item.full_name
-  const facts = [["Подія", item.event_name], ["Дата", item.achievement_date ? new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(new Date(item.achievement_date)) : ""], ["Організатор", item.organizer], ["Місце", item.location], ["Результат / роль", item.result]].filter(([, value]) => value)
+  const facts = [["Event", item.event_name], ["Date", item.achievement_date ? new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(new Date(item.achievement_date)) : ""], ["Organizer", item.organizer], ["Location", item.location], ["Result / role", item.result]].filter(([, value]) => value)
   detailFacts.replaceChildren(...facts.map(([label, value]) => {
     const row = document.createElement("p")
     const key = document.createElement("b")
@@ -50,7 +50,7 @@ function openDetail(item) {
   }))
   if (item.link && /^https?:\/\//i.test(item.link)) {
     const link = document.createElement("a")
-    link.href = item.link; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "Доказ / посилання на результат ↗"
+    link.href = item.link; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "Proof / result link ↗"
     detailFacts.append(link)
   }
   detail.classList.remove("hidden")
@@ -63,11 +63,11 @@ function closeDetail() {
 }
 
 async function loadFeed(role = "all") {
-  feed.innerHTML = '<p class="achievement-empty">Завантаження досягнень…</p>'
+  feed.innerHTML = '<p class="achievement-empty">Loading achievements…</p>'
   const query = role === "all" ? "" : `?role=${encodeURIComponent(role)}`
   try {
     const response = await fetch(`/api/achievements${query}`)
-    if (!response.ok) throw new Error("Не вдалося завантажити досягнення")
+    if (!response.ok) throw new Error("Could not load achievements")
     const data = await response.json()
     renderFeed(data.achievements || [])
   } catch (error) {

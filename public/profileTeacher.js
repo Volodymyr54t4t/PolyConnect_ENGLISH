@@ -1,61 +1,61 @@
 const $ = (sel) => document.querySelector(sel)
 
-// Посади (останній пункт — "Інше")
+// Посади (останній пункт — "Other")
 const POSITIONS = [
-  "Завідувач кафедри",
-  "Проректор з науково-педагогічної роботи (одночасно доцент кафедри)",
-  "Професор кафедри",
-  "Доцент кафедри",
-  "Доцент кафедри (викладач-практик)",
-  "Старший викладач кафедри",
-  "Старший викладач кафедри (викладач-практик)",
-  "Асистент кафедри",
-  "Асистент кафедри (викладач-практик)",
-  "Інше",
+  "Department Chair",
+  "Vice-Rector for Academic Affairs and Associate Professor",
+  "Professor",
+  "Associate Professor",
+  "Associate Professor (викладач-практик)",
+  "Senior Lecturer",
+  "Senior Lecturer (викладач-практик)",
+  "Assistant Lecturer",
+  "Assistant Lecturer (викладач-практик)",
+  "Other",
 ]
 
 // Список предметів кафедри ІПЗ
 const SUBJECTS = [
-  "Алгоритми та структури даних",
-  "Дискретні структури",
-  "Аналіз вимог до програмного забезпечення",
-  "Архітектура комп’ютера",
-  "Архітектура, проєктування та конструювання ПЗ",
-  "Бази даних",
-  "Безпека програм та даних",
-  "Економіка програмного забезпечення",
-  "Емпіричні методи програмної інженерії",
-  "Людино-машинна взаємодія",
-  "Менеджмент проєктів програмного забезпечення",
-  "Моделювання та аналіз програмного забезпечення",
-  "Об’єктно-орієнтоване програмування",
-  "Операційні системи",
-  "Організація комп’ютерних мереж",
-  "Основи програмної інженерії",
-  "Основи програмування",
-  "Проєктний практикум та професійна практика програмної інженерії",
-  "Веб-дизайн",
-  "Інтернет-програмування",
-  "Патерни проєктування",
-  "Лінійне програмування",
-  "Якість програмного забезпечення та тестування",
+  "Algorithms and Data Structures",
+  "Discrete Structures",
+  "Software Requirements Analysis",
+  "Computer Architecture",
+  "Software Architecture, Design and Construction",
+  "Databases",
+  "Software and Data Security",
+  "Software Economics",
+  "Empirical Software Engineering Methods",
+  "Human-Computer Interaction",
+  "Software Project Management",
+  "Software Modeling and Analysis",
+  "Object-Oriented Programming",
+  "Operating Systems",
+  "Computer Network Organization",
+  "Fundamentals of Software Engineering",
+  "Programming Fundamentals",
+  "Software Engineering Project and Professional Practice",
+  "Web Design",
+  "Internet Programming",
+  "Design Patterns",
+  "Linear Programming",
+  "Software Quality and Testing",
   "ASP.NET Core",
-  "Проєктування інтерфейсів ПЗ",
-  "Розробка мережевих додатків",
-  "Нелінійне програмування",
-  "Дискретне програмування",
-  "Системи штучного інтелекту",
-  "Програмні оболонки і пакети",
-  "Іноземна мова професійного спрямування",
-  "Мова програмування РНР",
-  "Конструювання інтерфейсів веб-додатків",
-  "Програмування мобільних пристроїв",
-  "Математичні методи дослідження операцій",
-  "Сучасний штучний інтелект",
-  "Пакети прикладних програм",
-  "Програмування на Node.js",
-  "РНР бекенд-фреймворки",
-  ".NET-розробка",
+  "Software Interface Design",
+  "Network Application Development",
+  "Nonlinear Programming",
+  "Discrete Programming",
+  "Artificial Intelligence Systems",
+  "Software Environments and Packages",
+  "Foreign Language for Professional Purposes",
+  "PHP Programming",
+  "Web Application Interface Design",
+  "Mobile Device Programming",
+  "Mathematical Methods of Operations Research",
+  "Modern Artificial Intelligence",
+  "Application Software Packages",
+  "Node.js Programming",
+  "PHP Backend Frameworks",
+  ".NET Development",
   "Dev Net",
 ]
 
@@ -118,9 +118,9 @@ function buildPositions() {
     POSITIONS.map((p) => `<option value="${p}">${p}</option>`).join("")
 }
 
-// Показ/приховування поля "Інше"
+// Показ/приховування поля "Other"
 function togglePositionOther() {
-  const isOther = els.positionSelect.value === "Інше"
+  const isOther = els.positionSelect.value === "Other"
   els.positionOtherField.classList.toggle("hidden", !isOther)
 }
 
@@ -164,13 +164,13 @@ function fillView(user) {
 
   els.viewName.textContent = user.full_name || "—"
   els.viewEmail.textContent = user.email || "—"
-  els.viewRole.textContent = user.role || "Викладач"
+  els.viewRole.textContent = user.role || "Faculty"
   els.viewPosition.textContent = user.position || "—"
   els.viewDept.textContent = user.department || "—"
   els.viewPhone.textContent = user.phone || "—"
-  els.viewAbout.textContent = user.about || "Додайте коротку інформацію про себе та напрямки досліджень."
+  els.viewAbout.textContent = user.about || "Add a brief introduction and describe your research interests."
   renderProfileLinks(user)
-  els.photoPlaceholder.textContent = (user.full_name || "В").trim().charAt(0).toUpperCase()
+  els.photoPlaceholder.textContent = (user.full_name || "F").trim().charAt(0).toUpperCase()
   renderTags(user.subjects)
 
   els.emailField.value = user.email || ""
@@ -183,11 +183,11 @@ function fillView(user) {
   els.form.contacts.value = user.contacts || ""
   if (user.department) els.form.department.value = user.department
 
-  // Посада: якщо не входить у список — це "Інше"
-  if (user.position && POSITIONS.includes(user.position) && user.position !== "Інше") {
+  // Position: якщо не входить у список — це "Other"
+  if (user.position && POSITIONS.includes(user.position) && user.position !== "Other") {
     els.positionSelect.value = user.position
   } else if (user.position) {
-    els.positionSelect.value = "Інше"
+    els.positionSelect.value = "Other"
     els.positionOther.value = user.position
   } else {
     els.positionSelect.value = ""
@@ -199,7 +199,7 @@ function fillView(user) {
 }
 
 function renderProfileLinks(user) {
-  const links = [["GitHub", user.github_url], ["LinkedIn", user.linkedin_url], ["Портфоліо", user.portfolio_url]]
+  const links = [["GitHub", user.github_url], ["LinkedIn", user.linkedin_url], ["Portfolio", user.portfolio_url]]
     .filter(([, url]) => /^https?:\/\//i.test(url || ""))
   els.viewSocial.replaceChildren(...links.map(([label, url]) => {
     const link = document.createElement("a")
@@ -234,12 +234,12 @@ async function load() {
   }
 }
 
-// Завантаження фото → base64
+// Upload photo → base64
 els.photoInput.addEventListener("change", (e) => {
   const file = e.target.files[0]
   if (!file) return
   if (file.size > 4 * 1024 * 1024) {
-    showAlert("Файл завеликий. Максимум 4 МБ.")
+    showAlert("File is too large. Maximum size: 4 MB.")
     return
   }
   const reader = new FileReader()
@@ -250,15 +250,15 @@ els.photoInput.addEventListener("change", (e) => {
   reader.readAsDataURL(file)
 })
 
-// Збереження
+// Save
 els.form.addEventListener("submit", async (e) => {
   e.preventDefault()
 
   let position = els.positionSelect.value
-  if (position === "Інше") {
+  if (position === "Other") {
     position = els.positionOther.value.trim()
     if (!position) {
-      showAlert('Вкажіть посаду у полі "Інше"')
+      showAlert('Enter a job title in the field "Other"')
       return
     }
   }
@@ -286,10 +286,10 @@ els.form.addEventListener("submit", async (e) => {
       body: JSON.stringify(body),
     })
     const data = await res.json().catch(() => ({}))
-    if (!res.ok) throw new Error(data.error || "Помилка збереження")
+    if (!res.ok) throw new Error(data.error || "Could not save changes")
     photoData = null
     fillView(data.user)
-    showAlert("Профіль успішно збережено", true)
+    showAlert("Profile saved successfully", true)
   } catch (err) {
     showAlert(err.message)
   }

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile викладача — Software Engineering Portal</title>
+  <title>Faculty profile — Software Engineering Portal</title>
   <link rel="stylesheet" href="/profileTeacher.css" />
   <link rel="stylesheet" href="/header.css" />
   <link rel="stylesheet" href="/achievements.css" />
@@ -43,16 +43,16 @@
     <main class="wrap">
       <div id="alert" class="alert hidden" role="alert"></div>
 
-      <section class="profile-page-heading"><div><p class="profile-eyebrow">ОСОБИСТИЙ ПРОСТІР · ВИКЛАДАЧ</p><h1>Мій профіль</h1><p>Представте свій досвід, напрямки роботи та дисципліни для спільноти.</p></div><div class="profile-heading-mark"><span>✳</span><small>ВАШ ПРОФІЛЬ<br />ВАШІ МОЖЛИВОСТІ</small></div></section>
+      <section class="profile-page-heading"><div><p class="profile-eyebrow">YOUR SPACE · FACULTY</p><h1>My profile</h1><p>Introduce your experience, areas of work, and courses to the community.</p></div><div class="profile-heading-mark"><span>✳</span><small>YOUR PROFILE<br />YOUR OPPORTUNITIES</small></div></section>
 
       <section class="grid">
         <aside class="card card--profile">
           <div class="photo">
-            <img id="photoPreview" class="photo__img hidden" alt="Photo викладача" />
-            <div id="photoPlaceholder" class="photo__placeholder">В</div>
+            <img id="photoPreview" class="photo__img hidden" alt="Faculty photo" />
+            <div id="photoPlaceholder" class="photo__placeholder">F</div>
           </div>
           <label class="photo__upload btn btn--secondary">
-            Змінити фото
+            Change photo
             <input id="photoInput" type="file" accept="image/*" hidden />
           </label>
 
@@ -61,41 +61,41 @@
           <span id="viewRole" class="chip">Faculty</span>
 
           <section class="presence-card" aria-labelledby="presenceTitle">
-            <div class="presence-card__head"><span id="presenceOrb" class="presence-orb presence-orb--offline"></span><div><small>СТАТУС КОРИСТУВАЧА</small><h2 id="presenceTitle">Offline</h2></div></div>
-            <p id="presenceCurrentMessage" class="presence-card__message">Ваш статус видно іншим у чатах і списках користувачів.</p>
+            <div class="presence-card__head"><span id="presenceOrb" class="presence-orb presence-orb--offline"></span><div><small>USER STATUS</small><h2 id="presenceTitle">Offline</h2></div></div>
+            <p id="presenceCurrentMessage" class="presence-card__message">Others can see your status in chats and the user directory.</p>
             <form id="presenceForm" class="presence-form">
-              <label class="field"><span>Моя доступність</span><select id="presenceSelect" name="user_status"><option value="available">🟢 Available</option><option value="away">🟡 Away</option><option value="dnd">🔴 Do not disturb</option><option value="offline">⚫ Offline</option></select></label>
-              <label class="field"><span>Короткий підпис <small>(за бажанням)</small></span><input id="presenceMessage" name="status_message" maxlength="80" placeholder="Наприклад: консультація сьогодні о 15:00" /></label>
+              <label class="field"><span>My availability</span><select id="presenceSelect" name="user_status"><option value="available">🟢 Available</option><option value="away">🟡 Away</option><option value="dnd">🔴 Do not disturb</option><option value="offline">⚫ Offline</option></select></label>
+              <label class="field"><span>Short status message <small>(optional)</small></span><input id="presenceMessage" name="status_message" maxlength="80" placeholder="For example: office hours today at 3:00 PM" /></label>
               <button class="btn btn--primary" type="submit">Update status</button>
               <p id="presenceFeedback" class="presence-feedback" role="status"></p>
             </form>
           </section>
 
           <ul class="facts">
-            <li><span>Посада</span><b id="viewPosition">—</b></li>
-            <li><span>Кафедра</span><b id="viewDept">—</b></li>
+            <li><span>Position</span><b id="viewPosition">—</b></li>
+            <li><span>Department</span><b id="viewDept">—</b></li>
             <li><span>Phone</span><b id="viewPhone">—</b></li>
           </ul>
 
-          <section class="profile-about"><h2>Про викладача</h2><p id="viewAbout">—</p></section>
+          <section class="profile-about"><h2>About the faculty member</h2><p id="viewAbout">—</p></section>
           <div id="viewSocial" class="profile-social"></div>
 
           <div class="subjects-view">
-            <span class="subjects-view__label">Предмети</span>
+            <span class="subjects-view__label">Subjects</span>
             <div id="viewSubjects" class="tags"><span class="tags__empty">—</span></div>
           </div>
-          <section class="profile-account-action" aria-label="Management обліковим записом">
-            <p>Завершили роботу з порталом?</p>
+          <section class="profile-account-action" aria-label="Account management">
+            <p>Finished using the portal?</p>
             <button id="logoutBtn" class="btn btn--danger" type="button"><span aria-hidden="true">↗</span> Sign out</button>
             <details class="account-delete">
-              <summary>Delete акаунт назавжди</summary>
+              <summary>Delete account permanently</summary>
               <div class="account-delete__body">
-                <p><strong>Цю дію не можна скасувати.</strong> Будуть видалені профіль, досягнення, повідомлення та пов'язані записи. Новинні публікації, створені цим акаунтом, також буде видалено.</p>
+                <p><strong>This action cannot be undone.</strong> Your profile, achievements, messages, and related records will be deleted. News posts created by this account will also be deleted.</p>
                 <form id="deleteAccountForm" class="account-delete__form">
-                  <label class="field"><span>Поточний пароль</span><input name="password" type="password" autocomplete="current-password" required /></label>
-                  <label class="field"><span>Введіть email акаунта <small id="deleteAccountEmailHint"></small></span><input name="email" type="email" autocomplete="email" required /></label>
-                  <label class="field"><span>Для підтвердження введіть ВИДАЛИТИ</span><input name="confirmation" required autocapitalize="characters" autocomplete="off" /></label>
-                  <button class="btn btn--danger" type="submit" disabled>Delete акаунт і дані</button>
+                  <label class="field"><span>Current password</span><input name="password" type="password" autocomplete="current-password" required /></label>
+                  <label class="field"><span>Enter account email <small id="deleteAccountEmailHint"></small></span><input name="email" type="email" autocomplete="email" required /></label>
+                  <label class="field"><span>Type DELETE to confirm</span><input name="confirmation" required autocapitalize="characters" autocomplete="off" /></label>
+                  <button class="btn btn--danger" type="submit" disabled>Delete account and data</button>
                   <p id="deleteAccountFeedback" class="account-delete__feedback" role="status" aria-live="polite"></p>
                 </form>
               </div>
@@ -107,8 +107,8 @@
           <h2 class="card__title">Edit profile</h2>
           <form id="profileForm" class="form">
             <label class="field">
-              <span>ПІБ</span>
-              <input name="full_name" type="text" placeholder="Прізвище Ім'я По батькові" required />
+              <span>Full name</span>
+              <input name="full_name" type="text" placeholder="First and last name" required />
             </label>
 
             <label class="field">
@@ -122,69 +122,69 @@
             </label>
 
             <label class="field">
-              <span>Посада</span>
+              <span>Position</span>
               <select id="positionSelect" name="position"></select>
             </label>
 
             <label id="positionOtherField" class="field hidden">
-              <span>Вкажіть посаду (Інше)</span>
-              <input id="positionOther" type="text" placeholder="Ваша посада" />
+              <span>Enter a position (Other)</span>
+              <input id="positionOther" type="text" placeholder="Your position" />
             </label>
 
             <label class="field">
-              <span>Кафедра</span>
+              <span>Department</span>
               <select name="department">
-                <option value="Інженерія програмного забезпечення" selected>
-                  Інженерія програмного забезпечення
+                <option value="Software Engineering" selected>
+                  Software Engineering
                 </option>
               </select>
             </label>
 
             <div class="field">
-              <span>Предмети</span>
+              <span>Subjects</span>
               <div class="subjects-picker">
-                <input id="subjectSearch" type="text" placeholder="Search предмета…" class="subjects-picker__search" />
+                <input id="subjectSearch" type="text" placeholder="Search subjects…" class="subjects-picker__search" />
                 <div id="subjectList" class="subjects-picker__list"></div>
               </div>
             </div>
 
             <label class="field">
-              <span>Контакти</span>
-              <textarea name="contacts" rows="4" placeholder="Phone, месенджери, посилання, кабінет…"></textarea>
+              <span>Contact information</span>
+              <textarea name="contacts" rows="4" placeholder="Phone, messengers, links, office…"></textarea>
             </label>
 
             <label class="field">
-              <span>Про себе та напрямки досліджень</span>
-              <textarea name="about" rows="4" maxlength="1200" required placeholder="Коротко про професійний досвід, наукові інтереси та проєкти…"></textarea>
+              <span>About me and research areas</span>
+              <textarea name="about" rows="4" maxlength="1200" required placeholder="Briefly describe your professional experience, research interests, and projects…"></textarea>
             </label>
 
             <div class="optional-profile-fields">
-              <div><h3>Професійні посилання</h3><p>Заповнюйте за бажанням — це допоможе краще представити ваші роботи.</p></div>
+              <div><h3>Professional links</h3><p>Optional information that helps showcase your work.</p></div>
               <label class="field"><span>GitHub</span><input name="github_url" type="url" maxlength="500" placeholder="https://github.com/username" /></label>
               <label class="field"><span>LinkedIn</span><input name="linkedin_url" type="url" maxlength="500" placeholder="https://linkedin.com/in/username" /></label>
-              <label class="field"><span>Портфоліо або особистий сайт</span><input name="portfolio_url" type="url" maxlength="500" placeholder="https://…" /></label>
+              <label class="field"><span>Portfolio or personal website</span><input name="portfolio_url" type="url" maxlength="500" placeholder="https://…" /></label>
             </div>
 
-          <button class="btn btn--primary" type="submit">Save зміни</button>
+          <button class="btn btn--primary" type="submit">Save changes</button>
           </form>
         </div>
       </section>
       <div class="profile-lower">
           <section class="profile-achievements" aria-labelledby="teacherAchievementsTitle">
-            <div class="profile-achievements__heading"><h2 id="teacherAchievementsTitle">Mine досягнення</h2><div><a class="text-link" href="/achievements">Дивитися публічні ↗</a><button id="openAchievementBtn" class="btn btn--secondary" type="button">Add досягнення</button></div></div>
+            <div class="profile-achievements__heading"><h2 id="teacherAchievementsTitle">My achievements</h2><div><a class="text-link" href="/achievements">View public achievements ↗</a><button id="openAchievementBtn" class="btn btn--secondary" type="button">Add achievement</button></div></div>
             <div id="achievementDialog" class="achievement-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="achievementDialogTitle">
               <div class="achievement-dialog__backdrop" data-close-achievement></div>
-              <div class="achievement-dialog__panel"><button class="achievement-dialog__close" type="button" data-close-achievement aria-label="Close">×</button><h2 id="achievementDialogTitle">Нове досягнення</h2><p class="achievement-dialog__hint">Заповнення зазвичай займає кілька секунд.</p>
+              <div class="achievement-dialog__panel"><button class="achievement-dialog__close" type="button" data-close-achievement aria-label="Close">×</button><h2 id="achievementDialogTitle">New achievement</h2><p class="achievement-dialog__hint">This usually takes a few seconds.</p>
                 <form id="achievementForm" class="achievement-form">
-                  <label class="field"><span>Що саме відзначаємо?</span><select name="achievement_type" required><option value="">Select формат</option><option>Перемога</option><option>Призове місце</option><option>Participation</option><option>Нагорода / відзнака</option><option>Сертифікат</option><option>Проєкт</option><option>Публікація</option><option>Інше</option></select></label>
-                  <label class="field"><span>Title досягнення</span><input name="title" maxlength="160" placeholder="Наприклад, наукова публікація або перемога команди" required /></label>
-                  <div class="achievement-fields-grid"><label class="field"><span>Подія / конкурс</span><input name="event_name" maxlength="180" placeholder="Title конференції, конкурсу чи проєкту" /></label><label class="field"><span>Date</span><input name="achievement_date" type="date" /></label><label class="field"><span>Організатор</span><input name="organizer" maxlength="180" placeholder="Університет, компанія, фонд…" /></label><label class="field"><span>Location / формат</span><input name="location" maxlength="180" placeholder="Житомир, Україна або онлайн" /></label></div>
-                  <label class="field"><span>Результат або ваша роль</span><input name="result" maxlength="300" placeholder="І місце, доповідач, науковий керівник, автор…" /></label>
-                  <label class="field"><span>Посилання на результат (необов’язково)</span><input name="link" type="url" maxlength="500" placeholder="Сторінка події, сертифікат або публікація" /></label>
-                  <label class="field"><span>Details та внесок</span><textarea name="description" maxlength="2000" rows="4" placeholder="Розкажіть про свою роботу, внесок і результат…"></textarea></label>
-                  <label class="field"><span>Photo (необов’язково)</span><input id="achievementPhoto" name="photo" type="file" accept="image/*" /></label>
-                  <label class="achievement-visibility"><input name="is_public" type="checkbox" /> <span>Показувати це досягнення публічно</span></label>
-                  <button class="btn btn--secondary" type="submit">Save досягнення</button><p id="achievementAlert" class="form-alert" role="status"></p><p id="achievementProgress" class="achievement-progress" role="status"></p>
+                  <label class="field"><span>What are you recognizing?</span><select name="achievement_type" required><option value="">Select a format</option><option>Win</option><option>Prize placement</option><option>Participation</option><option>Award / distinction</option><option>Certificate</option><option>Project</option><option>Publication</option><option>Other</option></select></label>
+                  <label class="field"><span>Achievement title</span><input name="title" maxlength="160" placeholder="For example, a research publication or team win" required /></label>
+                  <div class="achievement-fields-grid"><label class="field"><span>Event / competition</span><input name="event_name" maxlength="180" placeholder="Name of the conference, competition, or project" /></label><label class="field"><span>Date</span><input name="achievement_date" type="date" /></label><label class="field"><span>Organizer</span><input name="organizer" maxlength="180" placeholder="University, company, foundation…" /></label><label class="field"><span>Location / format</span><input name="location" maxlength="180" placeholder="Zhytomyr, Ukraine, or online" /></label></div>
+                  <label class="field"><span>Result or your role</span><input name="result" maxlength="300" placeholder="1st place, presenter, research advisor, author…" /></label>
+                  <label class="field"><span>Link to the result (optional)</span><input name="link" type="url" maxlength="500" placeholder="Event page, certificate, or publication" /></label>
+                  <label class="field"><span>Details and contribution</span><textarea name="description" maxlength="2000" rows="4" placeholder="Describe your work, contribution, and results…"></textarea></label>
+                  <label class="field"><span>Photo (optional)</span><input id="achievementPhoto" name="photo" type="file" accept="image/*" /></label>
+                  <label class="achievement-visibility"><input name="is_public" type="checkbox" /> <span>Show this achievement publicly</span></label>
+                  <button class="btn btn--secondary" type="submit">Save achievement</button><p id="achievementAlert" class="form-alert" role="status"></p><p id="achievementProgress" class="achievement-progress" role="status"></p>
                 </form>
               </div>
             </div>

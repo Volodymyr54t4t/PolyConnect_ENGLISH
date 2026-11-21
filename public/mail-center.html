@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Службова пошта PolyConnect ZTU">
-  <title>Центр пошти — PolyConnect ZTU</title>
+  <meta name="description" content="PolyConnect ZTU internal mail">
+  <title>Mail center — PolyConnect ZTU</title>
   <link rel="stylesheet" href="/auth.css"><link rel="stylesheet" href="/home.css"><link rel="stylesheet" href="/header.css"><link rel="stylesheet" href="/mail-center.css">
 </head>
 <body class="home-body mail-body">
@@ -12,27 +12,27 @@
     <div class="topbar__user"><div class="chip"><span class="chip__avatar" id="userAvatar">?</span><span class="chip__name" id="userName">—</span></div></div>
   </header>
   <main class="mail-shell">
-    <section class="mail-hero"><div><p class="mail-eyebrow">PolyConnect ZTU · службові листи</p><h1>Центр пошти<span>.</span></h1><p>Announcements, термінові сповіщення та робочі листи для людей університетської спільноти.</p></div><div class="mail-hero__stamp"><span>✉</span><small>Єдиний<br>простір зв’язку</small></div></section>
+    <section class="mail-hero"><div><p class="mail-eyebrow">PolyConnect ZTU · internal mail</p><h1>Mail center<span>.</span></h1><p>Announcements, urgent alerts, and work emails for the university community.</p></div><div class="mail-hero__stamp"><span>✉</span><small>One<br>place to connect</small></div></section>
     <div class="mail-grid">
       <form class="mail-compose" id="mailForm">
-        <div class="mail-compose__head"><div><span class="mail-step">01 / НОВИЙ ЛИСТ</span><h2>Написати повідомлення</h2></div><span class="mail-live"><i></i> Готово до відправлення</span></div>
-        <label class="mail-label">Тема листа<input id="subject" name="subject" maxlength="180" required placeholder="Наприклад: зміни в розкладі на цей тиждень"></label>
-        <div class="mail-recipient-head"><label class="mail-label">Кому надіслати <span class="mail-required">*</span></label><span id="recipientCount" class="mail-count">0 адресатів</span></div>
+        <div class="mail-compose__head"><div><span class="mail-step">01 / NEW EMAIL</span><h2>Compose email</h2></div><span class="mail-live"><i></i> Ready to send</span></div>
+        <label class="mail-label">Email subject<input id="subject" name="subject" maxlength="180" required placeholder="For example: schedule changes for this week"></label>
+        <div class="mail-recipient-head"><label class="mail-label">Send to <span class="mail-required">*</span></label><span id="recipientCount" class="mail-count">0 recipients</span></div>
         <div class="mail-audience" id="audience">
-          <label class="audience-option audience-option--all"><input type="checkbox" name="role" value="all"><span class="audience-icon">✳</span><span><b>Уся спільнота</b><small>Students, викладачі й деканат</small></span></label>
+          <label class="audience-option audience-option--all"><input type="checkbox" name="role" value="all"><span class="audience-icon">✳</span><span><b>Everyone</b><small>Students, faculty, and the dean’s office</small></span></label>
           <label class="audience-option"><input type="checkbox" name="role" value="Студент"><span class="audience-icon">◉</span><span><b>Students</b><small>All student addresses</small></span></label>
           <label class="audience-option"><input type="checkbox" name="role" value="Викладач"><span class="audience-icon">▤</span><span><b>Faculty</b><small>Faculty members</small></span></label>
-          <label class="audience-option"><input type="checkbox" name="role" value="ДеканФІКТ"><span class="audience-icon">⌂</span><span><b>Деканат</b><small>Faculty Dean</small></span></label>
-          <label class="audience-option"><input type="checkbox" name="role" value="Завідувач Кафедри"><span class="audience-icon">◆</span><span><b>Завідувачі</b><small>Керівники кафедр</small></span></label>
+          <label class="audience-option"><input type="checkbox" name="role" value="ДеканФІКТ"><span class="audience-icon">⌂</span><span><b>Dean’s office</b><small>Faculty Dean</small></span></label>
+          <label class="audience-option"><input type="checkbox" name="role" value="Завідувач Кафедри"><span class="audience-icon">◆</span><span><b>Department chairs</b><small>Department chairs</small></span></label>
         </div>
-        <div class="mail-recipient-tools"><label class="mail-label">Групи студентів <span class="mail-hint">можна обрати кілька</span><select id="groups" multiple size="1" aria-label="Групи студентів"></select></label><label class="mail-label">Окремі адресати <span class="mail-hint">пошук за ім’ям чи email</span><select id="people" multiple size="1" aria-label="Окремі адресати"></select></label></div>
-        <details class="mail-extra"><summary>Копія та додаткові параметри <span>+</span></summary><div class="mail-extra__fields"><label class="mail-label">Копія (CC)<select id="cc" multiple size="1" aria-label="Копія"></select></label><label class="mail-label">Прихована копія (BCC)<select id="bcc" multiple size="1" aria-label="Прихована копія"></select></label></div><p class="mail-hint">CC видно всім адресатам. Основні адреси масової розсилки приховані.</p></details>
-        <label class="mail-label mail-label--body">Повідомлення<textarea id="message" name="message" required maxlength="20000" rows="9" placeholder="Вітаю!&#10;&#10;Напишіть важливі деталі, терміни та наступні кроки…"></textarea><span class="mail-hint">Підпис буде додано автоматично: ваше ім’я та роль.</span></label>
-        <div class="mail-compose__bottom"><label class="mail-attachment" for="attachments"><span>＋</span><span><b>Add вкладення</b><small id="attachmentHint">PDF, документи, зображення · до 8 МБ</small></span><input id="attachments" type="file" multiple></label><label class="mail-priority"><input id="urgent" type="checkbox"><span class="mail-priority__icon">!</span><span><b>Терміново</b><small>Позначити високий пріоритет</small></span></label></div>
+        <div class="mail-recipient-tools"><label class="mail-label">Student groups <span class="mail-hint">Select multiple</span><select id="groups" multiple size="1" aria-label="Student groups"></select></label><label class="mail-label">Individual recipients <span class="mail-hint">Search by name or email</span><select id="people" multiple size="1" aria-label="Individual recipients"></select></label></div>
+        <details class="mail-extra"><summary>CC and additional options <span>+</span></summary><div class="mail-extra__fields"><label class="mail-label">CC (CC)<select id="cc" multiple size="1" aria-label="CC"></select></label><label class="mail-label">BCC (BCC)<select id="bcc" multiple size="1" aria-label="BCC"></select></label></div><p class="mail-hint">CC visible to all recipients. Bulk recipient addresses are hidden.</p></details>
+        <label class="mail-label mail-label--body">Messages<textarea id="message" name="message" required maxlength="20000" rows="9" placeholder="Hello!&#10;&#10;Include key details, deadlines, and next steps…"></textarea><span class="mail-hint">Your name and role will be added automatically as a signature.</span></label>
+        <div class="mail-compose__bottom"><label class="mail-attachment" for="attachments"><span>＋</span><span><b>Add attachments</b><small id="attachmentHint">PDF, documents, images · up to 8 MB</small></span><input id="attachments" type="file" multiple></label><label class="mail-priority"><input id="urgent" type="checkbox"><span class="mail-priority__icon">!</span><span><b>Urgent</b><small>Mark as high priority</small></span></label></div>
         <div class="mail-file-list" id="fileList"></div>
-        <div class="mail-submit-row"><p id="formStatus" class="mail-status" role="status"></p><button id="sendButton" class="mail-send" type="submit"><span>Send лист</span><b>↗</b></button></div>
+        <div class="mail-submit-row"><p id="formStatus" class="mail-status" role="status"></p><button id="sendButton" class="mail-send" type="submit"><span>Send email</span><b>↗</b></button></div>
       </form>
-      <aside class="mail-aside"><section class="mail-note mail-note--blue"><span class="mail-note__icon">✦</span><p class="mail-step">РОБОЧА КОМУНІКАЦІЯ</p><h2>Один лист — потрібні люди.</h2><p>Надсилайте оголошення студентам, колегам або деканату. Для приватних розмов і командних обговорень відкрийте чат.</p><a href="/chats">Перейти до чатів <span>↗</span></a></section><section class="mail-note mail-note--gold"><span class="mail-note__icon">◎</span><p class="mail-step">АДРЕСИ ЗАХИЩЕНО</p><h3>Жодної зайвої копії</h3><p>Адреси групових розсилок не показуються одержувачам. Копія та прихована копія керуються окремо.</p></section><div class="mail-footnote"><span>▰</span><p>Лист буде надісланий від імені службової пошти університетського порталу.</p></div></aside>
+      <aside class="mail-aside"><section class="mail-note mail-note--blue"><span class="mail-note__icon">✦</span><p class="mail-step">WORK COMMUNICATION</p><h2>One email to the right people.</h2><p>Send announcements to students, colleagues, or the dean’s office. Use chat for private conversations and team discussions.</p><a href="/chats">Go to chats <span>↗</span></a></section><section class="mail-note mail-note--gold"><span class="mail-note__icon">◎</span><p class="mail-step">ADDRESSES ARE PROTECTED</p><h3>No unnecessary copies</h3><p>Group recipient addresses are hidden. CC and BCC are managed separately.</p></section><div class="mail-footnote"><span>▰</span><p>This email will be sent from the university portal’s mail account.</p></div></aside>
     </div>
   </main>
   <script src="/mail-center.js"></script>

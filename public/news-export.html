@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Звіт новин</title>
+  <title>News report</title>
   <style>
     @page { size: A4; margin: 18mm 15mm }
     * { box-sizing: border-box }
@@ -18,19 +18,19 @@
   </style>
 </head>
 <body>
-  <button id="print" type="button">Save як PDF</button>
-  <header><h1>Звіт новин ФІКТ</h1><p id="summary" class="muted">Формування звіту…</p></header>
+  <button id="print" type="button">Save as PDF</button>
+  <header><h1>News report FICT</h1><p id="summary" class="muted">Preparing report…</p></header>
   <main id="news"></main>
   <script>
     const escapeHtml = (value) => String(value ?? '').replace(/[&<'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]))
     const categoryNames = (item) => (Array.isArray(item.categories) && item.categories.length ? item.categories : [{ name: item.category || 'Announcements' }]).map((category) => category.name)
-    const date = (value) => new Intl.DateTimeFormat('uk-UA', { dateStyle: 'long' }).format(new Date(value))
+    const date = (value) => new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(value))
     const chosen = new Set((new URLSearchParams(location.search).get('categories') || '').split(',').filter(Boolean))
     fetch('/api/news').then((response) => response.json()).then((data) => {
       const items = (data.news || []).filter((item) => categoryNames(item).some((name) => chosen.has(name)))
-      document.querySelector('#summary').textContent = `Категорії: ${[...chosen].join(', ')} · Новин: ${items.length} · Сформовано: ${date(new Date())}`
-      document.querySelector('#news').innerHTML = items.length ? items.map((item) => `<article><div class="tags">${categoryNames(item).map(escapeHtml).join(' · ')}</div><h2>${escapeHtml(item.title)}</h2><p class="muted">${date(item.created_at)} · ${escapeHtml(item.author_name || '')}</p><p>${escapeHtml(item.content)}</p></article>`).join('') : '<p>За вибраними категоріями новин немає.</p>'
-    }).catch(() => { document.querySelector('#news').textContent = 'Could not сформувати звіт.' })
+      document.querySelector('#summary').textContent = `Categories: ${[...chosen].join(', ')} · News: ${items.length} · Generated: ${date(new Date())}`
+      document.querySelector('#news').innerHTML = items.length ? items.map((item) => `<article><div class="tags">${categoryNames(item).map(escapeHtml).join(' · ')}</div><h2>${escapeHtml(item.title)}</h2><p class="muted">${date(item.created_at)} · ${escapeHtml(item.author_name || '')}</p><p>${escapeHtml(item.content)}</p></article>`).join('') : '<p>No news in the selected categories.</p>'
+    }).catch(() => { document.querySelector('#news').textContent = 'Could not generate the report.' })
     document.querySelector('#print').onclick = () => window.print()
   </script>
 </body>

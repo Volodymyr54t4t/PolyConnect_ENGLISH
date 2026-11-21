@@ -20,17 +20,17 @@
   async function request(url, options = {}) {
     const response = await fetch(url, { headers: { "Content-Type": "application/json" }, ...options })
     const data = await response.json().catch(() => ({}))
-    if (!response.ok) { const error = new Error(data.error || `Помилка запиту (HTTP ${response.status})`); error.status = response.status; throw error }
+      if (!response.ok) { const error = new Error(data.error || `Request failed (HTTP ${response.status})`); error.status = response.status; throw error }
     return data
   }
 
   function statusText(event) {
     if (event.status === "draft") return "Draft"
-    if (event.status === "cancelled") return "Скасовано"
-    if (isPast(event)) return "Closed"
-    if (!isRegistrationOpen(event)) return "Реєстрацію закрито"
-    if (event.capacity && event.registered_count >= event.capacity) return "Місць немає"
-    return "Реєстрація відкрита"
+    if (event.status === "cancelled") return "Cancelled"
+    if (isPast(event)) return "Completed"
+    if (!isRegistrationOpen(event)) return "Registration is closed"
+    if (event.capacity && event.registered_count >= event.capacity) return "No places available"
+    return "Registration is open"
   }
 
   function coverStyle(event) {
@@ -54,18 +54,18 @@
     const items = visibleEvents()
     const upcoming = events.filter((event) => event.status === "published" && !isPast(event)).sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at))
     $("#eventTotal").textContent = upcoming.length
-    $("#eventNext").textContent = upcoming.length ? eventDate(upcoming[0].starts_at) : "Поки немає"
+    $("#eventNext").textContent = upcoming.length ? eventDate(upcoming[0].starts_at) : "Nothing yet"
     if (!items.length) {
-      const message = filter === "attending" ? "Тут з’являться події, до яких ви долучилися." : filter === "hosted" ? "Створені вами події відображатимуться тут — навіть поки це чернетки." : filter === "archive" ? "Завершені події з’являться тут." : "Поки немає подій. Завітайте трохи пізніше або створіть першу подію."
+      const message = filter === "attending" ? "Events you join will appear here." : filter === "hosted" ? "Events you create will appear here, including drafts." : filter === "archive" ? "Completed events will appear here." : "No events yet. Check back later or create the first event."
       grid.innerHTML = `<div class="event-empty">${escapeHtml(message)}</div>`
       return
     }
     grid.innerHTML = items.map((event) => {
       const date = new Date(event.starts_at)
-      const status = event.my_status === "registered" ? "Ви учасник" : event.my_status === "waitlisted" ? "Ви в очікуванні" : statusText(event)
-      const spots = event.capacity ? `${Math.max(0, event.capacity - event.registered_count)} з ${event.capacity} місць` : `${event.registered_count} учасників`
-      const location = event.format === "online" ? "Online" : event.location || (event.format === "hybrid" ? "Гібридно" : "Місце уточнюється")
-      return `<article class="event-card"><div class="event-card__cover"${coverStyle(event)}><span class="event-card__date"><b>${date.toLocaleDateString("en-US", { day: "2-digit" })}</b><small>${date.toLocaleDateString("en-US", { month: "short" }).replace(".", "")}</small></span><span class="event-card__type">${escapeHtml(event.event_type)}</span><span class="event-card__status">${escapeHtml(status)}</span></div><div class="event-card__body"><div class="event-card__meta"><span>◷ ${eventDate(event.starts_at, { timeStyle: "short" })}</span><span>⌖ ${escapeHtml(location)}</span></div><h3>${escapeHtml(event.title)}</h3><p class="event-card__summary">${escapeHtml(event.summary || event.description)}</p><div class="event-card__foot"><span class="event-card__spots"><strong>${escapeHtml(spots)}</strong>${event.waitlist_count ? ` · ${event.waitlist_count} в очікуванні` : ""}</span><button class="event-card__open" data-open-event="${event.id}" type="button">Деталі <span aria-hidden="true">→</span></button></div></div></article>`
+      const status = event.my_status === "registered" ? "You are registered" : event.my_status === "waitlisted" ? "You are on the waitlist" : statusText(event)
+      const spots = event.capacity ? `${Math.max(0, event.capacity - event.registered_count)} of ${event.capacity} spots` : `${event.registered_count} participants`
+      const location = event.format === "online" ? "Online" : event.location || (event.format === "hybrid" ? "Hybrid" : "Location to be announced")
+      return `<article class="event-card"><div class="event-card__cover"${coverStyle(event)}><span class="event-card__date"><b>${date.toLocaleDateString("en-US", { day: "2-digit" })}</b><small>${date.toLocaleDateString("en-US", { month: "short" }).replace(".", "")}</small></span><span class="event-card__type">${escapeHtml(event.event_type)}</span><span class="event-card__status">${escapeHtml(status)}</span></div><div class="event-card__body"><div class="event-card__meta"><span>◷ ${eventDate(event.starts_at, { timeStyle: "short" })}</span><span>⌖ ${escapeHtml(location)}</span></div><h3>${escapeHtml(event.title)}</h3><p class="event-card__summary">${escapeHtml(event.summary || event.description)}</p><div class="event-card__foot"><span class="event-card__spots"><strong>${escapeHtml(spots)}</strong>${event.waitlist_count ? ` · ${event.waitlist_count} on the waitlist` : ""}</span><button class="event-card__open" data-open-event="${event.id}" type="button">Details <span aria-hidden="true">→</span></button></div></div></article>`
     }).join("")
   }
 
@@ -76,11 +76,11 @@
     selectedCoverData = ""
     preserveCover = Boolean(event?.has_local_cover || event?.cover_image)
     $("#eventFormMessage").textContent = ""
-    $("#eventEditorTitle").textContent = event ? "Редагувати подію" : "Створи подію"
+    $("#eventEditorTitle").textContent = event ? "Edit event" : "Create event"
     $("#eventId").value = event?.id || ""
     $("#eventTitle").value = event?.title || ""
     $("#eventSummary").value = event?.summary || ""
-    $("#eventType").value = event?.event_type || "Лекція"
+    $("#eventType").value = event?.event_type || "Lecture"
     $("#eventFormat").value = event?.format || "offline"
     $("#eventStarts").value = event ? toLocalInput(event.starts_at) : ""
     $("#eventEnds").value = event ? toLocalInput(event.ends_at) : ""
@@ -112,18 +112,18 @@
     activeEvent = event
     const coverUrl = event.has_local_cover ? `/api/events/${event.id}/cover` : event.cover_image
     $("#detailCover").style.backgroundImage = coverUrl ? `linear-gradient(180deg,rgba(5,17,43,.02),rgba(5,17,43,.2)),url("${cssSafeUrl(coverUrl)}")` : "linear-gradient(130deg,#173360,#4773d8 58%,#b2c9ff)"
-    $("#detailType").textContent = `${event.event_type} · ${event.format === "online" ? "Online" : event.format === "hybrid" ? "Гібридно" : "Очно"}`
+    $("#detailType").textContent = `${event.event_type} · ${event.format === "online" ? "Online" : event.format === "hybrid" ? "Hybrid" : "In person"}`
     $("#detailState").textContent = statusText(event)
     $("#detailTitle").textContent = event.title
     $("#detailSummary").textContent = event.summary || ""
     $("#detailWhen").textContent = `${eventDate(event.starts_at, { timeStyle: "short" })} — ${eventDate(event.ends_at, { timeStyle: "short" })}`
-    $("#detailWhere").textContent = event.format === "online" ? "Online" : event.location || "Місце уточнюється"
-    $("#detailCreator").textContent = event.creator_name || "Команда порталу"
-    $("#detailCapacity").textContent = `${event.registered_count} учасників${event.capacity ? ` із ${event.capacity}` : " · без обмежень"}${event.waitlist_count ? ` · ${event.waitlist_count} очікують` : ""}`
+    $("#detailWhere").textContent = event.format === "online" ? "Online" : event.location || "Location to be announced"
+    $("#detailCreator").textContent = event.creator_name || "Portal team"
+    $("#detailCapacity").textContent = `${event.registered_count} participants${event.capacity ? ` of ${event.capacity}` : " · no limit"}${event.waitlist_count ? ` · ${event.waitlist_count} waitlisted` : ""}`
     $("#detailDescription").textContent = event.description
     const links = []
-    if (event.meeting_url && /^https?:\/\//i.test(event.meeting_url)) links.push(`<a href="${escapeHtml(event.meeting_url)}" target="_blank" rel="noopener noreferrer">Посилання для участі ↗</a>`)
-    if (event.contact) links.push(`<a href="mailto:${escapeHtml(event.contact)}">Контакт організатора: ${escapeHtml(event.contact)}</a>`)
+    if (event.meeting_url && /^https?:\/\//i.test(event.meeting_url)) links.push(`<a href="${escapeHtml(event.meeting_url)}" target="_blank" rel="noopener noreferrer">Join event ↗</a>`)
+    if (event.contact) links.push(`<a href="mailto:${escapeHtml(event.contact)}">Organizer contact: ${escapeHtml(event.contact)}</a>`)
     $("#detailLinks").innerHTML = links.join("")
     $("#registrationMessage").textContent = ""
     const canEdit = canManage(event)
@@ -137,8 +137,8 @@
     const mayAct = isRegistrationOpen(event) || mayCancel
     registerButton.classList.toggle("hidden", !mayAct)
     registerButton.disabled = !mayAct
-    registerButton.textContent = event.my_status === "registered" ? "Скасувати участь" : event.my_status === "waitlisted" ? "Скасувати очікування" : event.capacity && event.registered_count >= event.capacity ? "Записатися в очікування" : "Долучитися до події"
-    if (activeRegistration) $("#registrationMessage").textContent = event.my_status === "waitlisted" ? "Ви у списку очікування. Якщо місце звільниться, система підтвердить участь автоматично." : "Ваша участь підтверджена. За потреби ви можете скасувати реєстрацію тут."
+    registerButton.textContent = event.my_status === "registered" ? "Cancel registration" : event.my_status === "waitlisted" ? "Leave waitlist" : event.capacity && event.registered_count >= event.capacity ? "Join waitlist" : "Join event"
+    if (activeRegistration) $("#registrationMessage").textContent = event.my_status === "waitlisted" ? "You are on the waitlist. If a place opens up, your registration will be confirmed automatically." : "Your place is confirmed. You can cancel your registration here if needed."
     detail.classList.remove("hidden")
     document.body.classList.add("modal-open")
     $("#participantsSection").classList.add("hidden")
@@ -150,8 +150,8 @@
     const ends = new Date($("#eventEnds").value)
     const deadline = $("#eventDeadline").value ? new Date($("#eventDeadline").value) : starts
     const message = $("#eventFormMessage")
-    if (!Number.isFinite(starts.getTime()) || !Number.isFinite(ends.getTime()) || ends <= starts) { message.textContent = "Перевірте дати: завершення має бути після початку."; return }
-    if (deadline > starts) { message.textContent = "Дедлайн реєстрації має бути не пізніше початку події."; return }
+    if (!Number.isFinite(starts.getTime()) || !Number.isFinite(ends.getTime()) || ends <= starts) { message.textContent = "Check the dates: the end must be after the start."; return }
+    if (deadline > starts) { message.textContent = "The registration deadline must be before the event starts."; return }
     const id = $("#eventId").value
     const payload = {
       title: $("#eventTitle").value,
@@ -182,8 +182,8 @@
     try {
       const data = await request(`/api/events/${activeEvent.id}/participants`)
       const participants = data.participants || []
-      $("#participantCount").textContent = `(${participants.filter((item) => item.status === "registered").length} учасників · ${participants.filter((item) => item.status === "waitlisted").length} очікують)`
-      $("#participantList").innerHTML = participants.length ? participants.map((person) => `<div class="event-participants__row"><span>${escapeHtml(person.full_name)} <small>(${escapeHtml(person.role)})</small></span><small>${person.status === "waitlisted" ? "Очікує" : "Зареєстрований"} · ${escapeHtml(person.email)}</small></div>`).join("") : "<p>Поки немає зареєстрованих учасників.</p>"
+      $("#participantCount").textContent = `(${participants.filter((item) => item.status === "registered").length} participants · ${participants.filter((item) => item.status === "waitlisted").length} waitlisted)`
+      $("#participantList").innerHTML = participants.length ? participants.map((person) => `<div class="event-participants__row"><span>${escapeHtml(person.full_name)} <small>(${escapeHtml(person.role)})</small></span><small>${person.status === "waitlisted" ? "Waitlisted" : "Registered"} · ${escapeHtml(person.email)}</small></div>`).join("") : "<p>No one has registered yet.</p>"
       $("#participantsSection").classList.remove("hidden")
     } catch (error) { $("#registrationMessage").textContent = error.message }
   }
@@ -198,7 +198,7 @@
       const manager = managerRoles.includes(user.role)
       $("#createEventBtn").classList.toggle("hidden", !manager)
       $("#hostedFilter").classList.toggle("hidden", !manager)
-      if (["ДеканФІКТ", "Розробник"].includes(user.role)) $("#hostedFilter").textContent = "Керування"
+      if (["ДеканФІКТ", "Розробник"].includes(user.role)) $("#hostedFilter").textContent = "Management"
       const response = await request("/api/events")
       events = response.events || []
       render()
@@ -214,7 +214,7 @@
     if (!file) return
     const allowed = ["image/png", "image/jpeg", "image/webp", "image/gif"]
     if (!allowed.includes(file.type) || file.size > 5 * 1024 * 1024) {
-      $("#eventCoverMessage").textContent = "Оберіть PNG, JPEG, WebP або GIF розміром до 5 МБ."
+      $("#eventCoverMessage").textContent = "Choose a PNG, JPEG, WebP, or GIF file up to 5 MB."
       event.target.value = ""
       return
     }
@@ -225,9 +225,9 @@
       $("#eventCover").value = ""
       $("#eventCoverPreview").src = selectedCoverData
       $("#eventCoverPreviewWrap").classList.remove("hidden")
-      $("#eventCoverMessage").textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} МБ`
+      $("#eventCoverMessage").textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB`
     }
-    reader.onerror = () => { $("#eventCoverMessage").textContent = "Не вдалося прочитати файл. Спробуйте ще раз." }
+    reader.onerror = () => { $("#eventCoverMessage").textContent = "Could not read the file. Please try again." }
     reader.readAsDataURL(file)
   })
   $("#eventCover").addEventListener("input", () => {
@@ -244,7 +244,7 @@
     $("#eventCover").value = ""
     $("#eventCoverPreview").removeAttribute("src")
     $("#eventCoverPreviewWrap").classList.add("hidden")
-    $("#eventCoverMessage").textContent = "Обкладинку буде прибрано після збереження."
+    $("#eventCoverMessage").textContent = "The cover image will be removed after saving."
   })
   $("#saveDraftBtn").addEventListener("click", () => saveEvent("draft"))
   $("#publishEventBtn").addEventListener("click", () => saveEvent("published"))
@@ -256,7 +256,7 @@
   $("#registerBtn").addEventListener("click", async () => {
     if (!activeEvent) return
     const canceling = ["registered", "waitlisted"].includes(activeEvent.my_status)
-    if (canceling && !await window.modalConfirm("Ви справді хочете скасувати свою участь? Якщо звільниться місце, його автоматично запропонують наступній людині зі списку очікування.", { title: "Скасувати участь?", danger: true })) return
+    if (canceling && !await window.modalConfirm("Are you sure you want to cancel your registration? If a place opens, it will be offered to the next person on the waitlist.", { title: "Cancel registration?", danger: true })) return
     const button = $("#registerBtn")
     button.disabled = true
     try {
@@ -270,11 +270,11 @@
   })
   $("#editEventBtn").addEventListener("click", () => { const event = activeEvent; closeDetail(); if (event) openEditor(event) })
   $("#deleteEventBtn").addEventListener("click", async () => {
-    if (!activeEvent || !await window.modalConfirm("Подію та всі реєстрації буде видалено назавжди.", { title: "Видалити подію?", danger: true })) return
+    if (!activeEvent || !await window.modalConfirm("This event and all registrations will be permanently deleted.", { title: "Delete event?", danger: true })) return
     try { await request(`/api/events/${activeEvent.id}`, { method: "DELETE" }); closeDetail(); await load() } catch (error) { $("#registrationMessage").textContent = error.message }
   })
   $("#cancelEventBtn").addEventListener("click", async () => {
-    if (!activeEvent || !await window.modalConfirm("Реєстрація закриється, а подія залишиться в календарі зі статусом «Скасовано». Учасники побачать оновлення.", { title: "Скасувати подію?", danger: true })) return
+    if (!activeEvent || !await window.modalConfirm("Registration will close, and the event will remain in the calendar as cancelled. Participants will see the update.", { title: "Cancel event?", danger: true })) return
     try {
       const result = await request(`/api/events/${activeEvent.id}/cancel`, { method: "POST", body: "{}" })
       const id = activeEvent.id

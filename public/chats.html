@@ -32,7 +32,7 @@
                     <div class="chat-list__heading"><h2>Chats</h2><span id="chatCount" class="chat-list__count">0</span></div>
                     <div class="chat-list__actions">
                         <button id="createGroupBtn" type="button" title="Create group" aria-label="Create group">＋<span>Group</span></button>
-                        <button id="createChatBtn" type="button" title="Create chat" aria-label="Create chat">✎<span>Новий чат</span></button>
+                        <button id="createChatBtn" type="button" title="Create chat" aria-label="Create chat">✎<span>New chat</span></button>
                     </div>
                 </div>
                 <label class="chat-list__search"><span aria-hidden="true">⌕</span><input id="chatSearch" type="search" placeholder="Search chats" autocomplete="off" aria-label="Search chats" /></label>
@@ -63,26 +63,26 @@
                     <p class="empty">Messages will appear here.</p>
                 </div>
                 <form id="messageForm" class="message-form hidden">
-                    <div id="sendChoice" class="send-choice hidden" role="dialog" aria-label="Дія для Enter">
+                    <div id="sendChoice" class="send-choice hidden" role="dialog" aria-label="Action for Enter">
                         <span>What should Enter do?</span>
                         <button type="button" id="newLineBtn" class="send-choice__button">New line</button>
                         <button type="button" id="sendEnterBtn"
                             class="send-choice__button send-choice__button--primary">Send</button>
                     </div>
                     <div class="message-form__bar">
-                        <label class="message-file" for="messageFile" title="Add файли до 10 МБ"
-                            aria-label="Add файли до 10 МБ">📎<input id="messageFile" type="file"
+                        <label class="message-file" for="messageFile" title="Attach files up to 10 MB"
+                            aria-label="Attach files up to 10 MB">📎<input id="messageFile" type="file"
                                 accept="*/*" multiple /></label>
                         <button type="button" class="message-voice" id="voiceBtn"
-                            aria-label="Записати голосове повідомлення"
-                            title="Записати голосове повідомлення">🎙️</button>
+                            aria-label="Record a voice message"
+                            title="Record a voice message">🎙️</button>
                         <button type="button" class="message-emoji" id="emojiBtn"
-                            aria-label="Вставити смайлик">😊</button>
-                        <button type="button" class="message-schedule" id="scheduleMessageBtn" aria-label="Запланувати повідомлення" title="Запланувати повідомлення">◷</button>
-                        <input id="scheduledAt" class="scheduled-at hidden" type="datetime-local" aria-label="Час надсилання повідомлення" />
-                        <textarea id="messageInput" maxlength="2000" rows="1" placeholder="Напишіть повідомлення…"
+                            aria-label="Insert emoji">😊</button>
+                        <button type="button" class="message-schedule" id="scheduleMessageBtn" aria-label="Schedule message" title="Schedule message">◷</button>
+                        <input id="scheduledAt" class="scheduled-at hidden" type="datetime-local" aria-label="Message send time" />
+                        <textarea id="messageInput" maxlength="2000" rows="1" placeholder="Write a message…"
                             autocomplete="off"></textarea>
-                        <button class="btn btn--primary message-send" type="submit" aria-label="Send повідомлення">
+                        <button class="btn btn--primary message-send" type="submit" aria-label="Send message">
                             <span aria-hidden="true">➤</span>
                             <span class="sr-only">Send</span>
                         </button>
@@ -90,8 +90,8 @@
                     <p id="draftStatus" class="draft-status" aria-live="polite"></p>
                     <div id="filePreview" class="file-preview hidden"></div>
                     <div id="voicePreview" class="voice-preview hidden">
-                        <span id="voiceTimer">00:00</span><span class="voice-preview__label">Прослухайте запис перед
-                            відправленням</span>
+                        <span id="voiceTimer">00:00</span><span class="voice-preview__label">Listen to your recording before
+                            sending</span>
                         <audio id="voicePreviewAudio" controls preload="metadata"></audio>
                         <button type="button" id="cancelVoiceBtn">Cancel</button><button type="button"
                             id="sendVoiceBtn">Send</button>
@@ -104,18 +104,18 @@
         <div class="dialog-backdrop" data-close></div>
         <section class="dialog-panel card"><button class="icon-btn dialog-close" data-close
                 aria-label="Close">×</button>
-            <p class="eyebrow">Новий діалог</p>
+            <p class="eyebrow">New conversation</p>
             <h2>Create chat</h2>
-            <label class="chat-search"><span class="sr-only">Search користувача</span><input id="userSearch"
-                    type="search" placeholder="Search за ім’ям або email…" autocomplete="off" /></label>
-            <div class="user-filters" role="tablist" aria-label="Фільтр користувачів">
+            <label class="chat-search"><span class="sr-only">Search users</span><input id="userSearch"
+                    type="search" placeholder="Search by name or email…" autocomplete="off" /></label>
+            <div class="user-filters" role="tablist" aria-label="User filters">
                 <button class="user-filter is-active" data-user-role="All" type="button">All</button>
                 <button class="user-filter" data-user-role="Student" type="button">Students</button>
-                <button class="user-filter" data-user-role="Faculty" type="button">Facultyі</button>
-                <button class="user-filter" data-user-role="Деканат" type="button">Деканат</button>
+                <button class="user-filter" data-user-role="Faculty" type="button">Faculty</button>
+                <button class="user-filter" data-user-role="Dean’s office" type="button">Dean’s office</button>
             </div>
             <div id="userList" class="user-list">
-                <p class="empty">Завантаження користувачів…</p>
+                <p class="empty">Loading users…</p>
             </div>
             <p class="form-alert" id="dialogAlert"></p>
             <button class="btn btn--primary" id="confirmChatBtn" disabled>Create chat</button>
@@ -125,22 +125,22 @@
         <div class="file-dialog__backdrop" data-close-files></div>
         <section class="file-dialog__panel"><button class="dialog-close" type="button" data-close-files
                 aria-label="Close">×</button>
-            <p class="eyebrow">Вкладення</p>
-            <h2 id="fileDialogTitle">Перегляд файлів</h2>
+            <p class="eyebrow">Attachments</p>
+            <h2 id="fileDialogTitle">File preview</h2>
             <p id="fileDialogSummary" class="file-dialog__summary"></p>
             <div id="fileDialogList" class="file-dialog__list"></div><button class="btn btn--primary" id="sendFilesBtn"
-                type="button">Send всі файли</button>
+                type="button">Send all files</button>
         </section>
     </div>
     <div class="dialog hidden" id="groupDialog" role="dialog" aria-modal="true" aria-labelledby="groupDialogTitle">
         <div class="dialog-backdrop" data-close-group></div>
         <section class="dialog-panel card group-dialog-panel"><button class="icon-btn dialog-close" data-close-group
                 type="button" aria-label="Close">×</button>
-            <p class="eyebrow">Нова спільнота</p>
-            <h2 id="groupDialogTitle">Create груповий чат</h2><label>Title групи<input id="groupTitle" maxlength="120"
-                    placeholder="Наприклад, ІПЗ-21-1" /></label><label>Description групи<textarea id="groupDescription"
-                    maxlength="1000" rows="3" placeholder="Для чого ця група"></textarea></label><label>Аватар
-                групи<input id="groupAvatar" type="file" accept="image/*" /></label>
+            <p class="eyebrow">New community</p>
+            <h2 id="groupDialogTitle">Create a group chat</h2><label>Group name<input id="groupTitle" maxlength="120"
+                    placeholder="For example, SE-21-1" /></label><label>Group description<textarea id="groupDescription"
+                    maxlength="1000" rows="3" placeholder="What is this group for?"></textarea></label><label>Avatar
+                group<input id="groupAvatar" type="file" accept="image/*" /></label>
             <div class="group-members">
                 <div class="group-members-label">Participants</div>
                 <div id="groupUserList" class="group-user-list"></div>
@@ -153,9 +153,9 @@
         <div class="dialog-backdrop" data-close-group-details></div>
         <section class="dialog-panel card group-details-panel">
             <button class="icon-btn dialog-close" type="button" data-close-group-details aria-label="Close">×</button>
-            <p class="eyebrow">Груповий чат</p>
+            <p class="eyebrow">Group chat</p>
             <div class="group-details-heading">
-                <img id="groupDetailsAvatar" class="group-details-avatar hidden" alt="Аватар групи" />
+                <img id="groupDetailsAvatar" class="group-details-avatar hidden" alt="Group avatar" />
                 <div><h2 id="groupDetailsTitle">Group details</h2><p id="groupDetailsDescription"></p></div>
             </div>
             <h3 class="group-details-members-title">Participants <span id="groupDetailsMemberCount">0</span></h3>

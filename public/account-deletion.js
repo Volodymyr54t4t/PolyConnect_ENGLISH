@@ -14,16 +14,16 @@
     button.disabled = !(
       password.value.length > 0 &&
       accountEmail && email.value.trim().toLowerCase() === accountEmail &&
-      confirmation.value.trim() === "ВИДАЛИТИ"
+      confirmation.value.trim().toUpperCase() === "DELETE"
     )
   }
 
   form.addEventListener("input", validate)
   fetch("/api/me")
-    .then((response) => response.ok ? response.json() : Promise.reject(new Error("Не вдалося перевірити акаунт. Оновіть сторінку.")))
+    .then((response) => response.ok ? response.json() : Promise.reject(new Error("Could not verify the account. Refresh the page.")))
     .then(({ user }) => {
       accountEmail = String(user?.email || "").trim().toLowerCase()
-      emailHint.textContent = accountEmail ? `(ваш email: ${accountEmail})` : ""
+      emailHint.textContent = accountEmail ? `(your email: ${accountEmail})` : ""
       validate()
     })
     .catch((error) => {
@@ -36,7 +36,7 @@
     validate()
     if (button.disabled) return
     button.disabled = true
-    feedback.textContent = "Перевіряємо дані та видаляємо акаунт…"
+    feedback.textContent = "Verifying details and deleting your account…"
     feedback.classList.remove("is-error", "is-saved")
     try {
       const response = await fetch("/api/account", {
@@ -49,8 +49,8 @@
         }),
       })
       const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(data.error || `Не вдалося видалити акаунт (HTTP ${response.status})`)
-      feedback.textContent = "Акаунт видалено. Перенаправляємо…"
+      if (!response.ok) throw new Error(data.error || `Could not delete the account (HTTP ${response.status})`)
+      feedback.textContent = "Account deleted. Redirecting…"
       feedback.classList.add("is-saved")
       window.setTimeout(() => { window.location.replace("/") }, 900)
     } catch (error) {

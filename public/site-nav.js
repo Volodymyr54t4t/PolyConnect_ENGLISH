@@ -26,7 +26,7 @@
     const groups = categories.map(group => ({ ...group, items: [...group.items] }))
     if (staff) groups[1].items.push(['/mail-center', 'Mail', isHome ? 'mailCenterLink' : undefined])
     if (admin) groups.push({ title: 'Management', items: [[...admin, isHome ? 'deanDashboardLink' : currentPath === '/polls' ? 'deanLink' : currentPath === '/dean-dashboard' ? 'adminHomeLink' : undefined]] })
-    if (role === 'Розробник') groups[3].items.push(['/profiles-review', 'Профілі кафедри'])
+    if (role === 'Розробник') groups[3].items.push(['/profiles-review', 'Department profiles'])
     const profileHref = isHome ? '#profile' : profilePath
     const activePath = currentPath === '/profileStudent' || currentPath === '/profileTeacher' ? 'profile' : currentPath
     nav.innerHTML = groups.map(group => {
@@ -71,7 +71,7 @@
     const wrap = document.createElement('details')
     wrap.className = 'profile-disclosure'
     wrap.innerHTML = `<summary class="profile-disclosure__trigger" aria-label="More profile information"><span aria-hidden="true"></span></summary><div class="profile-disclosure__panel"><span class="profile-disclosure__eyebrow">YOUR PROFILE</span><strong data-profile-fullname>User</strong><span class="profile-disclosure__role"></span><a href="${profileHref}">Open profile <span aria-hidden="true">↗</span></a></div>`
-    const roleLabels = { 'ДеканФІКТ': 'Faculty Dean', 'Завідувач Кафедри': 'Department Chair', 'Викладач': 'Faculty', 'Студент': 'Student', 'Розробник': 'Developer' }
+    const roleLabels = { 'Розробник': 'Developer', 'ДеканФІКТ': 'Faculty Dean', 'Завідувач Кафедри': 'Department Chair', 'Викладач': 'Faculty', 'Студент': 'Student' }
     wrap.querySelector('.profile-disclosure__role').textContent = roleLabels[role] || 'PolyConnect member'
     user.append(wrap)
     const syncName = () => {

@@ -19,8 +19,8 @@
     const key = Object.prototype.hasOwnProperty.call(options, status) ? status : "offline"
     avatar.classList.remove("presence-user-avatar--available", "presence-user-avatar--away", "presence-user-avatar--dnd", "presence-user-avatar--offline")
     avatar.classList.add(`presence-user-avatar--${key}`)
-    avatar.title = `Ваш статус: ${options[key].label}`
-    avatar.setAttribute("aria-label", `Ваш статус: ${options[key].label}`)
+    avatar.title = `Your status: ${options[key].label}`
+    avatar.setAttribute("aria-label", `Your status: ${options[key].label}`)
   }
 
   let lastInteraction = Date.now()
@@ -59,7 +59,7 @@
     document.querySelector("#presenceOrb").className = `presence-orb presence-orb--${validStatus}`
     updateHeaderPresence(validStatus)
     const messageView = document.querySelector("#presenceCurrentMessage")
-    messageView.textContent = message || "Ваш статус видно іншим у чатах і списках користувачів."
+    messageView.textContent = message || "Others can see your status in chats and the user directory."
     select.value = validStatus
   }
 
@@ -91,12 +91,12 @@
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error("Сервер ще не завантажив API статусів. Перезапустіть його командою «npm run dev» і спробуйте знову.")
+          throw new Error("The status API is not available yet. Restart the server with “npm run dev” and try again.")
         }
         throw new Error(data.error || `Could not save status (HTTP ${response.status})`)
       }
       showStatus(data.presence_status, data.status_message)
-      feedback.textContent = "Статус оновлено. Інші побачать його у чатах і списках користувачів."
+      feedback.textContent = "Status updated. Others can see it in chats and the user directory."
       feedback.classList.add("is-saved")
       lastInteraction = Date.now()
     } catch (error) {

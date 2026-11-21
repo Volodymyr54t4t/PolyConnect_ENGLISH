@@ -157,7 +157,7 @@ els.forgotForm.addEventListener("submit", async (e) => {
     els.resetBlock.classList.remove("hidden")
     if (data.reset_token) {
       els.forgotForm.querySelector('input[name="token"]').value = data.reset_token
-      showAlert("Токен згенеровано та підставлено нижче. Введіть новий пароль.", true)
+      showAlert("A reset token has been generated below. Enter a new password.", true)
     } else {
       showAlert(data.message, true)
     }
@@ -201,7 +201,7 @@ if (setupToken) {
   els.forgotForm.querySelector('input[name="token"]').value = setupToken
   els.forgotForm.querySelector('input[name="email"]').closest("label").classList.add("hidden")
   els.forgotForm.querySelector('button[type="submit"]').classList.add("hidden")
-  showAlert("Створіть пароль для свого акаунта, а потім заповніть профіль необхідними даними.", true)
+  showAlert("Create a password for your account, then complete your profile.", true)
 } else {
   checkSession()
 }

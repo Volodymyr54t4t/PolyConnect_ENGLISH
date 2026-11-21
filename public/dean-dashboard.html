@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Адміністративна панель PolyConnect ZTU">
+  <meta name="description" content="PolyConnect ZTU administration dashboard">
   <title>Admin panel — PolyConnect ZTU</title>
   <link rel="stylesheet" href="/auth.css">
   <link rel="stylesheet" href="/home.css">
@@ -21,53 +21,53 @@
 
   <main class="dean-dashboard">
     <section class="dashboard-hero" id="dashboardHero">
-      <div><p class="eyebrow">Адміністрування платформи</p><h1>Панель керування</h1><p>Користувачі, контент, активності студентів і чати PolyConnect.</p></div>
-      <p class="dashboard-updated" id="updatedAt">Оновлюємо дані…</p>
+      <div><p class="eyebrow">Platform administration</p><h1>Dashboard</h1><p>Users, content, student activities, and PolyConnect chats.</p></div>
+      <p class="dashboard-updated" id="updatedAt">Updating data…</p>
     </section>
 
-    <section class="developer-overview hidden" id="developerOverview" aria-label="Огляд платформи">
-      <article><span>Користувачі</span><strong id="devUsersCount">—</strong><small>акаунтів на платформі</small></article>
-      <article><span>News</span><strong id="devNewsCount">—</strong><small>чернетки й публікації</small></article>
-      <article><span>Events</span><strong id="devEventsCount">—</strong><small>усі статуси</small></article>
-      <article><span>Achievements</span><strong id="devAchievementsCount">—</strong><small>у профілях спільноти</small></article>
+    <section class="developer-overview hidden" id="developerOverview" aria-label="Platform overview">
+      <article><span>Users</span><strong id="devUsersCount">—</strong><small>accounts on the platform</small></article>
+      <article><span>News</span><strong id="devNewsCount">—</strong><small>drafts and published posts</small></article>
+      <article><span>Events</span><strong id="devEventsCount">—</strong><small>all statuses</small></article>
+      <article><span>Achievements</span><strong id="devAchievementsCount">—</strong><small>in community profiles</small></article>
       <article><span>Chats</span><strong id="devChatsCount">—</strong><small id="devChatBreakdown">—</small></article>
     </section>
     <section class="developer-shortcuts hidden" id="developerShortcuts">
-      <button type="button" data-go-tab="users"><b>Користувачі</b><span>Ролі, профілі та доступ до акаунтів</span></button>
-      <button type="button" data-go-tab="students"><b>Students</b><span>Групи, курси та студентські активності</span></button>
-      <button type="button" data-go-tab="chats"><b>Chats й групи</b><span>Склад груп і повна історія повідомлень</span></button>
-      <button type="button" data-go-tab="news"><b>Контент</b><span>News, події, досягнення та категорії</span></button>
+      <button type="button" data-go-tab="users"><b>Users</b><span>Roles, profiles, and account access</span></button>
+      <button type="button" data-go-tab="students"><b>Students</b><span>Groups, years, and student activities</span></button>
+      <button type="button" data-go-tab="chats"><b>Chats and groups</b><span>Group membership and full message history</span></button>
+      <button type="button" data-go-tab="news"><b>Content</b><span>News, events, achievements, and categories</span></button>
     </section>
 
-    <section class="metric-grid" aria-label="Основні показники">
-      <article class="metric-card metric-card--students"><span class="metric-card__icon" aria-hidden="true">♙</span><p>Students</p><strong id="studentsCount">—</strong><small>зареєстровано у порталі</small></article>
-      <article class="metric-card metric-card--teachers"><span class="metric-card__icon" aria-hidden="true">♧</span><p>Facultyі</p><strong id="teachersCount">—</strong><small>включно з керівниками</small></article>
-      <article class="metric-card"><span class="metric-card__icon" aria-hidden="true">▣</span><p>News</p><strong id="newsCount">—</strong><small>опублікованих матеріалів</small></article>
-      <article class="metric-card"><span class="metric-card__icon" aria-hidden="true">◌</span><p>Events</p><strong id="eventsCount">—</strong><small>студентських активностей</small></article>
-      <article class="metric-card"><span class="metric-card__icon" aria-hidden="true">▤</span><p>Матеріали</p><strong id="materialsCount">—</strong><small>вкладень до новин</small></article>
+    <section class="metric-grid" aria-label="Key metrics">
+      <article class="metric-card metric-card--students"><span class="metric-card__icon" aria-hidden="true">♙</span><p>Students</p><strong id="studentsCount">—</strong><small>registered on the portal</small></article>
+      <article class="metric-card metric-card--teachers"><span class="metric-card__icon" aria-hidden="true">♧</span><p>Faculty</p><strong id="teachersCount">—</strong><small>including department chairs</small></article>
+      <article class="metric-card"><span class="metric-card__icon" aria-hidden="true">▣</span><p>News</p><strong id="newsCount">—</strong><small>published items</small></article>
+      <article class="metric-card"><span class="metric-card__icon" aria-hidden="true">◌</span><p>Events</p><strong id="eventsCount">—</strong><small>student activities</small></article>
+      <article class="metric-card"><span class="metric-card__icon" aria-hidden="true">▤</span><p>Materials</p><strong id="materialsCount">—</strong><small>news attachments</small></article>
     </section>
 
     <section class="dashboard-section">
-      <div class="section-heading"><div><p class="eyebrow">Залученість</p><h2>Активність порталу</h2></div><p>Дії в чатах, новинах, подіях і досягненнях.</p></div>
+      <div class="section-heading"><div><p class="eyebrow">Engagement</p><h2>Portal activity</h2></div><p>Actions across chats, news, events, and achievements.</p></div>
       <div class="activity-grid">
-        <article class="activity-card"><p>Сьогодні</p><strong id="dayActions">—</strong><span><b id="dayUsers">—</b> активних користувачів</span></article>
-        <article class="activity-card"><p>Останні 7 днів</p><strong id="weekActions">—</strong><span><b id="weekUsers">—</b> активних користувачів</span></article>
+        <article class="activity-card"><p>Today</p><strong id="dayActions">—</strong><span><b id="dayUsers">—</b> active users</span></article>
+        <article class="activity-card"><p>Last 7 days</p><strong id="weekActions">—</strong><span><b id="weekUsers">—</b> active users</span></article>
       </div>
     </section>
 
     <section class="stat-columns">
-      <article class="stat-panel"><div class="section-heading"><div><p class="eyebrow">Students</p><h2>За групами</h2></div></div><div class="stats-list" id="groupsList"><p class="stats-loading">Loading…</p></div></article>
-      <article class="stat-panel"><div class="section-heading"><div><p class="eyebrow">Структура</p><h2>За кафедрами</h2></div></div><div class="stats-list" id="departmentsList"><p class="stats-loading">Loading…</p></div></article>
+      <article class="stat-panel"><div class="section-heading"><div><p class="eyebrow">Students</p><h2>By group</h2></div></div><div class="stats-list" id="groupsList"><p class="stats-loading">Loading…</p></div></article>
+      <article class="stat-panel"><div class="section-heading"><div><p class="eyebrow">Structure</p><h2>By department</h2></div></div><div class="stats-list" id="departmentsList"><p class="stats-loading">Loading…</p></div></article>
     </section>
     <section class="dashboard-section admin-section" id="adminSection">
-      <div class="section-heading"><div><p class="eyebrow">Адміністрування</p><h2>Management платформою</h2></div><p>Повний контроль над обліковими записами, контентом і спільнотою.</p></div>
-      <div class="admin-tabs" role="tablist"><button class="admin-tab is-active" data-admin-tab="users">Користувачі</button><button class="admin-tab" data-admin-tab="students">Students та активності</button><button class="admin-tab" data-admin-tab="news">News</button><button class="admin-tab" data-admin-tab="events">Events</button><button class="admin-tab" data-admin-tab="achievements">Achievements</button><button class="admin-tab" data-admin-tab="chats">Chats й групи</button><button class="admin-tab" data-admin-tab="categories">Категорії новин</button></div>
-      <div class="admin-toolbar"><h3 id="adminTitle">Користувачі</h3><div class="admin-toolbar__actions"><label id="userSortWrap" class="user-sort">Сортувати за <select id="userSort"><option value="created_at">Датою створення акаунта</option><option value="profile_updated_at">Датою зміни профілю</option><option value="full_name">Іменем</option></select></label><button class="admin-primary" id="adminCreate">＋ Add</button></div></div>
+      <div class="section-heading"><div><p class="eyebrow">Administration</p><h2>Platform management</h2></div><p>Full control over accounts, content, and the community.</p></div>
+      <div class="admin-tabs" role="tablist"><button class="admin-tab is-active" data-admin-tab="users">Users</button><button class="admin-tab" data-admin-tab="students">Students and activities</button><button class="admin-tab" data-admin-tab="news">News</button><button class="admin-tab" data-admin-tab="events">Events</button><button class="admin-tab" data-admin-tab="achievements">Achievements</button><button class="admin-tab" data-admin-tab="chats">Chats and groups</button><button class="admin-tab" data-admin-tab="categories">News categories</button></div>
+      <div class="admin-toolbar"><h3 id="adminTitle">Users</h3><div class="admin-toolbar__actions"><label id="userSortWrap" class="user-sort">Sort by <select id="userSort"><option value="created_at">Account creation date</option><option value="profile_updated_at">Profile update date</option><option value="full_name">Name</option></select></label><button class="admin-primary" id="adminCreate">＋ Add</button></div></div>
       <p class="admin-message hidden" id="adminMessage" role="status"></p>
       <div class="admin-list" id="adminList"><p class="stats-loading">Loading…</p></div>
     </section>
     <dialog class="admin-dialog" id="adminDialog"><form id="adminForm" method="dialog"><div class="admin-dialog__head"><h2 id="adminFormTitle">Create</h2><button type="button" class="admin-close" id="adminClose" aria-label="Close">×</button></div><div id="adminFields" class="admin-fields"></div><div class="admin-actions"><button type="button" class="admin-secondary" id="adminCancel">Cancel</button><button type="submit" class="admin-primary">Save</button></div></form></dialog>
-    <dialog class="admin-dialog" id="chatDetailDialog"><div class="admin-detail"><div class="admin-dialog__head"><h2 id="chatDetailTitle">Details чату</h2><button type="button" class="admin-close" id="chatDetailClose" aria-label="Close">×</button></div><div id="chatDetailBody"></div></div></dialog>
+    <dialog class="admin-dialog" id="chatDetailDialog"><div class="admin-detail"><div class="admin-dialog__head"><h2 id="chatDetailTitle">Chat details</h2><button type="button" class="admin-close" id="chatDetailClose" aria-label="Close">×</button></div><div id="chatDetailBody"></div></div></dialog>
     <p class="dashboard-error hidden" id="dashboardError" role="alert"></p>
   </main>
   <script src="/presence.js"></script>

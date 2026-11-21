@@ -30,9 +30,9 @@ function toggleAchievementDialog(isOpen) {
 
 function startAchievementTimer() {
   const startedAt = Date.now()
-  setAchievementProgress("Обробка… минуло 0 с")
+  setAchievementProgress("Processing… 0 seconds elapsed")
   const timer = window.setInterval(() => {
-    setAchievementProgress(`Обробка… минуло ${Math.floor((Date.now() - startedAt) / 1000)} с`)
+    setAchievementProgress(`Processing… elapsed ${Math.floor((Date.now() - startedAt) / 1000)} sec`)
   }, 250)
   return () => {
     window.clearInterval(timer)
@@ -42,20 +42,20 @@ function startAchievementTimer() {
 
 function renderMyAchievements(items) {
   if (!items.length) {
-    achievementEls.list.innerHTML = '<p class="form-alert">У вас ще немає доданих досягнень.</p>'
+    achievementEls.list.innerHTML = '<p class="form-alert">You have not added any achievements yet.</p>'
     return
   }
   achievementEls.list.innerHTML = items.map((item) => `
     <article class="my-achievement">
       ${item.photo ? `<img src="${item.photo}" alt="" />` : '<span class="my-achievement__placeholder" aria-hidden="true"></span>'}
-      <div><span class="achievement-type-pill">${escapeAchievement(item.achievement_type || "Досягнення")}</span><h3>${escapeAchievement(item.title)}</h3><div class="my-achievement__details">${item.event_name ? `<span>${escapeAchievement(item.event_name)}</span>` : ""}${item.achievement_date ? `<span>${escapeAchievement(new Intl.DateTimeFormat("en-US").format(new Date(item.achievement_date)))}</span>` : ""}${item.result ? `<b>${escapeAchievement(item.result)}</b>` : ""}${item.link ? `<a href="${escapeAchievement(item.link)}" target="_blank" rel="noopener noreferrer">Підтвердження ↗</a>` : ""}</div><p>${escapeAchievement(item.description) || "Деталі не додані"}</p><small>${item.is_public ? "Публічне" : "Приватне"}</small></div>
-      <button class="achievement-delete" type="button" data-achievement-id="${item.id}">Видалити</button>
+      <div><span class="achievement-type-pill">${escapeAchievement(item.achievement_type || "Achievement")}</span><h3>${escapeAchievement(item.title)}</h3><div class="my-achievement__details">${item.event_name ? `<span>${escapeAchievement(item.event_name)}</span>` : ""}${item.achievement_date ? `<span>${escapeAchievement(new Intl.DateTimeFormat("en-US").format(new Date(item.achievement_date)))}</span>` : ""}${item.result ? `<b>${escapeAchievement(item.result)}</b>` : ""}${item.link ? `<a href="${escapeAchievement(item.link)}" target="_blank" rel="noopener noreferrer">Proof ↗</a>` : ""}</div><p>${escapeAchievement(item.description) || "No details provided"}</p><small>${item.is_public ? "Public" : "Private"}</small></div>
+      <button class="achievement-delete" type="button" data-achievement-id="${item.id}">Delete</button>
     </article>`).join("")
 }
 
 async function loadMyAchievements() {
   const response = await fetch("/api/achievements/mine")
-  if (!response.ok) throw new Error("Не вдалося завантажити досягнення")
+  if (!response.ok) throw new Error("Could not load achievements")
   const data = await response.json()
   renderMyAchievements(data.achievements || [])
 }
@@ -74,18 +74,18 @@ if (sheetImportForm) {
   const readSheetResponse = async response => {
     const contentType = response.headers.get("content-type") || ""
     if (!contentType.includes("application/json")) {
-      if (response.status === 404) throw new Error("Сервер ще не має оновленого імпорту Google Таблиць (HTTP 404). Перезапусти або онови сервер порталу.")
-      if (response.redirected || contentType.includes("text/html")) throw new Error("Сервер повернув сторінку замість відповіді API. Онови сторінку й увійди в акаунт повторно.")
-      throw new Error(`Сервер повернув неочікувану відповідь (HTTP ${response.status}). Спробуй ще раз або звернися до адміністратора.`)
+      if (response.status === 404) throw new Error("The server does not support the latest Google Sheets import yet (HTTP 404). Restart or update the portal server.")
+      if (response.redirected || contentType.includes("text/html")) throw new Error("The server returned a page instead of an API response. Refresh and sign in again.")
+      throw new Error(`The server returned an unexpected response (HTTP ${response.status}). Please try again or contact an administrator.`)
     }
     const data = await response.json()
-    if (!response.ok) throw new Error(data.error || `Помилка сервера (HTTP ${response.status})`)
+    if (!response.ok) throw new Error(data.error || `Server error (HTTP ${response.status})`)
     return data
   }
   const selectedSheetRows = () => [...sheetRowsHost.querySelectorAll("[data-sheet-row]:checked")].map(input => previewRows[Number(input.dataset.sheetRow)])
   const updateSheetSelection = () => {
     const selected = selectedSheetRows().length
-    sheetImportButton.textContent = `Імпортувати обрані (${selected})`
+    sheetImportButton.textContent = `Import selected (${selected})`
     const valid = previewRows.filter(row => !row.error).length
     sheetSelectAll.checked = selected > 0 && selected === valid
     sheetSelectAll.indeterminate = selected > 0 && selected < valid
@@ -93,30 +93,30 @@ if (sheetImportForm) {
   sheetImportForm.addEventListener("submit", async event => {
     event.preventDefault()
     const submit = document.querySelector("#googleSheetPreviewButton")
-    submit.disabled = true; submit.textContent = "Читаємо таблицю…"; sheetPreview.classList.add("hidden"); sheetMessageShow("")
+    submit.disabled = true; submit.textContent = "Reading spreadsheet…"; sheetPreview.classList.add("hidden"); sheetMessageShow("")
     try {
       const response = await fetch("/api/achievements/google-sheet/preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: sheetUrl.value.trim() }) })
       const data = await readSheetResponse(response)
-      if (!Array.isArray(data.rows)) throw new Error("Сервер не повернув рядки таблиці. Онови сторінку й спробуй ще раз.")
+      if (!Array.isArray(data.rows)) throw new Error("The server did not return any spreadsheet rows. Refresh and try again.")
       previewRows = data.rows || []
       const valid = previewRows.filter(row => !row.error).length
-      sheetSummary.textContent = `${valid} коректних із ${previewRows.length} рядків${data.truncated ? ` · показано перші ${previewRows.length} із ${data.totalRows}` : ""}`
-      sheetRowsHost.innerHTML = previewRows.map((row, index) => `<tr class="${row.error ? "is-error" : ""}"><td><input type="checkbox" data-sheet-row="${index}" ${row.error ? "disabled" : "checked"} aria-label="Обрати рядок ${row.row_number}"></td><td>${escapeAchievement(row.title || "—")}</td><td>${escapeAchievement(row.achievement_type || "Досягнення")}</td><td>${escapeAchievement(row.event_name || "—")}</td><td>${escapeAchievement(row.achievement_date || "—")}</td><td>${escapeAchievement(row.result || "—")}</td><td>${escapeAchievement(row.error || "Готово")}</td></tr>`).join("")
+      sheetSummary.textContent = `${valid} valid out of ${previewRows.length} rows${data.truncated ? ` · showing the first ${previewRows.length} of ${data.totalRows}` : ""}`
+      sheetRowsHost.innerHTML = previewRows.map((row, index) => `<tr class="${row.error ? "is-error" : ""}"><td><input type="checkbox" data-sheet-row="${index}" ${row.error ? "disabled" : "checked"} aria-label="Select row ${row.row_number}"></td><td>${escapeAchievement(row.title || "—")}</td><td>${escapeAchievement(row.achievement_type || "Achievement")}</td><td>${escapeAchievement(row.event_name || "—")}</td><td>${escapeAchievement(row.achievement_date || "—")}</td><td>${escapeAchievement(row.result || "—")}</td><td>${escapeAchievement(row.error || "Ready")}</td></tr>`).join("")
       sheetPreview.classList.remove("hidden"); updateSheetSelection()
-      sheetMessageShow("Перегляньте записи й зніміть позначки з тих, які не потрібно додавати.")
+      sheetMessageShow("Review the entries and uncheck any you do not want to add.")
     } catch (error) { sheetMessageShow(error.message, true) }
-    finally { submit.disabled = false; submit.textContent = "Переглянути записи" }
+    finally { submit.disabled = false; submit.textContent = "Preview records" }
   })
   sheetRowsHost.addEventListener("change", updateSheetSelection)
   sheetSelectAll.addEventListener("change", () => { sheetRowsHost.querySelectorAll("[data-sheet-row]:not(:disabled)").forEach(input => { input.checked = sheetSelectAll.checked }); updateSheetSelection() })
   sheetImportButton.addEventListener("click", async () => {
     const selected = selectedSheetRows()
-    if (!selected.length) { sheetMessageShow("Оберіть хоча б один коректний рядок.", true); return }
-    sheetImportButton.disabled = true; sheetImportButton.textContent = "Імпортуємо…"
+    if (!selected.length) { sheetMessageShow("Select at least one valid row.", true); return }
+    sheetImportButton.disabled = true; sheetImportButton.textContent = "Importing…"
     try {
       const response = await fetch("/api/achievements/google-sheet/import", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rows: selected }) })
       const data = await readSheetResponse(response)
-      sheetMessageShow(data.message || "Імпорт завершено.")
+      sheetMessageShow(data.message || "Import complete.")
       sheetPreview.classList.add("hidden"); previewRows = []
       await loadMyAchievements()
     } catch (error) { sheetMessageShow(error.message, true) }
@@ -127,11 +127,11 @@ if (sheetImportForm) {
 function readAchievementPhoto() {
   const file = achievementEls.photo.files[0]
   if (!file) return Promise.resolve("")
-  if (file.size > 4 * 1024 * 1024) return Promise.reject(new Error("Фото досягнення не може перевищувати 4 МБ"))
+  if (file.size > 4 * 1024 * 1024) return Promise.reject(new Error("Achievement photo cannot exceed 4 MB"))
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result)
-    reader.onerror = () => reject(new Error("Не вдалося прочитати фото"))
+    reader.onerror = () => reject(new Error("Could not read the photo"))
     reader.readAsDataURL(file)
   })
 }
@@ -161,16 +161,16 @@ achievementEls.form.addEventListener("submit", async (event) => {
       }),
     })
     const data = await response.json().catch(() => ({}))
-    if (!response.ok) throw new Error(data.error || "Не вдалося зберегти досягнення")
+    if (!response.ok) throw new Error(data.error || "Could not save the achievement")
     achievementEls.form.reset()
     const elapsed = finishTimer()
-    showAchievementAlert("Досягнення додано", true)
-    setAchievementProgress(`Готово за ${elapsed} с. Вікно можна закрити.`)
+    showAchievementAlert("Achievement added", true)
+    setAchievementProgress(`Done in ${elapsed} sec. You can close this window.`)
     await loadMyAchievements()
   } catch (error) {
     const elapsed = finishTimer()
     showAchievementAlert(error.message)
-    setAchievementProgress(`Не вдалося зберегти за ${elapsed} с. Перевірте дані та спробуйте ще раз.`)
+    setAchievementProgress(`Could not save in ${elapsed} sec. Check the details and try again.`)
   } finally {
     submitButton.disabled = false
   }
@@ -180,7 +180,7 @@ achievementEls.list.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-achievement-id]")
   if (!button) return
   const response = await fetch(`/api/achievements/${button.dataset.achievementId}`, { method: "DELETE" })
-  if (!response.ok) return showAchievementAlert("Не вдалося видалити досягнення")
+  if (!response.ok) return showAchievementAlert("Could not delete the achievement")
   await loadMyAchievements()
 })
 
