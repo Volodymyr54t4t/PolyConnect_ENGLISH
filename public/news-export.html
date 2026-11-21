@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Звіт новин</title>
+  <style>
+    @page { size: A4; margin: 18mm 15mm }
+    * { box-sizing: border-box }
+    body { margin: 0; color: #17233a; font: 12px/1.55 Arial, sans-serif }
+    header { border-bottom: 2px solid #1e5eff; margin-bottom: 22px; padding-bottom: 12px }
+    h1 { margin: 0 0 5px; font-size: 23px } .muted { color: #61708a; margin: 0 }
+    article { break-inside: avoid; border-bottom: 1px solid #dce3ee; padding: 0 0 15px; margin: 0 0 16px }
+    h2 { margin: 6px 0; font-size: 15px; line-height: 1.35 } p { margin: 5px 0; white-space: pre-wrap }
+    .tags { color: #1854d7; font-weight: bold; font-size: 10px; text-transform: uppercase } a { color: #1854d7; word-break: break-all }
+    #print { position: fixed; top: 12px; right: 12px; border: 0; border-radius: 6px; background: #1e5eff; color: white; padding: 9px 13px; cursor: pointer }
+    @media print { #print { display: none } }
+  </style>
+</head>
+<body>
+  <button id="print" type="button">Зберегти як PDF</button>
+  <header><h1>Звіт новин ФІКТ</h1><p id="summary" class="muted">Формування звіту…</p></header>
+  <main id="news"></main>
+  <script>
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]))
+    const categoryNames = (item) => (Array.isArray(item.categories) && item.categories.length ? item.categories : [{ name: item.category || 'Оголошення' }]).map((category) => category.name)
+    const date = (value) => new Intl.DateTimeFormat('uk-UA', { dateStyle: 'long' }).format(new Date(value))
+    const chosen = new Set((new URLSearchParams(location.search).get('categories') || '').split(',').filter(Boolean))
+    fetch('/api/news').then((response) => response.json()).then((data) => {
+      const items = (data.news || []).filter((item) => categoryNames(item).some((name) => chosen.has(name)))
+      document.querySelector('#summary').textContent = `Категорії: ${[...chosen].join(', ')} · Новин: ${items.length} · Сформовано: ${date(new Date())}`
+      document.querySelector('#news').innerHTML = items.length ? items.map((item) => `<article><div class="tags">${categoryNames(item).map(escapeHtml).join(' · ')}</div><h2>${escapeHtml(item.title)}</h2><p class="muted">${date(item.created_at)} · ${escapeHtml(item.author_name || '')}</p><p>${escapeHtml(item.content)}</p></article>`).join('') : '<p>За вибраними категоріями новин немає.</p>'
+    }).catch(() => { document.querySelector('#news').textContent = 'Не вдалося сформувати звіт.' })
+    document.querySelector('#print').onclick = () => window.print()
+  </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Події, зустрічі та активності спільноти Порталу Інженерії Програмного Забезпечення" />
+  <title>Події — Портал Інженерії Програмного Забезпечення</title>
+  <link rel="stylesheet" href="/auth.css" />
+  <link rel="stylesheet" href="/header.css" />
+  <link rel="stylesheet" href="/events.css" />
+  <link rel="stylesheet" href="/modal.css" />
+</head>
+<body class="events-page">
+  <header class="topbar">
+    <a href="/home" class="topbar__brand"><img class="topbar__logo" src="/ztu-logo.png" alt="Житомирська політехніка" /><span class="topbar__name">Портал Інженерії Програмного Забезпечення</span></a>
+    <nav class="topbar__nav" aria-label="Головна навігація">
+      <a href="/home" class="navlink">Головна</a><a href="/news" class="navlink">Новини</a><a href="/events" class="navlink is-active">Події</a><a href="/chats" class="navlink">Чати</a><a href="/achievements" class="navlink">Досягнення</a><a href="/students" class="navlink">Студенти</a><a href="/profileStudent" class="navlink" id="navProfile">Профіль</a>
+    </nav>
+    <div class="topbar__user"><div class="chip"><span class="chip__avatar" id="userAvatar">?</span><span class="chip__name" id="userName">—</span></div></div>
+  </header>
+  <main class="events-shell">
+    <section class="events-hero">
+      <div class="events-hero__copy"><p class="event-eyebrow">Календар спільноти · ФІКТ</p><h1>Зустрічаймося<br /><em>на подіях.</em></h1><p>Лекції, хакатони, захисти, воркшопи й зустрічі спільноти. Обирай цікаве та долучайся.</p></div>
+      <div class="events-hero__side"><div class="events-orbit" aria-hidden="true"><span>✳</span><i></i><b></b></div><button id="createEventBtn" class="btn btn--primary hidden" type="button">＋ Створити подію</button><p id="heroNote">Участь відкрита студентам, викладачам і деканату.</p></div>
+    </section>
+    <section class="events-dashboard" aria-label="Каталог подій">
+      <div class="events-toolbar"><div><p class="event-eyebrow">Знайди своє</p><h2>Календар подій</h2></div><div class="events-tabs" role="tablist" aria-label="Фільтр подій"><button class="event-tab is-active" data-filter="upcoming" type="button">Найближчі</button><button class="event-tab" data-filter="attending" type="button">Моя участь</button><button class="event-tab hidden" id="hostedFilter" data-filter="hosted" type="button">Мої події</button><button class="event-tab" data-filter="archive" type="button">Архів</button></div></div>
+      <div class="events-summary"><span><b id="eventTotal">—</b><small> подій у календарі</small></span><span><b id="eventNext">—</b><small> найближча зустріч</small></span><label class="events-search"><span aria-hidden="true">⌕</span><input id="eventSearch" type="search" placeholder="Пошук події…" aria-label="Пошук подій" /></label></div>
+      <div id="eventsGrid" class="events-grid" aria-live="polite"><div class="event-empty">Завантажуємо календар…</div></div>
+    </section>
+  </main>
+
+  <div id="eventEditor" class="event-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="eventEditorTitle">
+    <button class="event-overlay__backdrop" type="button" data-close-editor aria-label="Закрити"></button>
+    <section class="event-editor">
+      <div class="event-editor__head"><div><p class="event-eyebrow">Організатор події</p><h2 id="eventEditorTitle">Створи подію</h2><p>Додай усі деталі — учасникам буде простіше спланувати участь.</p></div><button class="event-close" type="button" data-close-editor aria-label="Закрити">×</button></div>
+      <form id="eventForm" class="event-form">
+        <input id="eventId" type="hidden" />
+        <label class="event-field event-field--wide"><span>Назва події <b>*</b></span><input id="eventTitle" maxlength="160" required placeholder="Наприклад, Хакатон цифрових рішень 2026" /></label>
+        <label class="event-field event-field--wide"><span>Короткий опис <small>До 280 символів</small></span><input id="eventSummary" maxlength="280" placeholder="Про що подія і кому буде цікава?" /></label>
+        <label class="event-field"><span>Тип події</span><select id="eventType"><option>Лекція</option><option>Воркшоп</option><option>Хакатон</option><option>Конференція</option><option>Зустріч</option><option>Захист</option><option>Кар’єра</option><option>Конкурс</option><option>Інше</option></select></label>
+        <label class="event-field"><span>Формат</span><select id="eventFormat"><option value="offline">📍 Очно</option><option value="online">🌐 Онлайн</option><option value="hybrid">↔ Гібридний</option></select></label>
+        <label class="event-field"><span>Початок <b>*</b></span><input id="eventStarts" type="datetime-local" required /></label>
+        <label class="event-field"><span>Завершення <b>*</b></span><input id="eventEnds" type="datetime-local" required /></label>
+        <label class="event-field"><span>Дедлайн реєстрації</span><input id="eventDeadline" type="datetime-local" /></label>
+        <label class="event-field"><span>Кількість місць <small>Порожньо — без обмежень</small></span><input id="eventCapacity" type="number" min="1" max="100000" placeholder="Наприклад, 40" /></label>
+        <label class="event-field event-field--wide"><span>Місце проведення</span><input id="eventLocation" maxlength="200" placeholder="Корпус, аудиторія або місто" /></label>
+        <div class="event-field event-field--wide"><span>Обкладинка з пристрою <small>PNG, JPEG, WebP або GIF · до 5 МБ</small></span><label class="event-upload"><input id="eventCoverFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" /><span aria-hidden="true">↑</span><span><b>Обрати зображення</b><small>Завантажити з комп’ютера або телефона</small></span></label><div id="eventCoverPreviewWrap" class="event-cover-preview hidden"><img id="eventCoverPreview" alt="Попередній перегляд обкладинки події" /><button id="clearEventCover" type="button">Прибрати фото</button></div><p id="eventCoverMessage" class="event-cover-message" role="status"></p></div>
+        <label class="event-field event-field--wide"><span>Або посилання на обкладинку <small>Необов’язково</small></span><input id="eventCover" type="url" maxlength="1000" placeholder="https://…" /></label>
+        <label class="event-field event-field--wide"><span>Посилання для онлайн-участі</span><input id="eventMeeting" type="url" maxlength="1000" placeholder="https://…" /></label>
+        <label class="event-field event-field--wide"><span>Контакт організатора</span><input id="eventContact" maxlength="300" placeholder="Email, телефон або Telegram" /></label>
+        <label class="event-field event-field--wide"><span>Повний опис <b>*</b></span><textarea id="eventDescription" rows="6" maxlength="10000" required placeholder="Програма, для кого подія, що підготувати, умови участі…"></textarea></label>
+        <div class="event-form__footer"><p id="eventFormMessage" role="status"></p><div><button id="saveDraftBtn" class="btn btn--secondary" type="button">Зберегти чернетку</button><button id="publishEventBtn" class="btn btn--primary" type="button">Опублікувати подію</button></div></div>
+      </form>
+    </section>
+  </div>
+
+  <div id="eventDetail" class="event-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <button class="event-overlay__backdrop" type="button" data-close-detail aria-label="Закрити"></button>
+    <article class="event-detail">
+      <button class="event-close event-detail__close" type="button" data-close-detail aria-label="Закрити">×</button>
+      <div id="detailCover" class="event-detail__cover"></div>
+      <div class="event-detail__body"><div class="event-detail__eyebrow"><span id="detailType"></span><span id="detailState"></span></div><h2 id="detailTitle"></h2><p id="detailSummary" class="event-detail__summary"></p>
+        <div class="event-facts"><div><span>Коли</span><b id="detailWhen"></b></div><div><span>Де</span><b id="detailWhere"></b></div><div><span>Організатор</span><b id="detailCreator"></b></div><div><span>Місця</span><b id="detailCapacity"></b></div></div>
+        <div id="detailDescription" class="event-detail__description"></div><div id="detailLinks" class="event-detail__links"></div>
+        <section id="participantsSection" class="event-participants hidden"><h3>Учасники <span id="participantCount"></span></h3><div id="participantList"></div></section>
+        <div class="event-detail__actions"><p id="registrationMessage" role="status"></p><div><button id="participantsBtn" class="btn btn--secondary hidden" type="button">Список учасників</button><button id="editEventBtn" class="btn btn--secondary hidden" type="button">Редагувати</button><button id="cancelEventBtn" class="btn btn--danger hidden" type="button">Скасувати подію</button><button id="deleteEventBtn" class="btn btn--danger hidden" type="button">Видалити</button><button id="registerBtn" class="btn btn--primary" type="button">Долучитися</button></div></div>
+      </div>
+    </article>
+  </div>
+  <script src="/modal.js"></script>
+  <script src="/events.js"></script>
+  <script src="/site-nav.js" defer></script>
+</body>
+</html>

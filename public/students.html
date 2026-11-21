@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Студенти та активності — Портал Інженерії Програмного Забезпечення</title>
+  <link rel="stylesheet" href="/auth.css"><link rel="stylesheet" href="/home.css"><link rel="stylesheet" href="/header.css"><link rel="stylesheet" href="/students.css">
+</head>
+<body>
+  <header class="topbar"><a href="/home" class="topbar__brand"><img class="topbar__logo" src="/ztu-logo.png" alt="Житомирська політехніка" /><span class="topbar__name">Портал Інженерії Програмного Забезпечення</span></a><nav class="topbar__nav" aria-label="Головна навігація"><a href="/home" class="navlink">Головна</a><a href="/news" class="navlink">Новини</a><a href="/chats" class="navlink">Чати</a><a href="/achievements" class="navlink">Досягнення</a><a href="/students" class="navlink is-active">Студенти</a><a href="/profileStudent" class="navlink" id="navProfile">Профіль</a></nav><div class="topbar__user"><div class="chip"><span class="chip__avatar" id="userAvatar">?</span><span class="chip__name" id="userName">—</span></div></div></header>
+  <main class="students-main"><section class="students-intro"><div><p class="eyebrow">Портфоліо спільноти</p><h1>Студенти та їх активності</h1><p>Конкурси, мобільність, стажування, сертифікати й проєкти, якими ділиться студентська спільнота.</p></div><button id="studentExtractBtn" class="btn btn--primary hidden" type="button">Витяг у PDF</button></section><div id="studentFilters" class="student-filters"></div><div id="studentsList" class="students-list"><p class="empty">Завантаження…</p></div></main>
+  <div id="studentExtractDialog" class="extract-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="extractTitle"><div class="extract-dialog__backdrop" data-close-extract></div><section class="extract-dialog__panel"><button class="extract-dialog__close" type="button" aria-label="Закрити" data-close-extract>×</button><p class="eyebrow">Службовий документ</p><h2 id="extractTitle">Витяг здобутків студентів</h2><label class="extract-field">Студент<select id="extractStudent"><option value="all">Усі студенти</option></select></label><p class="extract-label">Категорії активностей</p><div id="extractCategories" class="extract-categories"></div><button id="createStudentExtractBtn" class="btn btn--primary" type="button">Сформувати витяг</button></section></div>
+  <script src="/presence.js"></script>
+  <script src="/students.js"></script>
+  <script src="/site-nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Новини кафедри ЖДТУ">
+    <title>Новини кафедри — Портал Інженерії Програмного Забезпечення</title>
+    <link rel="stylesheet" href="/auth.css">
+    <link rel="stylesheet" href="/home.css">
+    <link rel="stylesheet" href="/news.css">
+    <link rel="stylesheet" href="/header.css">
+    <link rel="stylesheet" href="/modal.css">
+</head>
+
+<body class="news-body">
+    <header class="topbar"><a href="/home" class="topbar__brand"><img class="topbar__logo" src="/ztu-logo.png" alt="Житомирська політехніка" /><span
+                class="topbar__name">Портал Інженерії Програмного Забезпечення</span></a>
+        <nav class="topbar__nav" aria-label="Головна навігація"><a href="/home" class="navlink">Головна</a><a
+                href="/news" class="navlink is-active">Новини</a><a href="/events" class="navlink">Події</a><a href="/chats" class="navlink">Чати</a><a
+                href="/achievements" class="navlink">Досягнення</a><a
+                href="/students" class="navlink">Студенти</a><a href="/profileStudent" class="navlink"
+                id="navProfile">Профіль</a></nav>
+        <div class="topbar__user">
+            <div class="chip" id="userChip"><span class="chip__avatar" aria-hidden="true">?</span><span
+                    class="chip__name" id="userName">Гість</span></div>
+        </div>
+    </header>
+    <main class="news-shell">
+        <section class="news-intro">
+            <div>
+                <p class="eyebrow">Інформаційний центр кафедри</p>
+                <h1>Новини</h1>
+                <p>Події, оголошення та важливі оновлення для студентів і викладачів.</p>
+            </div>
+            <div class="news-intro__actions"><button class="btn btn--ghost hidden" id="exportBtn"
+                    type="button">Вивантажити PDF</button><button class="btn btn--primary hidden" id="newBtn">+ Створити
+                    новину</button></div>
+        </section>
+        <div class="news-layout">
+            <div class="filters" id="newsFilters" aria-label="Фільтри новин"></div>
+            <div id="newsList" class="news-list">
+                <div class="loader">Завантаження новин…</div>
+            </div>
+        </div>
+    </main>
+    <div id="editor" class="news-modal hidden" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
+        <div class="news-modal__backdrop" data-close-editor></div>
+        <section class="news-modal__panel editor" tabindex="-1">
+            <div class="editor-head">
+                <div>
+                    <p class="eyebrow">Кабінет викладача</p>
+                    <h2 id="editorTitle">Нова новина</h2>
+                </div><button class="icon-btn news-modal__close" id="closeEditor" type="button"
+                    aria-label="Закрити">×</button>
+            </div>
+            <form id="newsForm"><input type="hidden" id="newsId"><label>Заголовок<input id="title" required
+                        maxlength="180" placeholder="Наприклад, захист курсових робіт"></label>
+                <fieldset class="category-picker">
+                    <legend>Категорії / маркери</legend><label class="picklist-label" for="categoryOptions">Оберіть
+                        категорії</label><select id="categoryOptions" class="category-picklist" multiple size="6"
+                        aria-describedby="categoryHint"></select>
+                    <div class="category-create"><input id="newCategoryName" maxlength="80"
+                            placeholder="Нова категорія"><button id="createCategoryBtn" class="btn btn--ghost btn--sm"
+                            type="button">Додати</button></div>
+                    <div id="categoryManagement" class="category-management"></div>
+                    <p id="categoryHint" class="field-hint">Утримуйте Ctrl/Cmd для вибору кількох категорій. Нову
+                        категорію можна перейменувати або видалити.</p>
+                </fieldset>
+                <div class="editor-field"><label for="contentEditor">Текст новини</label>
+                    <div class="wysiwyg" id="contentEditor" role="textbox" aria-multiline="true"
+                        aria-labelledby="contentEditorLabel">
+                        <div class="wysiwyg-toolbar" role="toolbar" aria-label="Форматування тексту"><select
+                                data-command="formatBlock" aria-label="Стиль абзацу">
+                                <option value="p">Абзац</option>
+                                <option value="h2">Заголовок 2</option>
+                                <option value="h3">Заголовок 3</option>
+                                <option value="pre">Код</option>
+                            </select><span class="wysiwyg-divider" aria-hidden="true"></span><button type="button"
+                                data-command="bold" aria-label="Жирний текст"><strong>B</strong></button><button
+                                type="button" data-command="italic" aria-label="Курсив"><em>I</em></button><button
+                                type="button" data-command="underline"
+                                aria-label="Підкреслений текст"><u>U</u></button><button type="button"
+                                data-command="strikeThrough" aria-label="Закреслений текст"><s>S</s></button><button
+                                type="button" data-command="superscript" aria-label="Верхній індекс">x²</button><span
+                                class="wysiwyg-divider" aria-hidden="true"></span><button type="button"
+                                data-command="justifyLeft" aria-label="Ліворуч">←</button><button type="button"
+                                data-command="justifyCenter" aria-label="По центру">↔</button><button type="button"
+                                data-command="justifyRight" aria-label="Праворуч">→</button><button type="button"
+                                data-command="justifyFull" aria-label="По ширині">≡</button><span
+                                class="wysiwyg-divider" aria-hidden="true"></span><button type="button"
+                                data-command="insertUnorderedList" aria-label="Маркований список">•
+                                Список</button><button type="button" data-command="insertOrderedList"
+                                aria-label="Нумерований список">1. Список</button><button type="button"
+                                data-command="formatBlock" data-value="blockquote" aria-label="Цитата">“</button><button
+                                type="button" data-action="link" aria-label="Додати посилання">Посилання</button><button
+                                type="button" data-action="image" aria-label="Вставити зображення">Фото</button><button
+                                type="button" data-command="insertHorizontalRule"
+                                aria-label="Горизонтальна лінія">―</button><span class="wysiwyg-divider"
+                                aria-hidden="true"></span><button type="button" data-command="undo"
+                                aria-label="Скасувати">↶</button><button type="button" data-command="redo"
+                                aria-label="Повторити">↷</button><button type="button" data-command="removeFormat"
+                                aria-label="Очистити форматування">Очистити</button></div><input id="inlineImageInput"
+                            class="hidden" type="file" accept="image/*">
+                        <p class="editor-helper">Можна вставляти зображення прямо в текст, додавати посилання, цитати,
+                            списки та вирівнювання.</p>
+                        <div id="content" class="wysiwyg-content" contenteditable="true"
+                            data-placeholder="Напишіть текст новини..." aria-label="Текст новини"></div>
+                    </div>
+                </div><label class="check"><input type="checkbox" id="pinned"> Закріпити новину</label><label>Фото або
+                    файл<input type="file" id="attachment" accept="image/*,.pdf,.doc,.docx,.ppt,.pptx"></label>
+                <div class="editor-actions"><button type="button" class="btn btn--ghost" id="draftBtn">Зберегти
+                        чернетку</button><button class="btn btn--primary">Опублікувати</button></div>
+                <p id="formAlert" class="form-alert" role="alert"></p>
+            </form>
+        </section>
+    </div>
+    <div id="newsDetail" class="news-modal hidden" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+        <div class="news-modal__backdrop" data-close-detail></div>
+        <article class="news-modal__panel"><button class="icon-btn news-modal__close" type="button" aria-label="Закрити"
+                data-close-detail>×</button>
+            <p id="detailCategory" class="eyebrow"></p>
+            <p id="detailDate" class="news-modal__date"></p>
+            <h2 id="detailTitle"></h2>
+            <div id="detailContent" class="news-modal__content"></div>
+            <div id="detailAttachments" class="attachment"></div>
+        </article>
+    </div>
+    <div id="exportDialog" class="news-modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+        <div class="news-modal__backdrop" data-close-export></div>
+        <section class="news-modal__panel export-panel"><button class="icon-btn news-modal__close" type="button"
+                aria-label="Закрити" data-close-export>×</button>
+            <p class="eyebrow">Звіт новин</p>
+            <h2 id="exportTitle">Вивантаження у PDF</h2>
+            <p>Оберіть категорії, які треба включити у звіт.</p>
+            <div id="exportCategories" class="category-options"></div>
+            <div class="editor-actions"><button id="downloadPdfBtn" class="btn btn--primary" type="button">Сформувати
+                    PDF</button></div>
+        </section>
+    </div>
+    <script src="/presence.js"></script>
+    <script src="news.js"></script>
+    <script src="/modal.js"></script>
+  <script src="/site-nav.js" defer></script>
+</body>
+
+</html>

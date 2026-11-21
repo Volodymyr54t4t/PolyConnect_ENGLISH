@@ -1,0 +1,25 @@
+.app-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.app-modal.hidden { display: none; }
+.app-modal__backdrop { position: absolute; inset: 0; background: rgba(8, 18, 35, .68); backdrop-filter: blur(7px); }
+.app-modal__panel { position: relative; width: min(460px, calc(100vw - 32px)); overflow: hidden; border: 1px solid rgba(255,255,255,.8); border-radius: 18px; background: #fff; box-shadow: 0 26px 90px rgba(6, 14, 40, .3); animation: app-modal-in .2s ease-out; }
+.app-modal__brand { display: flex; align-items: center; gap: 12px; padding: 22px 26px 16px; background: linear-gradient(135deg, #f2f6ff, #fff); border-bottom: 1px solid #e5ebf5; }
+.app-modal__logo { width: 56px; height: 56px; object-fit: contain; border-radius: 50%; background: #fff; }
+.app-modal__brand-name { color: #164791; font-size: 12px; font-weight: 800; line-height: 1.25; text-transform: uppercase; letter-spacing: .7px; }
+.app-modal__body { padding: 24px 26px 26px; }
+.app-modal__title { margin: 0 0 10px; color: #101d35; font-size: 25px; line-height: 1.1; }
+.app-modal__message { margin: 0; color: #5b687b; font-size: 15px; line-height: 1.55; white-space: pre-wrap; }
+.app-modal__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.app-modal__button { min-width: 100px; border: 1px solid #d8e0ec; border-radius: 9px; padding: 10px 16px; background: #fff; color: #42516a; cursor: pointer; font: inherit; font-weight: 700; }
+.app-modal__button:hover { border-color: #8eaff2; }
+.app-modal__button--primary { border-color: #1e5eff; background: #1e5eff; color: #fff; }
+.app-modal__button--danger { border-color: #d94a52; background: #d94a52; color: #fff; }
+@keyframes app-modal-in { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (max-width: 480px) { .app-modal__brand, .app-modal__body { padding-left: 20px; padding-right: 20px; } }

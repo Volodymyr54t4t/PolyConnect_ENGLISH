@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Адміністративна панель PolyConnect ZTU">
+  <title>Адмін-панель — PolyConnect ZTU</title>
+  <link rel="stylesheet" href="/auth.css">
+  <link rel="stylesheet" href="/home.css">
+  <link rel="stylesheet" href="/header.css">
+  <link rel="stylesheet" href="/dean-dashboard.css">
+</head>
+<body class="dean-dashboard-body">
+  <header class="topbar">
+    <a href="/home" class="topbar__brand"><img class="topbar__logo" src="/ztu-logo.png" alt="Житомирська політехніка" /><span class="topbar__name">Портал Інженерії Програмного Забезпечення</span></a>
+    <nav class="topbar__nav" aria-label="Головна навігація">
+      <a href="/home" class="navlink">Головна</a><a href="/news" class="navlink">Новини</a><a href="/events" class="navlink">Події</a><a href="/chats" class="navlink">Чати</a><a href="/achievements" class="navlink">Досягнення</a><a href="/students" class="navlink">Студенти</a><a href="/dean-dashboard" class="navlink is-active" id="adminHomeLink">Дашборд</a><a href="/profileTeacher" class="navlink" id="navProfile">Профіль</a>
+    </nav>
+    <div class="topbar__user"><div class="chip"><span class="chip__avatar" id="userAvatar">?</span><span class="chip__name" id="userName">—</span></div></div>
+  </header>
+
+  <main class="dean-dashboard">
+    <section class="dashboard-hero" id="dashboardHero">
+      <div><p class="eyebrow">Адміністрування платформи</p><h1>Панель керування</h1><p>Користувачі, контент, активності студентів і чати PolyConnect.</p></div>
+      <p class="dashboard-updated" id="updatedAt">Оновлюємо дані…</p>
+    </section>
+
+    <section class="developer-overview hidden" id="developerOverview" aria-label="Огляд платформи">
+      <article><span>Користувачі</span><strong id="devUsersCount">—</strong><small>акаунтів на платформі</small></article>
+      <article><span>Новини</span><strong id="devNewsCount">—</strong><small>чернетки й публікації</small></article>
+      <article><span>Події</span><strong id="devEventsCount">—</strong><small>усі статуси</small></article>
+      <article><span>Досягнення</span><strong id="devAchievementsCount">—</strong><small>у профілях спільноти</small></article>
+      <article><span>Чати</span><strong id="devChatsCount">—</strong><small id="devChatBreakdown">—</small></article>
+    </section>
+    <section class="developer-shortcuts hidden" id="developerShortcuts">
+      <button type="button" data-go-tab="users"><b>Користувачі</b><span>Ролі, профілі та доступ до акаунтів</span></button>
+      <button type="button" data-go-tab="students"><b>Студенти</b><span>Групи, курси та студентські активності</span></button>
+      <button type="button" data-go-tab="chats"><b>Чати й групи</b><span>Склад груп і повна історія повідомлень</span></button>
+      <button type="button" data-go-tab="news"><b>Контент</b><span>Новини, події, досягнення та категорії</span></button>
+    </section>
+
+    <section class="metric-grid" aria-label="Основні показники">
+      <article class="metric-card metric-card--students"><span class="metric-card__icon" aria-hidden="true">♙</span><p>Студенти</p><strong id="studentsCount">—</strong><small>зареєстровано у порталі</small></article>
+      <article class="metric-card metric-card--teachers"><span class="metric-card__icon" aria-hidden="true">♧</span><p>Викладачі</p><strong id="teachersCount">—</strong><small>включно з керівниками</small></article>
+      <article class="metric-card"><span class="metric-card__icon" aria-hidden="true">▣</span><p>Новини</p><strong id="newsCount">—</strong><small>опублікованих матеріалів</small></article>
+      <article class="metric-card"><span class="metric-card__icon" aria-hidden="true">◌</span><p>Події</p><strong id="eventsCount">—</strong><small>студентських активностей</small></article>
+      <article class="metric-card"><span class="metric-card__icon" aria-hidden="true">▤</span><p>Матеріали</p><strong id="materialsCount">—</strong><small>вкладень до новин</small></article>
+    </section>
+
+    <section class="dashboard-section">
+      <div class="section-heading"><div><p class="eyebrow">Залученість</p><h2>Активність порталу</h2></div><p>Дії в чатах, новинах, подіях і досягненнях.</p></div>
+      <div class="activity-grid">
+        <article class="activity-card"><p>Сьогодні</p><strong id="dayActions">—</strong><span><b id="dayUsers">—</b> активних користувачів</span></article>
+        <article class="activity-card"><p>Останні 7 днів</p><strong id="weekActions">—</strong><span><b id="weekUsers">—</b> активних користувачів</span></article>
+      </div>
+    </section>
+
+    <section class="stat-columns">
+      <article class="stat-panel"><div class="section-heading"><div><p class="eyebrow">Студенти</p><h2>За групами</h2></div></div><div class="stats-list" id="groupsList"><p class="stats-loading">Завантаження…</p></div></article>
+      <article class="stat-panel"><div class="section-heading"><div><p class="eyebrow">Структура</p><h2>За кафедрами</h2></div></div><div class="stats-list" id="departmentsList"><p class="stats-loading">Завантаження…</p></div></article>
+    </section>
+    <section class="dashboard-section admin-section" id="adminSection">
+      <div class="section-heading"><div><p class="eyebrow">Адміністрування</p><h2>Керування платформою</h2></div><p>Повний контроль над обліковими записами, контентом і спільнотою.</p></div>
+      <div class="admin-tabs" role="tablist"><button class="admin-tab is-active" data-admin-tab="users">Користувачі</button><button class="admin-tab" data-admin-tab="students">Студенти та активності</button><button class="admin-tab" data-admin-tab="news">Новини</button><button class="admin-tab" data-admin-tab="events">Події</button><button class="admin-tab" data-admin-tab="achievements">Досягнення</button><button class="admin-tab" data-admin-tab="chats">Чати й групи</button><button class="admin-tab" data-admin-tab="categories">Категорії новин</button></div>
+      <div class="admin-toolbar"><h3 id="adminTitle">Користувачі</h3><div class="admin-toolbar__actions"><label id="userSortWrap" class="user-sort">Сортувати за <select id="userSort"><option value="created_at">Датою створення акаунта</option><option value="profile_updated_at">Датою зміни профілю</option><option value="full_name">Іменем</option></select></label><button class="admin-primary" id="adminCreate">＋ Додати</button></div></div>
+      <p class="admin-message hidden" id="adminMessage" role="status"></p>
+      <div class="admin-list" id="adminList"><p class="stats-loading">Завантаження…</p></div>
+    </section>
+    <dialog class="admin-dialog" id="adminDialog"><form id="adminForm" method="dialog"><div class="admin-dialog__head"><h2 id="adminFormTitle">Створити</h2><button type="button" class="admin-close" id="adminClose" aria-label="Закрити">×</button></div><div id="adminFields" class="admin-fields"></div><div class="admin-actions"><button type="button" class="admin-secondary" id="adminCancel">Скасувати</button><button type="submit" class="admin-primary">Зберегти</button></div></form></dialog>
+    <dialog class="admin-dialog" id="chatDetailDialog"><div class="admin-detail"><div class="admin-dialog__head"><h2 id="chatDetailTitle">Деталі чату</h2><button type="button" class="admin-close" id="chatDetailClose" aria-label="Закрити">×</button></div><div id="chatDetailBody"></div></div></dialog>
+    <p class="dashboard-error hidden" id="dashboardError" role="alert"></p>
+  </main>
+  <script src="/presence.js"></script>
+  <script src="/dean-dashboard.js"></script>
+  <script src="/site-nav.js" defer></script>
+</body>
+</html>

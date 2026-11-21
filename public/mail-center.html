@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Службова пошта PolyConnect ZTU">
+  <title>Центр пошти — PolyConnect ZTU</title>
+  <link rel="stylesheet" href="/auth.css"><link rel="stylesheet" href="/home.css"><link rel="stylesheet" href="/header.css"><link rel="stylesheet" href="/mail-center.css">
+</head>
+<body class="home-body mail-body">
+  <header class="topbar"><a href="/home" class="topbar__brand"><img class="topbar__logo" src="/ztu-logo.png" alt="Житомирська політехніка"><span class="topbar__name">Портал Інженерії Програмного Забезпечення</span></a>
+    <nav class="topbar__nav" aria-label="Головна навігація"><a href="/home" class="navlink">Головна</a><a href="/news" class="navlink">Новини</a><a href="/events" class="navlink">Події</a><a href="/chats" class="navlink">Чати</a><a href="/achievements" class="navlink">Досягнення</a><a href="/students" class="navlink">Студенти</a><a href="/profileStudent" class="navlink" id="navProfile">Профіль</a></nav>
+    <div class="topbar__user"><div class="chip"><span class="chip__avatar" id="userAvatar">?</span><span class="chip__name" id="userName">—</span></div></div>
+  </header>
+  <main class="mail-shell">
+    <section class="mail-hero"><div><p class="mail-eyebrow">PolyConnect ZTU · службові листи</p><h1>Центр пошти<span>.</span></h1><p>Оголошення, термінові сповіщення та робочі листи для людей університетської спільноти.</p></div><div class="mail-hero__stamp"><span>✉</span><small>Єдиний<br>простір зв’язку</small></div></section>
+    <div class="mail-grid">
+      <form class="mail-compose" id="mailForm">
+        <div class="mail-compose__head"><div><span class="mail-step">01 / НОВИЙ ЛИСТ</span><h2>Написати повідомлення</h2></div><span class="mail-live"><i></i> Готово до відправлення</span></div>
+        <label class="mail-label">Тема листа<input id="subject" name="subject" maxlength="180" required placeholder="Наприклад: зміни в розкладі на цей тиждень"></label>
+        <div class="mail-recipient-head"><label class="mail-label">Кому надіслати <span class="mail-required">*</span></label><span id="recipientCount" class="mail-count">0 адресатів</span></div>
+        <div class="mail-audience" id="audience">
+          <label class="audience-option audience-option--all"><input type="checkbox" name="role" value="all"><span class="audience-icon">✳</span><span><b>Уся спільнота</b><small>Студенти, викладачі й деканат</small></span></label>
+          <label class="audience-option"><input type="checkbox" name="role" value="Студент"><span class="audience-icon">◉</span><span><b>Студенти</b><small>Усі студентські адреси</small></span></label>
+          <label class="audience-option"><input type="checkbox" name="role" value="Викладач"><span class="audience-icon">▤</span><span><b>Викладачі</b><small>Викладацький склад</small></span></label>
+          <label class="audience-option"><input type="checkbox" name="role" value="ДеканФІКТ"><span class="audience-icon">⌂</span><span><b>Деканат</b><small>Декан ФІКТ</small></span></label>
+          <label class="audience-option"><input type="checkbox" name="role" value="Завідувач Кафедри"><span class="audience-icon">◆</span><span><b>Завідувачі</b><small>Керівники кафедр</small></span></label>
+        </div>
+        <div class="mail-recipient-tools"><label class="mail-label">Групи студентів <span class="mail-hint">можна обрати кілька</span><select id="groups" multiple size="1" aria-label="Групи студентів"></select></label><label class="mail-label">Окремі адресати <span class="mail-hint">пошук за ім’ям чи email</span><select id="people" multiple size="1" aria-label="Окремі адресати"></select></label></div>
+        <details class="mail-extra"><summary>Копія та додаткові параметри <span>+</span></summary><div class="mail-extra__fields"><label class="mail-label">Копія (CC)<select id="cc" multiple size="1" aria-label="Копія"></select></label><label class="mail-label">Прихована копія (BCC)<select id="bcc" multiple size="1" aria-label="Прихована копія"></select></label></div><p class="mail-hint">CC видно всім адресатам. Основні адреси масової розсилки приховані.</p></details>
+        <label class="mail-label mail-label--body">Повідомлення<textarea id="message" name="message" required maxlength="20000" rows="9" placeholder="Вітаю!&#10;&#10;Напишіть важливі деталі, терміни та наступні кроки…"></textarea><span class="mail-hint">Підпис буде додано автоматично: ваше ім’я та роль.</span></label>
+        <div class="mail-compose__bottom"><label class="mail-attachment" for="attachments"><span>＋</span><span><b>Додати вкладення</b><small id="attachmentHint">PDF, документи, зображення · до 8 МБ</small></span><input id="attachments" type="file" multiple></label><label class="mail-priority"><input id="urgent" type="checkbox"><span class="mail-priority__icon">!</span><span><b>Терміново</b><small>Позначити високий пріоритет</small></span></label></div>
+        <div class="mail-file-list" id="fileList"></div>
+        <div class="mail-submit-row"><p id="formStatus" class="mail-status" role="status"></p><button id="sendButton" class="mail-send" type="submit"><span>Надіслати лист</span><b>↗</b></button></div>
+      </form>
+      <aside class="mail-aside"><section class="mail-note mail-note--blue"><span class="mail-note__icon">✦</span><p class="mail-step">РОБОЧА КОМУНІКАЦІЯ</p><h2>Один лист — потрібні люди.</h2><p>Надсилайте оголошення студентам, колегам або деканату. Для приватних розмов і командних обговорень відкрийте чат.</p><a href="/chats">Перейти до чатів <span>↗</span></a></section><section class="mail-note mail-note--gold"><span class="mail-note__icon">◎</span><p class="mail-step">АДРЕСИ ЗАХИЩЕНО</p><h3>Жодної зайвої копії</h3><p>Адреси групових розсилок не показуються одержувачам. Копія та прихована копія керуються окремо.</p></section><div class="mail-footnote"><span>▰</span><p>Лист буде надісланий від імені службової пошти університетського порталу.</p></div></aside>
+    </div>
+  </main>
+  <script src="/mail-center.js"></script>
+  <script src="/site-nav.js" defer></script>
+</body>
+</html>
