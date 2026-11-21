@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="uk" class="theme">
+<html lang="en" class="theme">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Профіль студента — Портал Інженерії Програмного Забезпечення</title>
+  <title>Profile студента — Software Engineering Portal</title>
   <link rel="stylesheet" href="/profileStudent.css" />
   <link rel="stylesheet" href="/header.css" />
   <link rel="stylesheet" href="/achievements.css" />
@@ -13,23 +13,23 @@
 </head>
 
 <body>
-  <div id="loader" class="loader">Завантаження…</div>
+  <div id="loader" class="loader">Loading…</div>
 
   <div id="app" class="app hidden">
     <header class="topbar">
       <a href="/home" class="topbar__brand">
-        <img class="topbar__logo" src="/ztu-logo.png" alt="Житомирська політехніка" />
-        <span class="topbar__name">Портал Інженерії Програмного Забезпечення</span>
+        <img class="topbar__logo" src="/ztu-logo.png" alt="Zhytomyr Polytechnic" />
+        <span class="topbar__name">Software Engineering Portal</span>
       </a>
 
-      <nav class="topbar__nav" aria-label="Головна навігація">
-        <a href="/home" class="navlink">Головна</a>
-        <a href="/news" class="navlink">Новини</a>
-        <a href="/events" class="navlink">Події</a>
-        <a href="/chats" class="navlink">Чати</a>
-        <a href="/achievements" class="navlink">Досягнення</a>
-        <a href="/students" class="navlink">Студенти</a>
-        <a href="/profileStudent" class="navlink is-active">Профіль</a>
+      <nav class="topbar__nav" aria-label="Main navigation">
+        <a href="/home" class="navlink">Home</a>
+        <a href="/news" class="navlink">News</a>
+        <a href="/events" class="navlink">Events</a>
+        <a href="/chats" class="navlink">Chats</a>
+        <a href="/achievements" class="navlink">Achievements</a>
+        <a href="/students" class="navlink">Students</a>
+        <a href="/profileStudent" class="navlink is-active">Profile</a>
       </nav>
 
       <div class="topbar__user">
@@ -48,7 +48,7 @@
       <section class="grid">
         <aside class="card card--profile">
           <div class="photo">
-            <img id="photoPreview" class="photo__img hidden" alt="Фото студента" />
+            <img id="photoPreview" class="photo__img hidden" alt="Photo студента" />
             <div id="photoPlaceholder" class="photo__placeholder">Ф</div>
           </div>
           <label class="photo__upload btn btn--secondary">
@@ -58,39 +58,39 @@
 
           <h1 id="viewName" class="profile__name">—</h1>
           <p id="viewEmail" class="profile__email">—</p>
-          <span class="chip">Студент</span>
+          <span class="chip">Student</span>
 
           <section class="presence-card" aria-labelledby="presenceTitle">
-            <div class="presence-card__head"><span id="presenceOrb" class="presence-orb presence-orb--offline"></span><div><small>СТАТУС КОРИСТУВАЧА</small><h2 id="presenceTitle">Офлайн</h2></div></div>
+            <div class="presence-card__head"><span id="presenceOrb" class="presence-orb presence-orb--offline"></span><div><small>СТАТУС КОРИСТУВАЧА</small><h2 id="presenceTitle">Offline</h2></div></div>
             <p id="presenceCurrentMessage" class="presence-card__message">Ваш статус видно іншим у чатах і списку студентів.</p>
             <form id="presenceForm" class="presence-form">
-              <label class="field"><span>Моя доступність</span><select id="presenceSelect" name="user_status"><option value="available">🟢 Доступний</option><option value="away">🟡 Відійшов</option><option value="dnd">🔴 Не турбувати</option><option value="offline">⚫ Офлайн</option></select></label>
+              <label class="field"><span>Моя доступність</span><select id="presenceSelect" name="user_status"><option value="available">🟢 Available</option><option value="away">🟡 Away</option><option value="dnd">🔴 Do not disturb</option><option value="offline">⚫ Offline</option></select></label>
               <label class="field"><span>Короткий підпис <small>(за бажанням)</small></span><input id="presenceMessage" name="status_message" maxlength="80" placeholder="Наприклад: на парі до 14:00" /></label>
-              <button class="btn btn--primary" type="submit">Оновити статус</button>
+              <button class="btn btn--primary" type="submit">Update status</button>
               <p id="presenceFeedback" class="presence-feedback" role="status"></p>
             </form>
           </section>
 
           <ul class="facts">
-            <li><span>Група</span><b id="viewGroup">—</b></li>
-            <li><span>Рівень</span><b id="viewStudyLevel">—</b></li>
-            <li><span>Курс</span><b id="viewCourse">—</b></li>
-            <li><span>Телефон</span><b id="viewPhone">—</b></li>
+            <li><span>Group</span><b id="viewGroup">—</b></li>
+            <li><span>Level</span><b id="viewStudyLevel">—</b></li>
+            <li><span>Year</span><b id="viewCourse">—</b></li>
+            <li><span>Phone</span><b id="viewPhone">—</b></li>
           </ul>
-          <section class="profile-about"><h2>Про мене</h2><p id="viewAbout">—</p></section>
+          <section class="profile-about"><h2>About me</h2><p id="viewAbout">—</p></section>
           <div id="viewSocial" class="profile-social"></div>
-          <section class="profile-account-action" aria-label="Керування обліковим записом">
+          <section class="profile-account-action" aria-label="Management обліковим записом">
             <p>Завершили роботу з порталом?</p>
-            <button id="logoutBtn" class="btn btn--danger" type="button"><span aria-hidden="true">↗</span> Вийти з акаунта</button>
+            <button id="logoutBtn" class="btn btn--danger" type="button"><span aria-hidden="true">↗</span> Sign out</button>
             <details class="account-delete">
-              <summary>Видалити акаунт назавжди</summary>
+              <summary>Delete акаунт назавжди</summary>
               <div class="account-delete__body">
                 <p><strong>Цю дію не можна скасувати.</strong> Будуть видалені профіль, досягнення, активності, повідомлення та пов'язані записи. Новинні публікації, створені цим акаунтом, також буде видалено.</p>
                 <form id="deleteAccountForm" class="account-delete__form">
                   <label class="field"><span>Поточний пароль</span><input name="password" type="password" autocomplete="current-password" required /></label>
                   <label class="field"><span>Введіть email акаунта <small id="deleteAccountEmailHint"></small></span><input name="email" type="email" autocomplete="email" required /></label>
                   <label class="field"><span>Для підтвердження введіть ВИДАЛИТИ</span><input name="confirmation" required autocapitalize="characters" autocomplete="off" /></label>
-                  <button class="btn btn--danger" type="submit" disabled>Видалити акаунт і дані</button>
+                  <button class="btn btn--danger" type="submit" disabled>Delete акаунт і дані</button>
                   <p id="deleteAccountFeedback" class="account-delete__feedback" role="status" aria-live="polite"></p>
                 </form>
               </div>
@@ -99,7 +99,7 @@
         </aside>
 
         <div class="card">
-          <h2 class="card__title">Редагування профілю</h2>
+          <h2 class="card__title">Edit profile</h2>
           <form id="profileForm" class="form">
             <label class="field">
               <span>ПІБ</span>
@@ -112,17 +112,17 @@
             </label>
 
             <label class="field">
-              <span>Телефон</span>
+              <span>Phone</span>
               <input name="phone" type="tel" autocomplete="tel" placeholder="+380 00 000 00 00" required />
             </label>
 
             <div class="row">
               <label class="field">
-                <span>Група</span>
+                <span>Group</span>
                 <input name="group_name" type="text" placeholder="Напр. ІПЗ-21-1" />
               </label>
               <label class="field">
-                <span>Рівень освіти</span>
+                <span>Level освіти</span>
                 <select name="study_level" required>
                   <option value="">—</option>
                   <option value="Бакалавр">Бакалавр</option>
@@ -131,7 +131,7 @@
                 </select>
               </label>
               <label class="field">
-                <span>Курс</span>
+                <span>Year</span>
                 <select name="course" required>
                   <option value="">—</option>
                   <option value="1">1</option>
@@ -156,48 +156,48 @@
               <label class="field"><span>Портфоліо або особистий сайт</span><input name="portfolio_url" type="url" maxlength="500" placeholder="https://…" /></label>
             </div>
 
-          <button class="btn btn--primary" type="submit">Зберегти зміни</button>
+          <button class="btn btn--primary" type="submit">Save зміни</button>
           </form>
         </div>
       </section>
       <div class="profile-lower">
           <section class="profile-achievements" aria-labelledby="studentAchievementsTitle">
-            <div class="profile-achievements__heading"><h2 id="studentAchievementsTitle">Мої досягнення</h2><div><a class="text-link" href="/achievements">Дивитися публічні ↗</a><button id="openAchievementBtn" class="btn btn--secondary" type="button">Додати досягнення</button></div></div>
+            <div class="profile-achievements__heading"><h2 id="studentAchievementsTitle">Mine досягнення</h2><div><a class="text-link" href="/achievements">Дивитися публічні ↗</a><button id="openAchievementBtn" class="btn btn--secondary" type="button">Add досягнення</button></div></div>
             <section class="achievement-import" aria-labelledby="googleSheetImportTitle">
               <div><h3 id="googleSheetImportTitle">Імпорт із Google Таблиць</h3><p>Вставте посилання на таблицю, перегляньте знайдені записи й виберіть, що додати. Імпортовані досягнення спочатку приватні.</p></div>
               <form id="googleSheetImportForm" class="achievement-import__form"><label class="field"><span>Посилання на таблицю</span><input id="googleSheetUrl" type="url" required placeholder="https://docs.google.com/spreadsheets/d/…" /></label><button class="btn btn--secondary" id="googleSheetPreviewButton" type="submit">Переглянути записи</button></form>
-              <p class="achievement-import__hint">Для читання таблиця має бути доступна за посиланням або опублікована в Інтернеті. Перший рядок повинен містити заголовки, наприклад: Назва, Тип, Подія, Дата, Організатор, Опис, Результат, Посилання. Повторний імпорт пропускає записи, які вже додані. <a href="https://support.google.com/docs/answer/183965?hl=uk" target="_blank" rel="noopener">Як опублікувати Google Таблицю ↗</a></p>
+              <p class="achievement-import__hint">Для читання таблиця має бути доступна за посиланням або опублікована в Інтернеті. Перший рядок повинен містити заголовки, наприклад: Title, Тип, Подія, Date, Організатор, Description, Результат, Посилання. Повторний імпорт пропускає записи, які вже додані. <a href="https://support.google.com/docs/answer/183965?hl=uk" target="_blank" rel="noopener">Як опублікувати Google Таблицю ↗</a></p>
               <p id="googleSheetImportMessage" class="form-alert" role="status"></p>
-              <section id="googleSheetPreview" class="achievement-import__preview hidden" aria-label="Попередній перегляд імпорту"><div class="achievement-import__preview-head"><b id="googleSheetPreviewSummary"></b><label><input id="googleSheetSelectAll" type="checkbox" checked /> Обрати всі коректні</label></div><div class="achievement-import__table-wrap"><table class="achievement-import__table"><thead><tr><th></th><th>Назва</th><th>Тип</th><th>Подія</th><th>Дата</th><th>Результат</th><th>Перевірка</th></tr></thead><tbody id="googleSheetPreviewRows"></tbody></table></div><button class="btn btn--primary" id="googleSheetImportButton" type="button">Імпортувати обрані</button></section>
+              <section id="googleSheetPreview" class="achievement-import__preview hidden" aria-label="Попередній перегляд імпорту"><div class="achievement-import__preview-head"><b id="googleSheetPreviewSummary"></b><label><input id="googleSheetSelectAll" type="checkbox" checked /> Обрати всі коректні</label></div><div class="achievement-import__table-wrap"><table class="achievement-import__table"><thead><tr><th></th><th>Title</th><th>Тип</th><th>Подія</th><th>Date</th><th>Результат</th><th>Перевірка</th></tr></thead><tbody id="googleSheetPreviewRows"></tbody></table></div><button class="btn btn--primary" id="googleSheetImportButton" type="button">Імпортувати обрані</button></section>
             </section>
             <div id="achievementDialog" class="achievement-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="achievementDialogTitle">
               <div class="achievement-dialog__backdrop" data-close-achievement></div>
-              <div class="achievement-dialog__panel"><button class="achievement-dialog__close" type="button" data-close-achievement aria-label="Закрити">×</button><h2 id="achievementDialogTitle">Нове досягнення</h2><p class="achievement-dialog__hint">Заповнення зазвичай займає кілька секунд.</p>
+              <div class="achievement-dialog__panel"><button class="achievement-dialog__close" type="button" data-close-achievement aria-label="Close">×</button><h2 id="achievementDialogTitle">Нове досягнення</h2><p class="achievement-dialog__hint">Заповнення зазвичай займає кілька секунд.</p>
                 <form id="achievementForm" class="achievement-form">
-                  <label class="field"><span>Що саме відзначаємо?</span><select name="achievement_type" required><option value="">Оберіть формат</option><option>Перемога</option><option>Призове місце</option><option>Участь</option><option>Нагорода / відзнака</option><option>Сертифікат</option><option>Проєкт</option><option>Публікація</option><option>Інше</option></select></label>
-                  <label class="field"><span>Назва перемоги або участі</span><input name="title" maxlength="160" placeholder="Наприклад, І місце на хакатоні" required /></label>
-                  <div class="achievement-fields-grid"><label class="field"><span>Подія / конкурс</span><input name="event_name" maxlength="180" placeholder="Назва олімпіади, конкурсу чи проєкту" /></label><label class="field"><span>Дата</span><input name="achievement_date" type="date" /></label><label class="field"><span>Організатор</span><input name="organizer" maxlength="180" placeholder="Університет, компанія, фонд…" /></label><label class="field"><span>Місце / формат</span><input name="location" maxlength="180" placeholder="Житомир, Україна або онлайн" /></label></div>
+                  <label class="field"><span>Що саме відзначаємо?</span><select name="achievement_type" required><option value="">Select формат</option><option>Перемога</option><option>Призове місце</option><option>Participation</option><option>Нагорода / відзнака</option><option>Сертифікат</option><option>Проєкт</option><option>Публікація</option><option>Інше</option></select></label>
+                  <label class="field"><span>Title перемоги або участі</span><input name="title" maxlength="160" placeholder="Наприклад, І місце на хакатоні" required /></label>
+                  <div class="achievement-fields-grid"><label class="field"><span>Подія / конкурс</span><input name="event_name" maxlength="180" placeholder="Title олімпіади, конкурсу чи проєкту" /></label><label class="field"><span>Date</span><input name="achievement_date" type="date" /></label><label class="field"><span>Організатор</span><input name="organizer" maxlength="180" placeholder="Університет, компанія, фонд…" /></label><label class="field"><span>Location / формат</span><input name="location" maxlength="180" placeholder="Житомир, Україна або онлайн" /></label></div>
                   <label class="field"><span>Результат або ваша роль</span><input name="result" maxlength="300" placeholder="І місце, фіналіст, автор проєкту, 120 учасників…" /></label>
                   <label class="field"><span>Посилання на результат (необов’язково)</span><input name="link" type="url" maxlength="500" placeholder="Сторінка події, сертифікат або публікація" /></label>
-                  <label class="field"><span>Деталі та внесок</span><textarea name="description" maxlength="2000" rows="4" placeholder="Розкажіть, що зробили, як готувалися, хто був у команді й чим пишаєтеся…"></textarea></label>
-                  <label class="field"><span>Фото (необов’язково)</span><input id="achievementPhoto" name="photo" type="file" accept="image/*" /></label>
+                  <label class="field"><span>Details та внесок</span><textarea name="description" maxlength="2000" rows="4" placeholder="Розкажіть, що зробили, як готувалися, хто був у команді й чим пишаєтеся…"></textarea></label>
+                  <label class="field"><span>Photo (необов’язково)</span><input id="achievementPhoto" name="photo" type="file" accept="image/*" /></label>
                   <label class="achievement-visibility"><input name="is_public" type="checkbox" /> <span>Показувати це досягнення публічно</span></label>
-                  <button class="btn btn--secondary" type="submit">Зберегти досягнення</button><p id="achievementAlert" class="form-alert" role="status"></p><p id="achievementProgress" class="achievement-progress" role="status"></p>
+                  <button class="btn btn--secondary" type="submit">Save досягнення</button><p id="achievementAlert" class="form-alert" role="status"></p><p id="achievementProgress" class="achievement-progress" role="status"></p>
                 </form>
               </div>
             </div>
             <div id="myAchievements" class="my-achievements"></div>
           </section>
           <section class="student-activities" aria-labelledby="activitiesTitle">
-            <div class="profile-achievements__heading"><div><h2 id="activitiesTitle">Мої активності</h2><p class="activities-lead">Зберігайте участь у подіях, стажуваннях, конкурсах і проєктах.</p></div><a class="text-link" href="/students">Переглянути студентів ↗</a></div>
+            <div class="profile-achievements__heading"><div><h2 id="activitiesTitle">Mine активності</h2><p class="activities-lead">Зберігайте участь у подіях, стажуваннях, конкурсах і проєктах.</p></div><a class="text-link" href="/students">Переглянути студентів ↗</a></div>
             <form id="activityForm" class="activity-form">
-              <label class="field"><span>Назва активності</span><input name="title" maxlength="180" required placeholder="Наприклад, олімпіада з програмування" /></label>
+              <label class="field"><span>Title активності</span><input name="title" maxlength="180" required placeholder="Наприклад, олімпіада з програмування" /></label>
               <div class="row activity-row"><label class="field"><span>Вид активності</span><select id="activityCategory" name="category_name" required></select></label><label class="field"><span>Нова категорія (за потреби)</span><input id="newActivityCategory" maxlength="80" placeholder="Наприклад, Волонтерство" /></label></div>
-              <div class="row activity-row"><label class="field"><span>Організатор / захід</span><input name="organizer" maxlength="180" placeholder="Назва організації або події" /></label><label class="field"><span>Місце / країна</span><input name="location" maxlength="180" placeholder="Онлайн, Житомир, Польща…" /></label><label class="field"><span>Дата</span><input name="activity_date" type="date" /></label></div>
-              <label class="field"><span>Опис або результат</span><textarea name="description" maxlength="2000" rows="3" placeholder="Що саме ви робили або якого результату досягли?"></textarea></label>
+              <div class="row activity-row"><label class="field"><span>Організатор / захід</span><input name="organizer" maxlength="180" placeholder="Title організації або події" /></label><label class="field"><span>Location / країна</span><input name="location" maxlength="180" placeholder="Онлайн, Житомир, Польща…" /></label><label class="field"><span>Date</span><input name="activity_date" type="date" /></label></div>
+              <label class="field"><span>Description або результат</span><textarea name="description" maxlength="2000" rows="3" placeholder="Що саме ви робили або якого результату досягли?"></textarea></label>
               <label class="field"><span>Посилання-підтвердження (необов’язково)</span><input name="link" type="url" maxlength="500" placeholder="https://…" /></label>
               <label class="activity-public"><input name="is_public" type="checkbox" checked /> Показувати цю активність у каталозі студентів</label>
-              <div><button class="btn btn--primary" type="submit">Додати активність</button><p id="activityAlert" class="form-alert" role="status"></p></div>
+              <div><button class="btn btn--primary" type="submit">Add активність</button><p id="activityAlert" class="form-alert" role="status"></p></div>
             </form>
             <div id="myActivities" class="activity-list"></div>
           </section>

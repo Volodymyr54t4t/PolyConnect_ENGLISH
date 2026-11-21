@@ -2,7 +2,7 @@ const $ = (selector) => document.querySelector(selector)
 let students = [], activityCategories = [], activeCategory = "all"
 const staffRoles = ["Розробник", "ДеканФІКТ", "Завідувач Кафедри", "Викладач"]
 const escapeHtml = (value) => String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char]))
-const date = (value) => value ? new Intl.DateTimeFormat("uk-UA", { dateStyle: "medium" }).format(new Date(value)) : ""
+const date = (value) => value ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(value)) : ""
 function render() {
   const categories = [...new Set([...activityCategories, ...students.flatMap((student) => student.activities.map((activity) => activity.category_name))])].sort()
   $("#studentFilters").innerHTML = [`<button class="student-filter ${activeCategory === "all" ? "active" : ""}" data-category="all">Усі активності</button>`, ...categories.map((category) => `<button class="student-filter ${activeCategory === category ? "active" : ""}" data-category="${escapeHtml(category)}">${escapeHtml(category)}</button>`)].join("")
@@ -11,7 +11,7 @@ function render() {
 }
 function openExtract() {
   const categories = [...new Set([...activityCategories, ...students.flatMap((student) => student.activities.map((activity) => activity.category_name))])].sort()
-  $("#extractStudent").innerHTML = `<option value="all">Усі студенти</option>${students.map((student) => `<option value="${student.id}">${escapeHtml(student.full_name)}${student.group_name ? ` (${escapeHtml(student.group_name)})` : ""}</option>`).join("")}`
+  $("#extractStudent").innerHTML = `<option value="all">All students</option>${students.map((student) => `<option value="${student.id}">${escapeHtml(student.full_name)}${student.group_name ? ` (${escapeHtml(student.group_name)})` : ""}</option>`).join("")}`
   $("#extractCategories").innerHTML = categories.map((category) => `<label class="extract-category"><input type="checkbox" value="${escapeHtml(category)}" checked> ${escapeHtml(category)}</label>`).join("") || "<p>Немає публічних активностей для витягу.</p>"
   $("#studentExtractDialog").classList.remove("hidden")
 }

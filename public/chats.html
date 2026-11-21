@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="uk">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Чати — Портал Інженерії Програмного Забезпечення</title>
+    <title>Chats — Software Engineering Portal</title>
     <link rel="stylesheet" href="auth.css">
     <link rel="stylesheet" href="home.css">
     <link rel="stylesheet" href="chats.css">
@@ -13,12 +13,12 @@
 </head>
 
 <body class="home-body">
-    <header class="topbar"><a href="/home" class="topbar__brand"><img class="topbar__logo" src="/ztu-logo.png" alt="Житомирська політехніка" /><span
-                class="topbar__name">Портал Інженерії Програмного Забезпечення</span></a>
-        <nav class="topbar__nav" aria-label="Головна навігація"><a href="/home" class="navlink">Головна</a><a
-                href="/news" class="navlink">Новини</a><a href="/events" class="navlink">Події</a><a href="/chats" class="navlink is-active">Чати</a><a
-                href="/achievements" class="navlink">Досягнення</a><a href="/students" class="navlink">Студенти</a><a
-                href="/profileStudent" class="navlink" id="navProfile">Профіль</a>
+    <header class="topbar"><a href="/home" class="topbar__brand"><img class="topbar__logo" src="/ztu-logo.png" alt="Zhytomyr Polytechnic" /><span
+                class="topbar__name">Software Engineering Portal</span></a>
+        <nav class="topbar__nav" aria-label="Main navigation"><a href="/home" class="navlink">Home</a><a
+                href="/news" class="navlink">News</a><a href="/events" class="navlink">Events</a><a href="/chats" class="navlink is-active">Chats</a><a
+                href="/achievements" class="navlink">Achievements</a><a href="/students" class="navlink">Students</a><a
+                href="/profileStudent" class="navlink" id="navProfile">Profile</a>
         </nav>
         <div class="topbar__user">
             <div class="chip"><span class="chip__avatar" id="userAvatar">?</span><span class="chip__name"
@@ -29,49 +29,49 @@
         <section class="chats-layout" id="chatsLayout">
             <aside class="card chat-list">
                 <div class="chat-list__toolbar">
-                    <div class="chat-list__heading"><h2>Чати</h2><span id="chatCount" class="chat-list__count">0</span></div>
+                    <div class="chat-list__heading"><h2>Chats</h2><span id="chatCount" class="chat-list__count">0</span></div>
                     <div class="chat-list__actions">
-                        <button id="createGroupBtn" type="button" title="Створити групу" aria-label="Створити групу">＋<span>Група</span></button>
-                        <button id="createChatBtn" type="button" title="Створити чат" aria-label="Створити чат">✎<span>Новий чат</span></button>
+                        <button id="createGroupBtn" type="button" title="Create group" aria-label="Create group">＋<span>Group</span></button>
+                        <button id="createChatBtn" type="button" title="Create chat" aria-label="Create chat">✎<span>Новий чат</span></button>
                     </div>
                 </div>
-                <label class="chat-list__search"><span aria-hidden="true">⌕</span><input id="chatSearch" type="search" placeholder="Пошук чатів" autocomplete="off" aria-label="Пошук чатів" /></label>
+                <label class="chat-list__search"><span aria-hidden="true">⌕</span><input id="chatSearch" type="search" placeholder="Search chats" autocomplete="off" aria-label="Search chats" /></label>
                 <div id="chatList">
-                    <p class="empty">У вас ще немає чатів.</p>
+                    <p class="empty">You have no chats yet.</p>
                 </div>
             </aside>
             <section class="card conversation">
                 <div class="conversation-head">
-                    <button id="backToChatsBtn" class="conversation-back" type="button" aria-label="Назад до списку чатів">‹</button>
+                    <button id="backToChatsBtn" class="conversation-back" type="button" aria-label="Back to chats">‹</button>
                     <div class="conversation-identity">
                         <span id="conversationAvatar" class="conversation-avatar">✉</span>
                         <div class="conversation-identity__text">
-                            <h2 id="chatTitle">Оберіть чат</h2>
-                            <p id="chatRole">Ваші повідомлення з’являться тут</p>
+                            <h2 id="chatTitle">Select a chat</h2>
+                            <p id="chatRole">Your messages will appear here</p>
                             <div id="groupTopicControls" class="group-topic-controls hidden">
-                                <select id="groupTopicSelect" aria-label="Тема групового чату"></select>
-                                <button id="createTopicBtn" type="button" aria-label="Створити тему" title="Створити тему">＋</button>
+                                <select id="groupTopicSelect" aria-label="Group chat topic"></select>
+                                <button id="createTopicBtn" type="button" aria-label="Create topic" title="Create topic">＋</button>
                             </div>
                         </div>
                     </div>
-                    <button id="groupInfoBtn" class="conversation-info hidden" type="button" aria-expanded="false"><span>Деталі групи</span><b
+                    <button id="groupInfoBtn" class="conversation-info hidden" type="button" aria-expanded="false"><span>Group details</span><b
                             aria-hidden="true">⌄</b></button>
                 </div>
-                <button id="pinnedBanner" class="pinned-banner hidden" type="button"><span aria-hidden="true">📌</span><span><small>Закріплене повідомлення</small><strong id="pinnedBannerText"></strong></span><b aria-hidden="true">›</b></button>
-                <button id="loadOlderMessages" class="load-older-messages hidden" type="button">Завантажити старіші повідомлення</button>
+                <button id="pinnedBanner" class="pinned-banner hidden" type="button"><span aria-hidden="true">📌</span><span><small>Pinned message</small><strong id="pinnedBannerText"></strong></span><b aria-hidden="true">›</b></button>
+                <button id="loadOlderMessages" class="load-older-messages hidden" type="button">Load older messages</button>
                 <div id="messages" class="messages">
-                    <p class="empty">Повідомлення з’являться тут.</p>
+                    <p class="empty">Messages will appear here.</p>
                 </div>
                 <form id="messageForm" class="message-form hidden">
                     <div id="sendChoice" class="send-choice hidden" role="dialog" aria-label="Дія для Enter">
-                        <span>Що зробити з Enter?</span>
-                        <button type="button" id="newLineBtn" class="send-choice__button">Новий рядок</button>
+                        <span>What should Enter do?</span>
+                        <button type="button" id="newLineBtn" class="send-choice__button">New line</button>
                         <button type="button" id="sendEnterBtn"
-                            class="send-choice__button send-choice__button--primary">Відправити</button>
+                            class="send-choice__button send-choice__button--primary">Send</button>
                     </div>
                     <div class="message-form__bar">
-                        <label class="message-file" for="messageFile" title="Додати файли до 10 МБ"
-                            aria-label="Додати файли до 10 МБ">📎<input id="messageFile" type="file"
+                        <label class="message-file" for="messageFile" title="Add файли до 10 МБ"
+                            aria-label="Add файли до 10 МБ">📎<input id="messageFile" type="file"
                                 accept="*/*" multiple /></label>
                         <button type="button" class="message-voice" id="voiceBtn"
                             aria-label="Записати голосове повідомлення"
@@ -82,9 +82,9 @@
                         <input id="scheduledAt" class="scheduled-at hidden" type="datetime-local" aria-label="Час надсилання повідомлення" />
                         <textarea id="messageInput" maxlength="2000" rows="1" placeholder="Напишіть повідомлення…"
                             autocomplete="off"></textarea>
-                        <button class="btn btn--primary message-send" type="submit" aria-label="Надіслати повідомлення">
+                        <button class="btn btn--primary message-send" type="submit" aria-label="Send повідомлення">
                             <span aria-hidden="true">➤</span>
-                            <span class="sr-only">Надіслати</span>
+                            <span class="sr-only">Send</span>
                         </button>
                     </div>
                     <p id="draftStatus" class="draft-status" aria-live="polite"></p>
@@ -93,8 +93,8 @@
                         <span id="voiceTimer">00:00</span><span class="voice-preview__label">Прослухайте запис перед
                             відправленням</span>
                         <audio id="voicePreviewAudio" controls preload="metadata"></audio>
-                        <button type="button" id="cancelVoiceBtn">Скасувати</button><button type="button"
-                            id="sendVoiceBtn">Надіслати</button>
+                        <button type="button" id="cancelVoiceBtn">Cancel</button><button type="button"
+                            id="sendVoiceBtn">Send</button>
                     </div>
                 </form>
             </section>
@@ -103,62 +103,62 @@
     <div class="dialog hidden" id="createDialog">
         <div class="dialog-backdrop" data-close></div>
         <section class="dialog-panel card"><button class="icon-btn dialog-close" data-close
-                aria-label="Закрити">×</button>
+                aria-label="Close">×</button>
             <p class="eyebrow">Новий діалог</p>
-            <h2>Створити чат</h2>
-            <label class="chat-search"><span class="sr-only">Пошук користувача</span><input id="userSearch"
-                    type="search" placeholder="Пошук за ім’ям або email…" autocomplete="off" /></label>
+            <h2>Create chat</h2>
+            <label class="chat-search"><span class="sr-only">Search користувача</span><input id="userSearch"
+                    type="search" placeholder="Search за ім’ям або email…" autocomplete="off" /></label>
             <div class="user-filters" role="tablist" aria-label="Фільтр користувачів">
-                <button class="user-filter is-active" data-user-role="Усі" type="button">Усі</button>
-                <button class="user-filter" data-user-role="Студент" type="button">Студенти</button>
-                <button class="user-filter" data-user-role="Викладач" type="button">Викладачі</button>
+                <button class="user-filter is-active" data-user-role="All" type="button">All</button>
+                <button class="user-filter" data-user-role="Student" type="button">Students</button>
+                <button class="user-filter" data-user-role="Faculty" type="button">Facultyі</button>
                 <button class="user-filter" data-user-role="Деканат" type="button">Деканат</button>
             </div>
             <div id="userList" class="user-list">
                 <p class="empty">Завантаження користувачів…</p>
             </div>
             <p class="form-alert" id="dialogAlert"></p>
-            <button class="btn btn--primary" id="confirmChatBtn" disabled>Створити чат</button>
+            <button class="btn btn--primary" id="confirmChatBtn" disabled>Create chat</button>
         </section>
     </div>
     <div class="file-dialog hidden" id="fileDialog" role="dialog" aria-modal="true" aria-labelledby="fileDialogTitle">
         <div class="file-dialog__backdrop" data-close-files></div>
         <section class="file-dialog__panel"><button class="dialog-close" type="button" data-close-files
-                aria-label="Закрити">×</button>
+                aria-label="Close">×</button>
             <p class="eyebrow">Вкладення</p>
             <h2 id="fileDialogTitle">Перегляд файлів</h2>
             <p id="fileDialogSummary" class="file-dialog__summary"></p>
             <div id="fileDialogList" class="file-dialog__list"></div><button class="btn btn--primary" id="sendFilesBtn"
-                type="button">Надіслати всі файли</button>
+                type="button">Send всі файли</button>
         </section>
     </div>
     <div class="dialog hidden" id="groupDialog" role="dialog" aria-modal="true" aria-labelledby="groupDialogTitle">
         <div class="dialog-backdrop" data-close-group></div>
         <section class="dialog-panel card group-dialog-panel"><button class="icon-btn dialog-close" data-close-group
-                type="button" aria-label="Закрити">×</button>
+                type="button" aria-label="Close">×</button>
             <p class="eyebrow">Нова спільнота</p>
-            <h2 id="groupDialogTitle">Створити груповий чат</h2><label>Назва групи<input id="groupTitle" maxlength="120"
-                    placeholder="Наприклад, ІПЗ-21-1" /></label><label>Опис групи<textarea id="groupDescription"
+            <h2 id="groupDialogTitle">Create груповий чат</h2><label>Title групи<input id="groupTitle" maxlength="120"
+                    placeholder="Наприклад, ІПЗ-21-1" /></label><label>Description групи<textarea id="groupDescription"
                     maxlength="1000" rows="3" placeholder="Для чого ця група"></textarea></label><label>Аватар
                 групи<input id="groupAvatar" type="file" accept="image/*" /></label>
             <div class="group-members">
-                <div class="group-members-label">Учасники</div>
+                <div class="group-members-label">Participants</div>
                 <div id="groupUserList" class="group-user-list"></div>
             </div>
             <p class="form-alert" id="groupAlert"></p><button class="btn btn--primary" id="confirmGroupBtn"
-                type="button">Створити групу</button>
+                type="button">Create group</button>
         </section>
     </div>
     <div class="dialog hidden" id="groupDetailsDialog" role="dialog" aria-modal="true" aria-labelledby="groupDetailsTitle">
         <div class="dialog-backdrop" data-close-group-details></div>
         <section class="dialog-panel card group-details-panel">
-            <button class="icon-btn dialog-close" type="button" data-close-group-details aria-label="Закрити">×</button>
+            <button class="icon-btn dialog-close" type="button" data-close-group-details aria-label="Close">×</button>
             <p class="eyebrow">Груповий чат</p>
             <div class="group-details-heading">
                 <img id="groupDetailsAvatar" class="group-details-avatar hidden" alt="Аватар групи" />
-                <div><h2 id="groupDetailsTitle">Деталі групи</h2><p id="groupDetailsDescription"></p></div>
+                <div><h2 id="groupDetailsTitle">Group details</h2><p id="groupDetailsDescription"></p></div>
             </div>
-            <h3 class="group-details-members-title">Учасники <span id="groupDetailsMemberCount">0</span></h3>
+            <h3 class="group-details-members-title">Participants <span id="groupDetailsMemberCount">0</span></h3>
             <div id="groupDetailsMembers" class="group-details-members"></div>
         </section>
     </div>

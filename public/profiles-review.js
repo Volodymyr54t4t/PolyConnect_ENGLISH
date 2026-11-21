@@ -29,7 +29,7 @@ function render() {
     const fields = [["Кафедра", p.department], ["Посада", p.position], ["Група", p.group_name], ["Рівень", p.study_level], ["Курс", p.course], ["Телефон", p.phone], ["Про себе", p.about]]
       .filter(([, value]) => value).map(([label, value]) => `<span class="complete">${esc(label)}: ${esc(value)}</span>`).join("")
     const missingPills = p.missing_fields.map(field => `<span>${esc(field)} не заповнено</span>`).join("")
-    return `<article class="profile-card"><div><div class="profile-name">${esc(p.full_name)}</div><div class="profile-meta">${esc(p.role)}<br>${esc(p.email)}<br>${esc(p.department || "Кафедру не вказано")}</div></div><div><b>${missing ? `Не заповнено: ${missing}` : "Профіль повний"}</b><div class="profile-meta">${p.profile_updated_at ? `Остання зміна: ${new Date(p.profile_updated_at).toLocaleDateString("uk-UA")}` : "Профіль ще не оновлювали"}</div></div><div class="profile-fields">${fields}${missingPills}${!missing ? '<span class="complete">Усі обов’язкові поля заповнено</span>' : ""}</div><button class="admin-primary review-send" type="button" data-remind="${p.id}" ${!missing ? "disabled" : ""}>${missing ? "Надіслати нагадування" : "Усе заповнено"}</button></article>`
+    return `<article class="profile-card"><div><div class="profile-name">${esc(p.full_name)}</div><div class="profile-meta">${esc(p.role)}<br>${esc(p.email)}<br>${esc(p.department || "Кафедру не вказано")}</div></div><div><b>${missing ? `Не заповнено: ${missing}` : "Профіль повний"}</b><div class="profile-meta">${p.profile_updated_at ? `Остання зміна: ${new Date(p.profile_updated_at).toLocaleDateString("en-US")}` : "Профіль ще не оновлювали"}</div></div><div class="profile-fields">${fields}${missingPills}${!missing ? '<span class="complete">Усі обов’язкові поля заповнено</span>' : ""}</div><button class="admin-primary review-send" type="button" data-remind="${p.id}" ${!missing ? "disabled" : ""}>${missing ? "Надіслати нагадування" : "Усе заповнено"}</button></article>`
   }).join("")
 }
 
@@ -37,7 +37,7 @@ async function load() {
   try {
     const me = await fetch("/api/me"); if (!me.ok) { location.href = "/"; return }
     const user = (await me.json()).user
-    $("#userName").textContent = user.full_name || "Користувач"
+    $("#userName").textContent = user.full_name || "User"
     $("#userAvatar").textContent = (user.full_name || "?").trim().charAt(0).toUpperCase()
     if (!["Розробник", "Завідувач Кафедри"].includes(user.role)) { location.href = "/home"; return }
     const response = await fetch("/api/profiles-review"), data = await response.json()

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Система авторизації ЖДТУ — факультет інформаційно-комп'ютерних технологій (ФІКТ)" />
-  <title>Авторизація — Портал Інженерії Програмного Забезпечення</title>
+  <meta name="description" content="Zhytomyr Polytechnic sign-in — Faculty of Information and Computer Technologies" />
+  <title>Sign in — Software Engineering Portal</title>
   <link rel="stylesheet" href="auth.css" />
   <link rel="stylesheet" href="modal.css" />
 </head>
@@ -14,28 +14,28 @@
   <div id="lockoutOverlay" class="lockout-overlay hidden" role="alertdialog" aria-modal="true" aria-labelledby="lockoutTitle" aria-describedby="lockoutMessage">
     <section class="lockout-card">
       <div class="lockout-icon" aria-hidden="true">!</div>
-      <p class="lockout-kicker">СИСТЕМА БЕЗПЕКИ</p>
-      <h2 id="lockoutTitle">Доступ тимчасово заблоковано</h2>
-      <p id="lockoutMessage">Зафіксовано п’ять невдалих спроб.</p>
-      <div class="lockout-countdown"><span>Можна спробувати знову через</span><strong id="lockoutTimer">10:00</strong></div>
+      <p class="lockout-kicker">SECURITY SYSTEM</p>
+      <h2 id="lockoutTitle">Access temporarily locked</h2>
+      <p id="lockoutMessage">Five unsuccessful attempts were recorded.</p>
+      <div class="lockout-countdown"><span>You can try again in</span><strong id="lockoutTimer">10:00</strong></div>
     </section>
   </div>
   <main class="page">
     <section class="brand" aria-hidden="false">
       <div class="brand__inner">
-        <img class="brand__badge" src="/ztu-logo.png" alt="Логотип Житомирської політехніки" />
-        <h1 class="brand__title">Портал Інженерії Програмного Забезпечення</h1>
+        <img class="brand__badge" src="/ztu-logo.png" alt="Zhytomyr Polytechnic logo" />
+        <h1 class="brand__title">Software Engineering Portal</h1>
         <p class="brand__subtitle">
-          Єдина система доступу для деканату, кафедр, викладачів та студентів.
-          Вхід дозволено лише за корпоративною поштою
+          A single access point for the dean's office, departments, faculty, and students.
+          Sign-in is available only with an institutional email address
           <span class="brand__domain">@ztu.edu.ua</span> або
           <span class="brand__domain">@student.ztu.edu.ua</span>.
         </p>
         <ul class="brand__roles">
-          <li><span class="dot"></span>Декан ФІКТ</li>
-          <li><span class="dot"></span>Завідувач кафедри</li>
-          <li><span class="dot"></span>Викладач</li>
-          <li><span class="dot"></span>Студент</li>
+          <li><span class="dot"></span>Faculty Dean</li>
+          <li><span class="dot"></span>Department Chair</li>
+          <li><span class="dot"></span>Faculty</li>
+          <li><span class="dot"></span>Student</li>
         </ul>
       </div>
     </section>
@@ -46,77 +46,77 @@
         <h2 class="account__name" id="accName">—</h2>
         <p class="account__email" id="accEmail">—</p>
         <span class="badge" id="accRole">—</span>
-        <button class="btn btn--danger" id="logoutBtn" type="button">Вийти з системи</button>
+        <button class="btn btn--danger" id="logoutBtn" type="button">Sign out</button>
       </div>
 
       <div id="authBox" class="card">
         <div class="tabs" role="tablist">
-          <button class="tab is-active" data-view="login" role="tab" type="button">Вхід</button>
-          <button class="tab" data-view="register" role="tab" type="button">Реєстрація</button>
-          <button class="tab" data-view="forgot" role="tab" type="button">Відновлення</button>
+          <button class="tab is-active" data-view="login" role="tab" type="button">Sign in</button>
+          <button class="tab" data-view="register" role="tab" type="button">Register</button>
+          <button class="tab" data-view="forgot" role="tab" type="button">Reset password</button>
         </div>
 
         <div id="alert" class="alert hidden" role="status"></div>
 
         <form id="loginForm" class="form" data-view="login" novalidate>
-          <h2 class="form__title">Вхід у систему</h2>
+          <h2 class="form__title">Sign in to your account</h2>
           <label class="field">
-            <span>Корпоративна пошта</span>
-            <input type="email" name="email" placeholder="ivanov@ztu.edu.ua або student@student.ztu.edu.ua" autocomplete="email" required />
+            <span>Institutional email</span>
+            <input type="email" name="email" placeholder="name@ztu.edu.ua or name@student.ztu.edu.ua" autocomplete="email" required />
           </label>
           <label class="field">
-            <span>Пароль</span>
+            <span>Password</span>
             <input type="password" name="password" placeholder="••••••••" autocomplete="current-password" required />
           </label>
-          <button class="btn btn--primary" type="submit">Увійти</button>
+          <button class="btn btn--primary" type="submit">Sign in</button>
         </form>
 
         <form id="registerForm" class="form hidden" data-view="register" novalidate>
-          <h2 class="form__title">Створення акаунта</h2>
+          <h2 class="form__title">Create an account</h2>
           <label class="field">
-            <span>Повне ім'я (ПІБ)</span>
-            <input type="text" name="full_name" placeholder="Іваненко Іван Іванович" autocomplete="name" required />
+            <span>Full name</span>
+            <input type="text" name="full_name" placeholder="First and last name" autocomplete="name" required />
           </label>
           <label class="field">
-            <span>Корпоративна пошта</span>
-            <input type="email" name="email" placeholder="ivanov@ztu.edu.ua або student@student.ztu.edu.ua" autocomplete="email" required />
+            <span>Institutional email</span>
+            <input type="email" name="email" placeholder="name@ztu.edu.ua or name@student.ztu.edu.ua" autocomplete="email" required />
           </label>
           <label class="field">
-            <span>Роль</span>
+            <span>Role</span>
             <select name="role" required>
-              <option value="" disabled selected>Оберіть роль</option>
-              <option value="ДеканФІКТ">Декан ФІКТ</option>
-              <option value="Завідувач Кафедри">Завідувач кафедри</option>
-              <option value="Викладач">Викладач</option>
-              <option value="Студент">Студент</option>
+              <option value="" disabled selected>Select a role</option>
+              <option value="ДеканФІКТ">Faculty Dean</option>
+              <option value="Завідувач Кафедри">Department Chair</option>
+              <option value="Викладач">Faculty</option>
+              <option value="Студент">Student</option>
             </select>
           </label>
           <label class="field">
-            <span>Пароль (мін. 6 символів)</span>
+            <span>Password (at least 6 characters)</span>
             <input type="password" name="password" placeholder="••••••••" autocomplete="new-password" required />
           </label>
-          <button class="btn btn--primary" type="submit">Зареєструватися</button>
+          <button class="btn btn--primary" type="submit">Create account</button>
         </form>
 
         <form id="forgotForm" class="form hidden" data-view="forgot" novalidate>
-          <h2 class="form__title">Відновлення пароля</h2>
-          <p class="form__hint">Введіть пошту — ми згенеруємо токен для скидання пароля.</p>
+          <h2 class="form__title">Reset your password</h2>
+          <p class="form__hint">Enter your email and we'll generate a password reset token.</p>
           <label class="field">
-            <span>Корпоративна пошта</span>
-            <input type="email" name="email" placeholder="ivanov@ztu.edu.ua або student@student.ztu.edu.ua" autocomplete="email" required />
+            <span>Institutional email</span>
+            <input type="email" name="email" placeholder="name@ztu.edu.ua or name@student.ztu.edu.ua" autocomplete="email" required />
           </label>
-          <button class="btn btn--primary" type="submit">Отримати токен</button>
+          <button class="btn btn--primary" type="submit">Get reset token</button>
 
           <div id="resetBlock" class="reset hidden">
             <label class="field">
-              <span>Токен відновлення</span>
-              <input type="text" name="token" placeholder="Вставте отриманий токен" />
+              <span>Reset token</span>
+              <input type="text" name="token" placeholder="Paste the token you received" />
             </label>
             <label class="field">
-              <span>Новий пароль</span>
+              <span>New password</span>
               <input type="password" name="new_password" placeholder="••••••••" autocomplete="new-password" />
             </label>
-            <button class="btn btn--secondary" type="button" id="resetBtn">Змінити пароль</button>
+            <button class="btn btn--secondary" type="button" id="resetBtn">Change password</button>
           </div>
         </form>
       </div>

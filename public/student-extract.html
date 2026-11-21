@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Витяг здобутків студентів</title>
   <style>
@@ -7,17 +7,17 @@
   </style>
 </head>
 <body>
-  <button id="print" type="button">Зберегти як PDF</button><header><h1>Витяг здобутків студентів</h1><p id="summary" class="muted">Формування документа…</p></header><main id="content"></main>
+  <button id="print" type="button">Save як PDF</button><header><h1>Витяг здобутків студентів</h1><p id="summary" class="muted">Формування документа…</p></header><main id="content"></main>
   <script>
     const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' }[char]))
     const date = (value) => value ? new Intl.DateTimeFormat('uk-UA', { dateStyle: 'medium' }).format(new Date(value)) : 'Дату не вказано'
     const params = new URLSearchParams(location.search); const studentId = params.get('student_id') || 'all'; const selectedCategories = new Set((params.get('categories') || '').split(',').filter(Boolean))
     fetch('/api/students').then(async (response) => { const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error); return data }).then((data) => {
       const rows = (data.students || []).filter((student) => studentId === 'all' || String(student.id) === studentId).map((student) => ({ ...student, activities: student.activities.filter((activity) => selectedCategories.has(activity.category_name)) })).filter((student) => student.activities.length)
-      const studentLabel = studentId === 'all' ? 'Усі студенти' : (data.students || []).find((student) => String(student.id) === studentId)?.full_name || 'Обраний студент'
-      document.querySelector('#summary').textContent = `Студент: ${studentLabel}. Категорії: ${[...selectedCategories].join(', ')}. Сформовано: ${date(new Date())}.`
-      document.querySelector('#content').innerHTML = rows.length ? rows.map((student) => `<section class="student"><h2>${escapeHtml(student.full_name)}</h2><p class="facts">${escapeHtml([student.group_name, student.study_level, student.course && `${student.course} курс`].filter(Boolean).join(' · ') || 'Студент')}</p>${student.activities.map((activity) => `<article class="activity"><span class="tag">${escapeHtml(activity.category_name)}</span><h3>${escapeHtml(activity.title)}</h3><p class="muted">${escapeHtml([date(activity.activity_date), activity.organizer, activity.location].filter(Boolean).join(' · '))}</p>${activity.description ? `<p>${escapeHtml(activity.description)}</p>` : ''}${activity.link ? `<p><a href="${escapeHtml(activity.link)}">${escapeHtml(activity.link)}</a></p>` : ''}</article>`).join('')}</section>`).join('') : '<p>За вказаними параметрами публічних здобутків не знайдено.</p>'
-    }).catch(() => { document.querySelector('#content').textContent = 'Не вдалося сформувати витяг.' })
+      const studentLabel = studentId === 'all' ? 'All студенти' : (data.students || []).find((student) => String(student.id) === studentId)?.full_name || 'Обраний студент'
+      document.querySelector('#summary').textContent = `Student: ${studentLabel}. Категорії: ${[...selectedCategories].join(', ')}. Сформовано: ${date(new Date())}.`
+      document.querySelector('#content').innerHTML = rows.length ? rows.map((student) => `<section class="student"><h2>${escapeHtml(student.full_name)}</h2><p class="facts">${escapeHtml([student.group_name, student.study_level, student.course && `${student.course} курс`].filter(Boolean).join(' · ') || 'Student')}</p>${student.activities.map((activity) => `<article class="activity"><span class="tag">${escapeHtml(activity.category_name)}</span><h3>${escapeHtml(activity.title)}</h3><p class="muted">${escapeHtml([date(activity.activity_date), activity.organizer, activity.location].filter(Boolean).join(' · '))}</p>${activity.description ? `<p>${escapeHtml(activity.description)}</p>` : ''}${activity.link ? `<p><a href="${escapeHtml(activity.link)}">${escapeHtml(activity.link)}</a></p>` : ''}</article>`).join('')}</section>`).join('') : '<p>За вказаними параметрами публічних здобутків не знайдено.</p>'
+    }).catch(() => { document.querySelector('#content').textContent = 'Could not сформувати витяг.' })
     document.querySelector('#print').onclick = () => window.print()
   </script>
 </body>

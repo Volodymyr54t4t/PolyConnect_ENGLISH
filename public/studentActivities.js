@@ -4,13 +4,13 @@ const activityList = document.querySelector("#myActivities")
 const activityAlert = document.querySelector("#activityAlert")
 
 const escapeActivity = (value) => String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char]))
-const activityDate = (value) => value ? new Intl.DateTimeFormat("uk-UA", { dateStyle: "medium" }).format(new Date(value)) : "Дату не вказано"
+const activityDate = (value) => value ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(value)) : "Дату не вказано"
 function activityMessage(message, ok = false) { activityAlert.textContent = message; activityAlert.style.color = ok ? "var(--ok)" : "var(--danger)" }
 
 async function activityRequest(url, options = {}) {
   const response = await fetch(url, { headers: { "Content-Type": "application/json" }, ...options })
   const data = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(data.error || "Сталася помилка")
+  if (!response.ok) throw new Error(data.error || "Something went wrong")
   return data
 }
 async function loadActivityCategories(selectedName = "") {

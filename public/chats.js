@@ -10,7 +10,7 @@ async function api(path, options = {}) {
         }
     })
     const data = await res.json().catch(() => ({}))
-    if (!res.ok) throw new Error(data.error || 'Сталася помилка')
+    if (!res.ok) throw new Error(data.error || 'Something went wrong')
     return data
 }
 
@@ -36,9 +36,9 @@ function formatChatTime(value) {
     const date = new Date(value)
     const now = new Date()
     if (date.toDateString() === now.toDateString()) {
-        return date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
     }
-    return date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' })
+    return date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' })
 }
 
 function formatFileSize(bytes) {
@@ -125,7 +125,7 @@ async function loadOlderMessages() {
     const oldScrollHeight = $('#messages').scrollHeight
     const oldScrollTop = $('#messages').scrollTop
     button.disabled = true
-    button.textContent = 'Завантажуємо…'
+    button.textContent = 'Loading…'
     try {
         const chatId = state.current.id
         const params = new URLSearchParams({ limit: '60', before_id: String(state.messages[0].id) })
@@ -370,7 +370,7 @@ function renderGroupUsers() {
         return groups
     }, {})).sort(([first], [second]) => first.localeCompare(second, 'uk'))
     const studentSection = studentGroups.length ? `<details class="group-user-section" open><summary><span>Студенти · за групами</span><b>${sections['Студенти'].length}</b></summary><div>${studentGroups.map(([group, users]) => `<details class="group-user-subsection" open><summary><span>${escapeHtml(group)}</span><b>${users.length}</b></summary><div>${users.sort((first, second) => first.full_name.localeCompare(second.full_name, 'uk')).map(renderOption).join('')}</div></details>`).join('')}</div></details>` : ''
-    $('#groupUserList').innerHTML = renderSection('Деканат', sections['Деканат'], true) + renderSection('Викладачі', sections['Викладачі'], true) + studentSection || '<p class="empty">Користувачів не знайдено.</p>'
+    $('#groupUserList').innerHTML = renderSection('Деканат', sections['Деканат'], true) + renderSection('Викладачі', sections['Викладачі'], true) + studentSection || '<p class="empty">Userів не знайдено.</p>'
 }
 
 function closeGroupDialog() {
@@ -421,7 +421,7 @@ async function showGroupDetails() {
         $('#groupDetailsMembers').innerHTML = members.length ? members.map(member => `
             <article class="group-details-member">
                 <span class="group-details-member__avatar" aria-hidden="true">${escapeHtml((member.full_name || '?').trim().charAt(0).toUpperCase())}</span>
-                <span class="group-details-member__body"><strong>${escapeHtml(member.full_name || 'Користувач')}</strong><small>${escapeHtml(member.role || 'Учасник')}</small></span>
+                <span class="group-details-member__body"><strong>${escapeHtml(member.full_name || 'User')}</strong><small>${escapeHtml(member.role || 'Учасник')}</small></span>
                 ${member.is_admin ? '<span class="group-details-admin">Адміністратор</span>' : ''}
             </article>`).join('') : '<p class="empty">Учасників не знайдено.</p>'
         $('#groupDetailsDialog').classList.remove('hidden')
@@ -551,7 +551,7 @@ $('#emojiBtn').addEventListener('click', () => {
 $('#messageInput').addEventListener('input', event => {
     autoResizeTextarea(event.target)
     queueChatDraftSave()
-    $('#draftStatus').textContent = event.target.value ? 'Чернетка синхронізується…' : ''
+    $('#draftStatus').textContent = event.target.value ? 'Draft синхронізується…' : ''
 })
 
 $('#scheduleMessageBtn').addEventListener('click', () => {
@@ -672,7 +672,7 @@ function resetVoice() {
 
 async function startVoiceRecording() {
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-        modalAlert('Ваш браузер не підтримує запис голосу')
+        modalAlert('Ваш браузер не підтримує запис voteу')
         return
     }
     try {
@@ -747,7 +747,7 @@ async function sendCurrentMessage() {
         clearTimeout(state.draftTimer)
         input.value = ''
         await saveChatDraft(state.current.id, '')
-        $('#draftStatus').textContent = scheduledAt ? `Заплановано на ${new Date(scheduledAt).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' })}` : ''
+        $('#draftStatus').textContent = scheduledAt ? `Scheduled на ${new Date(scheduledAt).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}` : ''
         $('#scheduledAt').value = ''
         $('#scheduledAt').classList.add('hidden')
         $('#scheduleMessageBtn').classList.remove('is-active')

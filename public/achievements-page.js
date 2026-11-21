@@ -38,7 +38,7 @@ function openDetail(item) {
   detailTitle.textContent = item.title
   detailDescription.textContent = item.description || "Досягнення учасника спільноти ФІКТ."
   detailAuthor.textContent = item.full_name
-  const facts = [["Подія", item.event_name], ["Дата", item.achievement_date ? new Intl.DateTimeFormat("uk-UA", { dateStyle: "long" }).format(new Date(item.achievement_date)) : ""], ["Організатор", item.organizer], ["Місце", item.location], ["Результат / роль", item.result]].filter(([, value]) => value)
+  const facts = [["Подія", item.event_name], ["Дата", item.achievement_date ? new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(new Date(item.achievement_date)) : ""], ["Організатор", item.organizer], ["Місце", item.location], ["Результат / роль", item.result]].filter(([, value]) => value)
   detailFacts.replaceChildren(...facts.map(([label, value]) => {
     const row = document.createElement("p")
     const key = document.createElement("b")
@@ -105,7 +105,7 @@ async function initAchievementsPage() {
     const response = await fetch("/api/me")
     if (!response.ok) return (window.location.href = "/")
     const { user } = await response.json()
-    document.querySelector("#userName").textContent = user.full_name || "Користувач"
+    document.querySelector("#userName").textContent = user.full_name || "User"
     document.querySelector("#userAvatar").textContent = (user.full_name || "?").trim().charAt(0).toUpperCase()
     document.querySelector("#navProfile").href = user.redirect || (user.role === "Викладач" ? "/profileTeacher" : "/profileStudent")
     loadFeed()

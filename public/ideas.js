@@ -3,7 +3,7 @@
   const list=$('#ideaList'), formDialog=$('#ideaDialog'), detailDialog=$('#detailDialog'), form=$('#ideaForm')
   let categories=[], statuses=[], staff=false, ideas=[], currentId=null, editingId=null, toastTimer
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
-  const date = value => new Intl.DateTimeFormat('uk-UA',{day:'numeric',month:'short',year:'numeric'}).format(new Date(value))
+  const date = value => new Intl.DateTimeFormat('en-US',{day:'numeric',month:'short',year:'numeric'}).format(new Date(value))
   const showToast = message => {const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800)}
   async function api(url, options={}) {
     const response=await fetch(url,{credentials:'same-origin',...options,headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}})
@@ -52,7 +52,7 @@
     catch(err){$('#formError').textContent=err.message}
   })
   async function openDetail(id){
-    currentId=id;$('#detailBody').innerHTML='<div class="loading">Завантажуємо деталі…</div>';detailDialog.showModal()
+    currentId=id;$('#detailBody').innerHTML='<div class="loading">Loading деталі…</div>';detailDialog.showModal()
     try{
       const d=await api(`/api/ideas/${id}`),i=d.idea
       const comments=d.comments.map(c=>`<div class="comment"><strong>${esc(c.author_name)}</strong><time>${date(c.created_at)}</time><p>${esc(c.content)}</p></div>`).join('')||'<p class="privacy-help">Коментарів ще немає — почніть обговорення.</p>'

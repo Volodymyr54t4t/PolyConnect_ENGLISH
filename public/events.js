@@ -13,7 +13,7 @@
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]))
   const canManage = (event) => managerRoles.includes(user?.role) && (event?.created_by === user?.id || ["ДеканФІКТ", "Розробник"].includes(user?.role))
   const cssSafeUrl = (value) => encodeURI(value).replace(/["'()\\\n\r]/g, (char) => encodeURIComponent(char))
-  const eventDate = (value, options = {}) => new Intl.DateTimeFormat("uk-UA", { dateStyle: "medium", ...options }).format(new Date(value))
+  const eventDate = (value, options = {}) => new Intl.DateTimeFormat("en-US", { dateStyle: "medium", ...options }).format(new Date(value))
   const isPast = (event) => new Date(event.ends_at) < new Date()
   const isRegistrationOpen = (event) => event.status === "published" && !isPast(event) && new Date(event.registration_deadline) > new Date()
 
@@ -25,9 +25,9 @@
   }
 
   function statusText(event) {
-    if (event.status === "draft") return "Чернетка"
+    if (event.status === "draft") return "Draft"
     if (event.status === "cancelled") return "Скасовано"
-    if (isPast(event)) return "Завершено"
+    if (isPast(event)) return "Closed"
     if (!isRegistrationOpen(event)) return "Реєстрацію закрито"
     if (event.capacity && event.registered_count >= event.capacity) return "Місць немає"
     return "Реєстрація відкрита"
@@ -64,8 +64,8 @@
       const date = new Date(event.starts_at)
       const status = event.my_status === "registered" ? "Ви учасник" : event.my_status === "waitlisted" ? "Ви в очікуванні" : statusText(event)
       const spots = event.capacity ? `${Math.max(0, event.capacity - event.registered_count)} з ${event.capacity} місць` : `${event.registered_count} учасників`
-      const location = event.format === "online" ? "Онлайн" : event.location || (event.format === "hybrid" ? "Гібридно" : "Місце уточнюється")
-      return `<article class="event-card"><div class="event-card__cover"${coverStyle(event)}><span class="event-card__date"><b>${date.toLocaleDateString("uk-UA", { day: "2-digit" })}</b><small>${date.toLocaleDateString("uk-UA", { month: "short" }).replace(".", "")}</small></span><span class="event-card__type">${escapeHtml(event.event_type)}</span><span class="event-card__status">${escapeHtml(status)}</span></div><div class="event-card__body"><div class="event-card__meta"><span>◷ ${eventDate(event.starts_at, { timeStyle: "short" })}</span><span>⌖ ${escapeHtml(location)}</span></div><h3>${escapeHtml(event.title)}</h3><p class="event-card__summary">${escapeHtml(event.summary || event.description)}</p><div class="event-card__foot"><span class="event-card__spots"><strong>${escapeHtml(spots)}</strong>${event.waitlist_count ? ` · ${event.waitlist_count} в очікуванні` : ""}</span><button class="event-card__open" data-open-event="${event.id}" type="button">Деталі <span aria-hidden="true">→</span></button></div></div></article>`
+      const location = event.format === "online" ? "Online" : event.location || (event.format === "hybrid" ? "Гібридно" : "Місце уточнюється")
+      return `<article class="event-card"><div class="event-card__cover"${coverStyle(event)}><span class="event-card__date"><b>${date.toLocaleDateString("en-US", { day: "2-digit" })}</b><small>${date.toLocaleDateString("en-US", { month: "short" }).replace(".", "")}</small></span><span class="event-card__type">${escapeHtml(event.event_type)}</span><span class="event-card__status">${escapeHtml(status)}</span></div><div class="event-card__body"><div class="event-card__meta"><span>◷ ${eventDate(event.starts_at, { timeStyle: "short" })}</span><span>⌖ ${escapeHtml(location)}</span></div><h3>${escapeHtml(event.title)}</h3><p class="event-card__summary">${escapeHtml(event.summary || event.description)}</p><div class="event-card__foot"><span class="event-card__spots"><strong>${escapeHtml(spots)}</strong>${event.waitlist_count ? ` · ${event.waitlist_count} в очікуванні` : ""}</span><button class="event-card__open" data-open-event="${event.id}" type="button">Деталі <span aria-hidden="true">→</span></button></div></div></article>`
     }).join("")
   }
 
@@ -112,12 +112,12 @@
     activeEvent = event
     const coverUrl = event.has_local_cover ? `/api/events/${event.id}/cover` : event.cover_image
     $("#detailCover").style.backgroundImage = coverUrl ? `linear-gradient(180deg,rgba(5,17,43,.02),rgba(5,17,43,.2)),url("${cssSafeUrl(coverUrl)}")` : "linear-gradient(130deg,#173360,#4773d8 58%,#b2c9ff)"
-    $("#detailType").textContent = `${event.event_type} · ${event.format === "online" ? "Онлайн" : event.format === "hybrid" ? "Гібридно" : "Очно"}`
+    $("#detailType").textContent = `${event.event_type} · ${event.format === "online" ? "Online" : event.format === "hybrid" ? "Гібридно" : "Очно"}`
     $("#detailState").textContent = statusText(event)
     $("#detailTitle").textContent = event.title
     $("#detailSummary").textContent = event.summary || ""
     $("#detailWhen").textContent = `${eventDate(event.starts_at, { timeStyle: "short" })} — ${eventDate(event.ends_at, { timeStyle: "short" })}`
-    $("#detailWhere").textContent = event.format === "online" ? "Онлайн" : event.location || "Місце уточнюється"
+    $("#detailWhere").textContent = event.format === "online" ? "Online" : event.location || "Місце уточнюється"
     $("#detailCreator").textContent = event.creator_name || "Команда порталу"
     $("#detailCapacity").textContent = `${event.registered_count} учасників${event.capacity ? ` із ${event.capacity}` : " · без обмежень"}${event.waitlist_count ? ` · ${event.waitlist_count} очікують` : ""}`
     $("#detailDescription").textContent = event.description

@@ -44,7 +44,7 @@ async function api(path, body) {
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    const error = new Error(data.error || "Сталася помилка")
+    const error = new Error(data.error || "Something went wrong")
     error.locked = Boolean(data.locked)
     error.retryAfterSeconds = Number(data.retryAfterSeconds) || 600
     error.attemptsRemaining = Number.isInteger(data.attemptsRemaining) ? data.attemptsRemaining : null

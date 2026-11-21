@@ -1,9 +1,9 @@
 (() => {
   const options = {
-    available: { label: "Доступний", icon: "🟢" },
-    away: { label: "Відійшов", icon: "🟡" },
-    dnd: { label: "Не турбувати", icon: "🔴" },
-    offline: { label: "Офлайн", icon: "⚫" },
+    available: { label: "Available", icon: "🟢" },
+    away: { label: "Away", icon: "🟡" },
+    dnd: { label: "Do not disturb", icon: "🔴" },
+    offline: { label: "Offline", icon: "⚫" },
   }
   const escapeHtml = (value) => String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char])
 
@@ -51,7 +51,7 @@
   const select = document.querySelector("#presenceSelect")
   const messageInput = document.querySelector("#presenceMessage")
   const feedback = document.querySelector("#presenceFeedback")
-  const labels = { available: "Доступний", away: "Відійшов", dnd: "Не турбувати", offline: "Офлайн" }
+  const labels = { available: "Available", away: "Away", dnd: "Do not disturb", offline: "Offline" }
 
   function showStatus(status, message = "") {
     const validStatus = status in labels ? status : "offline"
@@ -71,8 +71,8 @@
   initialPing.finally(loadPresence)
 
   select.addEventListener("change", () => {
-    const labelsWithIcons = { available: "🟢 Доступний", away: "🟡 Відійшов", dnd: "🔴 Не турбувати", offline: "⚫ Офлайн" }
-    feedback.textContent = `Новий статус: ${labelsWithIcons[select.value]}. Натисніть «Оновити статус», щоб зберегти.`
+    const labelsWithIcons = { available: "🟢 Available", away: "🟡 Away", dnd: "🔴 Do not disturb", offline: "⚫ Offline" }
+    feedback.textContent = `New status: ${labelsWithIcons[select.value]}. Click “Update status” to save.`
     feedback.classList.remove("is-error", "is-saved")
   })
 
@@ -80,7 +80,7 @@
     event.preventDefault()
     const button = form.querySelector("button[type=submit]")
     button.disabled = true
-    feedback.textContent = "Зберігаємо статус…"
+    feedback.textContent = "Saving status…"
     feedback.classList.remove("is-error", "is-saved")
     try {
       const response = await fetch("/api/presence", {
@@ -93,7 +93,7 @@
         if (response.status === 404) {
           throw new Error("Сервер ще не завантажив API статусів. Перезапустіть його командою «npm run dev» і спробуйте знову.")
         }
-        throw new Error(data.error || `Не вдалося зберегти статус (HTTP ${response.status})`)
+        throw new Error(data.error || `Could not save status (HTTP ${response.status})`)
       }
       showStatus(data.presence_status, data.status_message)
       feedback.textContent = "Статус оновлено. Інші побачать його у чатах і списках користувачів."

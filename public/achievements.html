@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Досягнення — Портал Інженерії Програмного Забезпечення</title>
+  <title>Achievements — Software Engineering Portal</title>
   <link rel="stylesheet" href="/auth.css" />
   <link rel="stylesheet" href="/home.css" />
   <link rel="stylesheet" href="/header.css" />
@@ -15,23 +15,23 @@
 
 <body class="achievements-page">
   <header class="topbar">
-    <a href="/home" class="topbar__brand"><img class="topbar__logo" src="/ztu-logo.png" alt="Житомирська політехніка" /><span class="topbar__name">Портал Інженерії Програмного Забезпечення</span></a>
-    <nav class="topbar__nav" aria-label="Головна навігація">
-      <a href="/home" class="navlink">Головна</a><a href="/news" class="navlink">Новини</a><a href="/events" class="navlink">Події</a><a href="/chats" class="navlink">Чати</a><a href="/achievements" class="navlink is-active">Досягнення</a><a href="/students" class="navlink">Студенти</a><a href="/profileStudent" class="navlink" id="navProfile">Профіль</a>
+    <a href="/home" class="topbar__brand"><img class="topbar__logo" src="/ztu-logo.png" alt="Zhytomyr Polytechnic" /><span class="topbar__name">Software Engineering Portal</span></a>
+    <nav class="topbar__nav" aria-label="Main navigation">
+      <a href="/home" class="navlink">Home</a><a href="/news" class="navlink">News</a><a href="/events" class="navlink">Events</a><a href="/chats" class="navlink">Chats</a><a href="/achievements" class="navlink is-active">Achievements</a><a href="/students" class="navlink">Students</a><a href="/profileStudent" class="navlink" id="navProfile">Profile</a>
     </nav>
     <div class="topbar__user"><div class="chip"><span class="chip__avatar" id="userAvatar">?</span><span class="chip__name" id="userName">—</span></div></div>
   </header>
 
   <main class="achievements-main">
-    <section class="achievements-intro"><p class="eyebrow">Спільнота ФІКТ</p><h1>Досягнення людей,<br /><em>які рухають нас вперед.</em></h1><p>Відкриті перемоги, дослідження, проєкти та важливі кроки студентів, викладачів і деканату.</p></section>
+    <section class="achievements-intro"><p class="eyebrow">Community ФІКТ</p><h1>Achievements людей,<br /><em>які рухають нас вперед.</em></h1><p>Open перемоги, дослідження, проєкти та важливі кроки студентів, викладачів і деканату.</p></section>
     <div class="achievement-filters" role="tablist" aria-label="Фільтр досягнень">
-      <button class="achievement-filter is-active" data-role="all" type="button">Усі</button><button class="achievement-filter" data-role="Деканат" type="button">Деканат</button><button class="achievement-filter" data-role="Викладачі" type="button">Викладачі</button><button class="achievement-filter" data-role="Студенти" type="button">Студенти</button>
+      <button class="achievement-filter is-active" data-role="all" type="button">All</button><button class="achievement-filter" data-role="Деканат" type="button">Деканат</button><button class="achievement-filter" data-role="Facultyі" type="button">Facultyі</button><button class="achievement-filter" data-role="Students" type="button">Students</button>
     </div>
     <div id="achievementFeed" class="achievement-feed"><p class="achievement-empty">Завантаження досягнень…</p></div>
   </main>
   <div id="achievementDetail" class="achievement-detail hidden" role="dialog" aria-modal="true" aria-labelledby="detailAchievementTitle">
     <div class="achievement-detail__backdrop" data-close-detail></div>
-    <article class="achievement-detail__panel"><button class="achievement-detail__close" type="button" data-close-detail aria-label="Закрити">×</button><div id="detailAchievementMedia" class="achievement-detail__media"></div><div class="achievement-detail__content"><p id="detailAchievementMeta" class="achievement-card__meta"></p><h2 id="detailAchievementTitle"></h2><div id="detailAchievementFacts" class="achievement-detail__facts"></div><p id="detailAchievementDescription"></p><strong id="detailAchievementAuthor"></strong></div></article>
+    <article class="achievement-detail__panel"><button class="achievement-detail__close" type="button" data-close-detail aria-label="Close">×</button><div id="detailAchievementMedia" class="achievement-detail__media"></div><div class="achievement-detail__content"><p id="detailAchievementMeta" class="achievement-card__meta"></p><h2 id="detailAchievementTitle"></h2><div id="detailAchievementFacts" class="achievement-detail__facts"></div><p id="detailAchievementDescription"></p><strong id="detailAchievementAuthor"></strong></div></article>
   </div>
   <script src="/presence.js"></script>
   <script src="/achievements-page.js"></script>

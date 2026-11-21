@@ -13,10 +13,10 @@ const normalizeCategories = (value) => Array.from(new Set(String(value || "").sp
 async function request(url, options = {}) {
   const response = await fetch(url, { headers: { "Content-Type": "application/json" }, ...options })
   const data = await response.json().catch(() => ({}))
-  if (!response.ok) throw Error(data.error || "Сталася помилка")
+  if (!response.ok) throw Error(data.error || "Something went wrong")
   return data
 }
-function formatDate(value) { return new Intl.DateTimeFormat("uk-UA", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) }
+function formatDate(value) { return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) }
 function renderFilters() {
   const filters = $("#newsFilters")
   const available = categories
@@ -67,7 +67,7 @@ async function load() {
   try {
     try {
       const me = await request("/api/me"); currentUser = me.user
-      $("#navProfile").href = currentUser.redirect || "/profileStudent"; $("#userName").textContent = currentUser.full_name || "Користувач"
+      $("#navProfile").href = currentUser.redirect || "/profileStudent"; $("#userName").textContent = currentUser.full_name || "User"
       $("#userChip .chip__avatar").textContent = (currentUser.full_name || "?").trim().charAt(0).toUpperCase()
       if (canPublish()) { $("#newBtn").classList.remove("hidden"); $("#exportBtn").classList.remove("hidden") }
     } catch { $("#userName").textContent = "Гість" }
